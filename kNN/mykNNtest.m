@@ -10,14 +10,8 @@ k = 5;
 h = 1;
 
 % ------------------------------------------------------------------------------------------ %
-
-max_noise = 4;
-max_tests = 10;
-test_counter = 0;
-
-for k = 1:(samples / 10):(samples / 2)
-  for noise = 0:(max_noise / 4):max_noise
-    fprintf('k = %d, noise = %.1f ', k, noise);
+for k = 1:20:50
+  for noise = 1:1:3
 
     % Generate the dataset
     [data1, labels1, data2, labels2] = generate_dataset(datasetType, samples, noise);
@@ -32,20 +26,7 @@ for k = 1:(samples / 10):(samples / 2)
     end
 
     % Plot the decision boundaries
-    plot_boundaries(X, X1, X2, data1, data2, true, 'kNN_' + string(k) + '_' + string(noise) + '.png');
-    
-    fprintf('done\n');
-
-    test_counter = test_counter + 1;
-
-    if test_counter == max_tests
-      break;
-    end
+    plot_boundaries(X, X1, X2, data1, data2, true, string(k) + '_' + string(noise) + '.png');
 
   end
-
-  if test_counter == max_tests
-    break;
-  end
-
 end
