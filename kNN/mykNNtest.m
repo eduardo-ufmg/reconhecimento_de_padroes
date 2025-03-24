@@ -6,19 +6,19 @@ samples = 100;
 noise = 2;
 
 % kNN parameters
-k = 5;
+k = 20;
 h = 1;
 
 % ------------------------------------------------------------------------------------------ %
 
-generate_and_evaluate(datasetType, samples, h, k, noise, false);
+generate_and_evaluate(datasetType, samples, h, k, noise, false, '');
 
-return; % don't need to save plots while testing
+% return; % don't need to save plots while testing
 
 for k = 1:20:50
   for noise = 1:1:3
 
-    generate_and_evaluate(datasetType, samples, h, k, noise, true);
+    generate_and_evaluate(datasetType, samples, h, k, noise, true, 'kNN_' + string(k) + '_' + string(noise) + '.png');
 
   end
 end
