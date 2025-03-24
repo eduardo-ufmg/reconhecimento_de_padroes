@@ -53,11 +53,11 @@ function distance = euclidean_distance(x, y)
 end
 
 function value = kernel_function(distance, h)
-  % kernel_function: computes the kernel function value
-  % distance: distance between two points
+  % kernel_function: computes the kernel value using a normal distribution
+  % distance: distance between points
   % h: kernel bandwidth
-  % value: kernel function value
+  % value: kernel value
 
-  value = exp(-distance / (2 * h ^ 2));
+  value = normpdf(distance, 0, h);
 
 end
