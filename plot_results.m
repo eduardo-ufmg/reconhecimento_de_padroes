@@ -1,4 +1,4 @@
-function plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, k, h)
+function plot_results(X, X1, X2, data1, data2, Q1s, Q2s, labels, print, k, h)
   % Plot the decision boundaries and characteristic space of a binary classifier
 
   if print
@@ -28,7 +28,7 @@ function plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, k, h)
 
   % Plot the characteristic space
   subplot(1, 2, 2);
-  plot_charspace(Q1s, Q2s, samples, pt_colors);
+  plot_charspace(Q1s, Q2s, labels, pt_colors);
   title('Characteristic space');
 
   % Add a legend with the values of k and h

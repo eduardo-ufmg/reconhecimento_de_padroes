@@ -3,6 +3,7 @@ function generate_and_evaluate(datasetType, samples, h, k, noise, print)
   % Generate the dataset
   [data1, labels1, data2, labels2] = generate_dataset(datasetType, samples, noise);
   complete_set = [data1, labels1; data2, labels2];
+  labels = [labels1; labels2];
 
   % Generate a grid for plotting
   [X, X1, X2] = generate_grid(complete_set, 100);
@@ -20,6 +21,6 @@ function generate_and_evaluate(datasetType, samples, h, k, noise, print)
     [Q1s(i), Q2s(i)] = to_characteristic_space(complete_set(i, 1:2), complete_set, k, h);
   end
 
-  plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, k, h);
+  plot_results(X, X1, X2, data1, data2, Q1s, Q2s, labels, print, k, h);
 
 end
