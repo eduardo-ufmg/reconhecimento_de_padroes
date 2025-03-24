@@ -1,4 +1,4 @@
-function generate_and_evaluate(datasetType, samples, h, k, noise, print, filename)
+function generate_and_evaluate(datasetType, samples, h, k, noise, print)
 
   % Generate the dataset
   [data1, labels1, data2, labels2] = generate_dataset(datasetType, samples, noise);
@@ -20,6 +20,6 @@ function generate_and_evaluate(datasetType, samples, h, k, noise, print, filenam
     [Q1s(i), Q2s(i)] = to_characteristic_space(complete_set(i, 1:2), complete_set, k, h);
   end
 
-  plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, filename);
+  plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, k, h);
 
 end

@@ -2,23 +2,19 @@
 datasetType = 'blobs'; % Choose between 'blobs', 'spirals', 'moons', 'xor', 'circles'
 
 % Dataset parameters
-samples = 100;
-noise = 2;
-
-% kNN parameters
-k = 20;
-h = 1;
+samples = 250;
+noise = 3;
 
 % ------------------------------------------------------------------------------------------ %
 
-generate_and_evaluate(datasetType, samples, h, k, noise, false, '');
+for k = 10:10:10 * 1
+  for h = .66:.66:.66 * 1
 
-% return; % don't need to save plots while testing
+    fprintf('k = %d, h = %.2f\t', k, h);
 
-for k = 1:20:50
-  for noise = 1:1:3
+    generate_and_evaluate(datasetType, samples, h, k, noise, false);
 
-    generate_and_evaluate(datasetType, samples, h, k, noise, true, 'kNN_' + string(k) + '_' + string(noise) + '.png');
+    fprintf('Done\n');
 
   end
 end

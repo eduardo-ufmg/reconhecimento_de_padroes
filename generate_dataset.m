@@ -4,6 +4,9 @@ function [data1, labels1, data2, labels2] = generate_dataset(datasetType, n, noi
   % n: Number of samples
   % noise: Noise level
 
+  % Random seed
+  rng(0);
+
   switch datasetType
     case 'blobs'
       data1 = mvnrnd([2, 2], [0.5, 0; 0, 0.5], n/2) + noise * randn(n/2, 2);

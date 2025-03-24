@@ -1,4 +1,4 @@
-function plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, filename)
+function plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, k, h)
   % Plot the decision boundaries and characteristic space of a binary classifier
 
   if print
@@ -31,8 +31,12 @@ function plot_results(X, X1, X2, data1, data2, Q1s, Q2s, samples, print, filenam
   plot_charspace(Q1s, Q2s, samples, pt_colors);
   title('Characteristic space');
 
+  % Add a legend with the values of k and h
+  legend_text = sprintf('k = %d, h = %.2f', k, h);
+  legend(legend_text, 'Location', 'best');
+
   if print
-    saveas(fig, './output/' + filename);
+    saveas(fig, './output/kNN_' + string(k) + '_' + string(h) + '.png');
     close(fig);
   end
 
