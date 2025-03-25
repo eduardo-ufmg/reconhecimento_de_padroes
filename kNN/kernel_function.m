@@ -4,7 +4,7 @@ function value = kernel_function(x, h, mu)
   % h: radius of the kernel
   % mu: marginal distribution average vector
 
-  n = length(x); % number of features
+  n = numel(x); % number of features
   K = h * eye(n); % covariance matrix
 
   % Evaluate the kernel function

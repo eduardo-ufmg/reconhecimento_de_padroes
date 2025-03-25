@@ -173,7 +173,7 @@ function [X, X1, X2] = generate_grid(complete_set, resolution)
   x1 = linspace(min_x1 - 1, max_x1 + 1, resolution);
   x2 = linspace(min_x2 - 1, max_x2 + 1, resolution);
   [X1, X2] = meshgrid(x1, x2);
-  X = [X1(:), X2(:), zeros(length(X1(:)), 1)];
+  X = [X1(:), X2(:), zeros(numel(X1), 1)];
 
 end
 
