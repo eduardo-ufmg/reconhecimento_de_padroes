@@ -1,0 +1,60 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{pgffor}
+
+\lstset{
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+
+\graphicspath{{../../kNN/output/}}
+
+\begin{document}
+
+\title{Relatório kNN}
+\author{Eduardo}
+\date{\today}
+\maketitle
+
+\section*{Exercício 1}
+
+As figuras a seguir relacionam as superfícies de decisão e os espaços característicos aos parametros avaliados.
+  
+\foreach \k in {1, 25, 50} {
+  \foreach \r in {1, 2, 3} {
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.5\textwidth]{kNN_\k_noise\r.png}
+      \caption{Superfície de decisão e espaço característico para k=\k\ e r=\r}
+    \end{figure}
+  }
+}
+
+\section{Conclusão}
+Pelos resultados, fica claro que, quanto maior a quantidade de vizinhos avaliada, maior a robustês do classificador em relação a \textit{outliers}. No entanto, valores muito altos podem fazer com que este não capture com fidelidade a distribuição espacial dos dados.
+
+\section*{Exercício 2}
+
+As figuras a seguir relacionam as superfícies de decisão e os espaços característicos aos parametros avaliados.
+
+\foreach \k in {1, 25, 50} {
+  \foreach \h in {0.0001, 0.01, 1} {
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.5\textwidth]{kNN_\k_h\h.png}
+      \caption{Superfície de decisão e espaço característico para k=\k\ e h=\h}
+    \end{figure}
+  }
+}
+
+Os resultados indicam que a combinação de \texttt{k} e \texttt{h} é diretamente refletida no espaço característico. Nota-se, também, que a distribuição das amostras neste é fortemente relacionada à superfície de decisão no espaço de entrada.
+
+\end{document}
