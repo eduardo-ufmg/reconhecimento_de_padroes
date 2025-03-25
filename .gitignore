@@ -309,3 +309,4 @@ TSWLatexianTemp*
 
 # custom
 **/output/**
+**/**venv/**
