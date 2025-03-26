@@ -3,13 +3,12 @@ import numpy as np
 def preparekNN(x, complete_set, k, h):
   features = complete_set[:, :-1]
   squared_distances = np.sum((features - x) ** 2, axis=1)
-  sorted_indices = np.argsort(squared_distances)
-  top_k_indices = sorted_indices[:k]
+  top_k_indices = np.argpartition(squared_distances, k)[:k]
   squared_distances_top_k = squared_distances[top_k_indices]
   class_labels = complete_set[top_k_indices, -1]
   n_features = x.shape[0]
-  normalization = 1.0 / np.sqrt((2 * np.pi * h) ** n_features)
-  weights = normalization * np.exp(-0.5 * squared_distances_top_k / h)
+  normalization = 1.0 / ((2 * np.pi * h**2) ** (n_features / 2))
+  weights = normalization * np.exp(-0.5 * squared_distances_top_k / (h**2))
   return weights, class_labels
 
 def mykNN(x, complete_set, k, h):
@@ -30,8 +29,8 @@ def preparekNN_batch(X, complete_set, k, h):
   batch_distances = np.take_along_axis(squared_distances, top_k_indices, axis=1)
   batch_labels = complete_set[top_k_indices, -1]
   n_features = X.shape[1]
-  normalization = 1.0 / np.sqrt((2 * np.pi * h) ** n_features)
-  batch_weights = normalization * np.exp(-0.5 * batch_distances / h)
+  normalization = 1.0 / ((2 * np.pi * h**2) ** (n_features / 2))
+  batch_weights = normalization * np.exp(-0.5 * batch_distances / (h**2))
   return batch_weights, batch_labels
 
 def mykNN_batch(X, complete_set, k, h):
