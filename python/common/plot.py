@@ -52,3 +52,28 @@ def plot_results(X_grid, xx, yy, data1, data2, Q1s, Q2s, labels, k, h, noise, wh
   else:
     # Otherwise, display the plot
     plt.show()
+
+def plot_accuracyk(X, k_values, average_accuracies):
+  # Dataset metadata for visualization
+  dataset_name = "Occupancy"
+  num_instances, num_features = X.shape
+
+  # Plot the average accuracy vs k
+  plt.figure(figsize=(10, 6))
+  plt.plot(k_values, average_accuracies, marker='o', linestyle='-', color='b')
+  plt.title(f'Average Accuracy vs k ({dataset_name} Dataset)')
+  plt.xlabel('k')
+  plt.ylabel('Average Accuracy')
+  plt.legend([f'{dataset_name}: {num_instances} instances, {num_features} features'])
+  plt.grid(True)
+
+  # Create output directory for saving the plot
+  output_dir = './results'
+  os.makedirs(output_dir, exist_ok=True)
+
+  # Save the plot to a file
+  output_path = os.path.join(output_dir, 'average_accuracy_vs_k.png')
+  plt.savefig(output_path)
+
+  # Display the plot
+  plt.show()

@@ -1,73 +1,59 @@
-import os
 import numpy as np
-import matplotlib.pyplot as plt
+import multiprocessing
+import os
 from sklearn.model_selection import KFold
+from collections import defaultdict
 
-# Import custom modules for kNN implementation and data preparation
+# Import custom modules
 from kNN.mykNN import mykNN_batch
 from kNN.k_optimization.load_prepare_occupancy import load_prepare_occup
 from kNN.k_optimization.prepare_set import prepare_set
+from common.plot import plot_accuracyk
 
-# Load and prepare the Occupancy dataset
-X, y = load_prepare_occup()
-
-# Initialize K-Fold cross-validation with 10 splits and shuffling
-kf = KFold(n_splits=10, shuffle=True)
-
-# Define the range of k values to test
-k_values = range(10, 100, 10)
-average_accuracies = []  # List to store average accuracies for each k
-
-# Calculate the total number of iterations for progress tracking
-total_iterations = len(k_values) * kf.get_n_splits()
-iteration_counter = 0  # Counter to track progress
-
-# Loop through each k value
-for k in k_values:
-  accuracies = []  # List to store accuracies for each fold
-  # Perform K-Fold cross-validation
-  for train_index, test_index in kf.split(X):
-    # Split the dataset into training and testing sets
-    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-
-    # Prepare the complete set for kNN and the test set
-    complete_set, X_test, y_pred = prepare_set(X_train, y_train, X_test, y_test)
-
-    # Perform kNN classification
-    y_pred = mykNN_batch(X_test, complete_set, k=k, h=1.0)
-
-    # Calculate accuracy for the current fold
-    accuracy = np.mean(y_pred == y_test.values.ravel())
-    accuracies.append(accuracy)
-
-    # Update progress counter and print progress
-    iteration_counter += 1
-    print(f"Progress: {iteration_counter}/{total_iterations} iterations completed", end='\r')
+def process_task(args):
+  """Process a single task of evaluating k for a specific fold."""
+  k, train_index, test_index = args
+  X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+  y_train, y_test = y.iloc[train_index], y.iloc[test_index]
   
-  # Calculate and store the average accuracy for the current k
-  average_accuracies.append(np.mean(accuracies))
+  # Prepare sets and run kNN
+  complete_set, X_test_prepared, _ = prepare_set(X_train, y_train, X_test, y_test)
+  y_pred = mykNN_batch(X_test_prepared, complete_set, k, 1.0)
+  
+  accuracy = np.mean(y_pred == y_test.values.ravel())
+  return (k, accuracy)
 
-# Dataset metadata for visualization
-dataset_name = "Occupancy"
-num_instances, num_features = X.shape
-
-# Plot the average accuracy vs k
-plt.figure(figsize=(10, 6))
-plt.plot(k_values, average_accuracies, marker='o', linestyle='-', color='b')
-plt.title(f'Average Accuracy vs k ({dataset_name} Dataset)')
-plt.xlabel('k')
-plt.ylabel('Average Accuracy')
-plt.legend([f'{dataset_name}: {num_instances} instances, {num_features} features'])
-plt.grid(True)
-
-# Create output directory for saving the plot
-output_dir = './results'
-os.makedirs(output_dir, exist_ok=True)
-
-# Save the plot to a file
-output_path = os.path.join(output_dir, 'average_accuracy_vs_k.png')
-plt.savefig(output_path)
-
-# Display the plot
-plt.show()
+if __name__ == "__main__":
+  # Load data
+  X, y = load_prepare_occup()
+  
+  # Initialize KFold and precompute splits
+  kf = KFold(n_splits=10, shuffle=True)
+  folds = list(kf.split(X))
+  
+  # Define k values and generate tasks
+  k_values = range(10, 100, 10)
+  tasks = [(k, train_idx, test_idx) for k in k_values for (train_idx, test_idx) in folds]
+  
+  # Configure parallelism (limit processes to avoid overload)
+  n_procs = min(4, os.cpu_count())  # Adjust based on system capabilities
+  
+  # Process tasks in parallel
+  accuracies_dict = defaultdict(list)
+  total_tasks = len(tasks)
+  
+  with multiprocessing.Pool(processes=n_procs) as pool:
+    results = []
+    for i, result in enumerate(pool.imap_unordered(process_task, tasks), 1):
+      results.append(result)
+      print(f"Progress: {i}/{total_tasks} tasks completed", end='\r')
+  
+  # Aggregate results
+  for k, accuracy in results:
+    accuracies_dict[k].append(accuracy)
+  
+  # Calculate average accuracies
+  average_accuracies = [np.mean(accuracies_dict[k]) for k in k_values]
+  
+  # Plot results
+  plot_accuracyk(X, k_values, average_accuracies)
