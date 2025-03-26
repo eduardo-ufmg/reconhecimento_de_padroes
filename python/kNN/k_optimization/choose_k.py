@@ -1,12 +1,13 @@
-import numpy as np
 import multiprocessing
 import os
+import numpy as np
+import pandas as pd
 from sklearn.model_selection import KFold
 from collections import defaultdict
 
 # Import custom modules
 from kNN.mykNN import mykNN_batch
-from kNN.k_optimization.load_prepare_occupancy import load_prepare_occup
+from kNN.k_optimization.load_prepare import load_prepare_uciset
 from kNN.k_optimization.prepare_set import prepare_set
 from common.plot import plot_accuracyk
 
@@ -23,9 +24,8 @@ def process_task(args):
   accuracy = np.mean(y_pred == y_test.values.ravel())
   return (k, accuracy)
 
-if __name__ == "__main__":
-  # Load data
-  X, y = load_prepare_occup()
+def plot_k_for_set(setname, X, y):
+  """plot average accuracy vs k for a given dataset."""
   
   # Initialize KFold and precompute splits
   kf = KFold(n_splits=10, shuffle=True)
@@ -56,4 +56,18 @@ if __name__ == "__main__":
   average_accuracies = [np.mean(accuracies_dict[k]) for k in k_values]
   
   # Plot results
-  plot_accuracyk(X, k_values, average_accuracies)
+  plot_accuracyk(X, k_values, average_accuracies, setname)
+
+if __name__ == "__main__":
+
+  X, y = load_prepare_uciset(891) 
+
+  plot_k_for_set('cdc_diabetes_health_indicators', X, y)
+
+  X, y = load_prepare_uciset(329) 
+
+  plot_k_for_set('diabetic_retinopathy_debrecen', X, y)
+
+  X, y = load_prepare_uciset(357)
+
+  plot_k_for_set('occupancy', X, y)

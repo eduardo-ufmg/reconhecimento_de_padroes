@@ -53,9 +53,10 @@ def plot_results(X_grid, xx, yy, data1, data2, Q1s, Q2s, labels, k, h, noise, wh
     # Otherwise, display the plot
     plt.show()
 
-def plot_accuracyk(X, k_values, average_accuracies):
+def plot_accuracyk(X, k_values, average_accuracies, dataset_name):
+  """Plot the average accuracy vs k for a given dataset."""
+  
   # Dataset metadata for visualization
-  dataset_name = "Occupancy"
   num_instances, num_features = X.shape
 
   # Plot the average accuracy vs k
@@ -76,4 +77,4 @@ def plot_accuracyk(X, k_values, average_accuracies):
   plt.savefig(output_path)
 
   # Display the plot
-  plt.show()
+  # plt.show() # Uncomment this line to display the plot in the console
