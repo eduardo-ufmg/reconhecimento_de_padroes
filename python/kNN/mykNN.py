@@ -3,7 +3,7 @@ import numpy as np
 from common.distance import euclidean_distance, kernel_function
 
 def preparekNN(x, complete_set, k):
-  n_samples, n_features = complete_set.shape
+  _, n_features = complete_set.shape
   n_features -= 1  # Last column is label
   
   distances = np.array([euclidean_distance(x, point[:n_features]) for point in complete_set])
