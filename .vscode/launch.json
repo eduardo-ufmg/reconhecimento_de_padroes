@@ -5,10 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python Debugger: Module",
+      "name": "Python Debug Param Evaluation",
       "type": "debugpy",
       "request": "launch",
-      "module": "kNN.main",
+      "module": "kNN.eval",
+      "cwd": "${workspaceFolder}/python"
+    },
+    {
+      "name": "Python Debug K Choosing",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "kNN.choose_k",
       "cwd": "${workspaceFolder}/python"
     }
   ]

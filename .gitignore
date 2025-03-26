@@ -307,10 +307,6 @@ TSWLatexianTemp*
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
 
-# custom
-**/output/**
-**/**venv/**
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -485,3 +481,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# custom
+**/output/**
+**/**venv/**
+**/data/**

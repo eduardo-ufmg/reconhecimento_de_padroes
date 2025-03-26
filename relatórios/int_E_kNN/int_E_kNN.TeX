@@ -15,7 +15,7 @@
   postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 }
 
-\graphicspath{{../../kNN/output/}}
+\graphicspath{{../../python/kNN/output/}}
 
 \begin{document}
 
@@ -220,7 +220,7 @@ end
 As figuras a seguir relacionam as superfícies de decisão aos parametros avaliados.
   
 \foreach \k in {1, 25, 50} {
-  \foreach \r in {1, 2, 3} {
+  \foreach \r in {1.00, 2.00, 3.00} {
     \begin{figure}[H]
       \centering
       \includegraphics[width=0.5\textwidth]{kNN_\k_noise\r.png}
