@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import KFold
 
-from kNN.mykNN import mykNN
+from kNN.mykNN import mykNN_batch
 from kNN.k_optimization.load_prepare_occupancy import load_prepare_occup
 from kNN.k_optimization.prepare_set import prepare_set
 
@@ -15,8 +15,7 @@ for train_index, test_index in kf.split(X):
 
   complete_set, X_test, y_pred = prepare_set(X_train, y_train, X_test, y_test)
 
-  for i, x in enumerate(X_test):
-    y_pred[i] = mykNN(x, complete_set, k=5, h=1.0)
+  y_pred = mykNN_batch(X_test, complete_set, k=5, h=1.0)
 
   accuracy = np.mean(y_pred == y_test.values.ravel())
   print(f"mykNN Fold accuracy: {accuracy:.2f}")
