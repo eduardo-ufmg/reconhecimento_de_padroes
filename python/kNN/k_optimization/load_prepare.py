@@ -38,9 +38,6 @@ def load_prepare_occup():
 
 def load_prepare_uciset(id, nan_strategy='drop', max_categories=10):
 
-  if id == 357:
-    return load_prepare_occup()
-
   try:
     dataset = fetch_ucirepo(id=id)
   except Exception as e:
@@ -77,7 +74,7 @@ def load_prepare_uciset(id, nan_strategy='drop', max_categories=10):
   datetime_cols = []
   for col in X.select_dtypes(include=['object', 'datetime64']).columns:
     try:
-      X[col] = pd.to_datetime(X[col], errors='raise')
+      X[col] = pd.to_datetime(X[col], format='%Y-%m-%d %H:%M:%S', errors='raise')
       datetime_cols.append(col)
     except (TypeError, ValueError):
       pass
@@ -136,3 +133,14 @@ def load_prepare_uciset(id, nan_strategy='drop', max_categories=10):
   X = X.loc[y.index]
 
   return X.astype(np.float64), y.astype(np.float64)
+
+def window_bigset(X, y, window_size=1000):
+  """Split a large dataset into smaller windows."""
+  
+  windows = []
+  for i in range(0, len(X), window_size):
+    window = slice(i, i + window_size)
+    windows.append((X[window], y[window]))
+
+  num_instances, num_features = X.shape
+  return windows, num_instances, num_features
