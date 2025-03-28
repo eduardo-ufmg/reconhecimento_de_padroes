@@ -1,60 +1,39 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 
 def mykNN_batch(Xt: np.ndarray, X: np.ndarray, Y: np.ndarray, k: int, h: float) -> np.ndarray:
   """
-  Weighted k-nearest neighbors classifier
-  
-  Parameters:
-    Xt: target data, numpy array of shape (n_samples_t, n_features)
-    X: known data, numpy array of shape (n_samples, n_features)
-    Y: known labels, numpy array of shape (n_samples, 1) or (n_samples,)
-    k: number of neighbors to use
-    h: bandwidth of the kernel
-    
-  Returns:
-    Yt: predicted labels, numpy array of shape (n_samples_t, 1)
-    
-  Weights are computed using the multivariate normal distribution PDF
-  (ignoring the constant factor) as:
-    weight = exp(-d^2 / (2 * h^2))
-  where d is the Euclidean distance between the target and neighbor.
+    Weighted k-nearest neighbors classifier
+    Xt: target data, column vector of row vectors (samples, features)
+    X: known data, column vector of row vectors (samples, features)
+    Y: known labels, raw vector of integer labels (samples) expected labels are -1 and 1
+    k: number of neighbors
+    h: covariance factor
+    returns
+      Yt: predicted labels, raw vector of integer labels (samples) -1 or 1
+    Weights are given by the multivariate normal distribution pdf
+    with mean at the neighbor and bandwidth h
   """
-  # Ensure Y is a 1D array for easier indexing if needed
-  Y = Y.flatten()
+
+  distances_sq = cdist(Xt, X, 'sqeuclidean')
   
-  n_t = Xt.shape[0]
+  # Find indices of the k nearest neighbors for each target point
+  indices = np.argpartition(distances_sq, k, axis=1)[:, :k]
   
-  # Compute squared Euclidean distances between each Xt and each X
-  # Using the identity: ||a-b||^2 = ||a||^2 + ||b||^2 - 2 a.b
-  Xt_norm_sq = np.sum(Xt**2, axis=1, keepdims=True)  # (n_t, 1)
-  X_norm_sq = np.sum(X**2, axis=1, keepdims=True).T     # (1, n)
-  dists_sq = Xt_norm_sq + X_norm_sq - 2 * Xt.dot(X.T)    # (n_t, n)
+  # Extract squared distances of the k neighbors using advanced indexing
+  rows = np.arange(Xt.shape[0])[:, np.newaxis]
+  knn_dist_sq = distances_sq[rows, indices]
   
-  # Find the indices of the k nearest neighbors for each target sample.
-  # argpartition gives k smallest entries but not sorted.
-  neighbor_idx = np.argpartition(dists_sq, kth=k-1, axis=1)[:, :k]
+  # Calculate weights using the kernel (multivariate normal PDF without normalization)
+  weights = np.exp(-knn_dist_sq / (2 * h ** 2))
   
-  # Gather the corresponding squared distances and labels for these neighbors.
-  neighbor_dists_sq = np.take_along_axis(dists_sq, neighbor_idx, axis=1)
-  neighbor_labels = Y[neighbor_idx]  # shape (n_t, k)
+  # Retrieve the labels of the k nearest neighbors
+  knn_labels = Y[indices]
   
-  # Compute weights using the kernel function (ignoring constant factor).
-  weights = np.exp(- neighbor_dists_sq / (2 * h**2))  # shape (n_t, k)
+  # Compute the weighted sum of labels
+  weighted_sums = np.sum(weights * knn_labels, axis=1)
   
-  # For each target sample, accumulate the weights for each label.
-  pred_labels = np.empty(n_t, dtype=Y.dtype)
-  for i in range(n_t):
-    # Get labels and weights for the i-th target sample.
-    labels_i = neighbor_labels[i]
-    weights_i = weights[i]
-    
-    # Use np.unique to sum weights for each distinct label.
-    unique_labels, inverse = np.unique(labels_i, return_inverse=True)
-    weighted_sums = np.zeros_like(unique_labels, dtype=np.float64)
-    # Sum weights for each unique label.
-    np.add.at(weighted_sums, inverse, weights_i)
-    
-    # Predict the label with the maximum weight.
-    pred_labels[i] = unique_labels[np.argmax(weighted_sums)]
-      
-  return pred_labels.reshape(-1, 1)
+  # Determine the predicted labels based on the sign of the weighted sum
+  Yt = np.where(weighted_sums >= 0, 1, -1)
+  
+  return Yt
