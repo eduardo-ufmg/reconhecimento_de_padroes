@@ -39,7 +39,7 @@ def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_sta
 
     # Generate the first spiral
     theta1 = np.linspace(0, 4 * np.pi, spc)
-    r1 = np.linspace(0, np.pi, spc)
+    r1 = np.linspace(0.05, np.pi + 0.05, spc)
     x1 = r1 * np.sin(theta1) + np.random.normal(0, noise, spc)
     y1 = r1 * np.cos(theta1) + np.random.normal(0, noise, spc)
     X1 = np.column_stack((x1, y1))
@@ -47,7 +47,7 @@ def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_sta
 
     # Generate the second spiral rotated by pi radians
     theta2 = np.linspace(0, 4 * np.pi, spc)
-    r2 = np.linspace(0, np.pi, spc)
+    r2 = np.linspace(0.05, np.pi + 0.05, spc)
     x2 = r2 * np.sin(theta2 + np.pi) + np.random.normal(0, noise, spc)
     y2 = r2 * np.cos(theta2 + np.pi) + np.random.normal(0, noise, spc)
     X2 = np.column_stack((x2, y2))
