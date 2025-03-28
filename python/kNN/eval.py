@@ -7,19 +7,19 @@ from common.plot import plot_decision_boundary, plot_characteristic_space
 if __name__ == "__main__":
   SAMPLES = 500
   LINEAR_DATASET = 'blobs'
-  NONLIN_DATASET = 'spirals'
-  K = 5
+  NONLIN_DATASET = 'moons'
+  K = 10
   H = 1
 
   SETS = [LINEAR_DATASET, NONLIN_DATASET]
-  NOIS = [1.5, 0.001]
+  NOIS = [1, 0.2]
 
   for dataset, noise in zip(SETS, NOIS):
     X1, Y1, X2, Y2 = generate_dataset(dataset, SAMPLES, noise=noise)
     X = np.vstack((X1, X2))
     Y = np.hstack((Y1, Y2)).flatten()
 
-    G = generate_grid(X, 1)
+    G = generate_grid(X, 0.5)
 
     P = mykNN_batch(G, X, Y, k=K, h=H)
 

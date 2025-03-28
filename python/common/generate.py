@@ -1,12 +1,12 @@
 import numpy as np
 
-from sklearn.datasets import make_blobs
+from sklearn.datasets import make_blobs, make_moons
 from typing import Tuple
 
 def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_state: int=None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
   """
     Generate a dataset of type given by dataset_type with n_samples total samples and added noise
-    dataset_type: type of dataset to generate (blobs, spirals, xor)
+    dataset_type: type of dataset to generate (blobs, spirals, xor, moons)
     n_samples: total number of samples to generate
     noise: amount of noise to add to the dataset
     random_state: random state for reproducibility
@@ -34,24 +34,7 @@ def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_sta
     Y2 = Y[Y == 1]
 
   elif dataset_type == "spirals":
-    # Compute the number of samples per class
-    spc = n_samples // 2
-
-    # Generate the first spiral
-    theta1 = np.linspace(0, 4 * np.pi, spc)
-    r1 = np.linspace(0.05, np.pi + 0.05, spc)
-    x1 = r1 * np.sin(theta1) + np.random.normal(0, noise, spc)
-    y1 = r1 * np.cos(theta1) + np.random.normal(0, noise, spc)
-    X1 = np.column_stack((x1, y1))
-    Y1 = np.ones(spc)
-
-    # Generate the second spiral rotated by pi radians
-    theta2 = np.linspace(0, 4 * np.pi, spc)
-    r2 = np.linspace(0.05, np.pi + 0.05, spc)
-    x2 = r2 * np.sin(theta2 + np.pi) + np.random.normal(0, noise, spc)
-    y2 = r2 * np.cos(theta2 + np.pi) + np.random.normal(0, noise, spc)
-    X2 = np.column_stack((x2, y2))
-    Y2 = -np.ones(spc)
+    raise NotImplementedError("Spiral dataset generation is not implemented yet.")
 
   elif dataset_type == "xor":
     # Generate the XOR dataset
@@ -62,6 +45,20 @@ def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_sta
     centers2 = np.array([[-1, 1], [1, -1]])
     X2, Y2 = make_blobs(n_samples=n_samples // 2, centers=centers2, cluster_std=noise, random_state=random_state)
     Y2.fill(1)
+
+  elif dataset_type == "moons":
+    # Generate the moons dataset
+    X, Y = make_moons(n_samples=n_samples, noise=noise, random_state=random_state)
+
+    # Convert the target classes to -1 and 1
+    Y[Y == 0] = -1
+    Y[Y == 1] = 1
+
+    # Split the dataset into two classes
+    X1 = X[Y == -1]
+    Y1 = Y[Y == -1]
+    X2 = X[Y == 1]
+    Y2 = Y[Y == 1]
 
   else:
     raise ValueError("Invalid dataset type. Choose from 'blobs', 'spirals', or 'xor'.")

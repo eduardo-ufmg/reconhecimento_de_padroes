@@ -3,7 +3,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from typing import Tuple
 
-def mykNN_batch(Xt: np.ndarray, X: np.ndarray, Y: np.ndarray, k: int, h: float) -> np.ndarray:
+def mykNN_batch(Xt: np.ndarray, X: np.ndarray, Y: np.ndarray, k: int, h: float=None) -> np.ndarray:
   """
     Weighted k-nearest neighbors classifier
     Xt: target data, column vector of row vectors (samples, features)
@@ -26,8 +26,12 @@ def mykNN_batch(Xt: np.ndarray, X: np.ndarray, Y: np.ndarray, k: int, h: float) 
   rows = np.arange(Xt.shape[0])[:, np.newaxis]
   knn_dist_sq = distances_sq[rows, indices]
   
-  # Calculate weights using the kernel (multivariate normal PDF without normalization)
-  weights = np.exp(-knn_dist_sq / (2 * h ** 2))
+  if h is None:
+    weights = np.ones_like(knn_dist_sq)
+  else:
+    h = max(h, 1e-10)  # Ensure h is not zero to avoid division by zero
+    # Calculate weights using the kernel (multivariate normal PDF without normalization)
+    weights = np.exp(-knn_dist_sq / (2 * h ** 2))
   
   # Retrieve the labels of the k nearest neighbors
   knn_labels = Y[indices]
@@ -64,8 +68,12 @@ def to_characteristic_space(Xt: np.ndarray, X: np.ndarray, Y: np.ndarray, k: int
   rows = np.arange(Xt.shape[0])[:, np.newaxis]
   knn_dist_sq = distances_sq[rows, indices]
   
-  # Calculate weights using the kernel (multivariate normal PDF)
-  weights = np.exp(-knn_dist_sq / (2 * h ** 2))
+  if h is None:
+    weights = np.ones_like(knn_dist_sq)
+  else:
+    h = max(h, 1e-10) # Ensure h is not zero to avoid division by zero
+    # Calculate weights using the kernel (multivariate normal PDF)
+    weights = np.exp(-knn_dist_sq / (2 * h ** 2))
   
   # Retrieve the labels of the k nearest neighbors
   knn_labels = Y[indices]
