@@ -1,18 +1,22 @@
-from kNN.run import generate_and_evaluate
+import numpy as np
+
+from common.generate import generate_dataset, generate_grid
+from kNN.mykNN import mykNN_batch
+from common.plot import plot_decision_boundary
 
 if __name__ == "__main__":
-  # Define the type of dataset and the number of samples to generate
-  DATASET_TYPE = 'blobs'
-  SAMPLES = 200
+  SAMPLES = 500
+  LINEAR_DATASET = 'blobs'
+  NONLIN_DATASET = 'spirals'
+
+  X1l, Y1l, X2l, Y2l = generate_dataset(LINEAR_DATASET, SAMPLES, noise=1)
+  X = np.vstack((X1l, X2l))
+  Y = np.hstack((Y1l, Y2l)).flatten()
+
+  G = generate_grid(X, 1)
+
+  P = mykNN_batch(G, X, Y, k=5, h=1)
+
+  plot_decision_boundary(X, Y, G, P, LINEAR_DATASET)
   
-  # Evaluate the effect of different bandwidth (h) values on the model
-  for k in [1, 25, 50]:  # Iterate over different values of k (number of neighbors)
-    for h in [0.0001, 0.01, 1]:  # Iterate over different bandwidth values
-      # Generate the dataset, evaluate the model, and save the results
-      generate_and_evaluate(DATASET_TYPE, SAMPLES, k, h, noise=1, which='h', save=True)
   
-  # Evaluate the effect of different noise levels on the model
-  for k in [1, 25, 50]:  # Iterate over different values of k (number of neighbors)
-    for noise in [1, 2, 3]:  # Iterate over different noise levels
-      # Generate the dataset, evaluate the model, and save the results
-      generate_and_evaluate(DATASET_TYPE, SAMPLES, k, h=1, noise=noise, which='noise', save=True)

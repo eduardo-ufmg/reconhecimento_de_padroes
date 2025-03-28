@@ -1,79 +1,60 @@
 import numpy as np
 
-# Function to prepare k-Nearest Neighbors (kNN) for a single query point
-def preparekNN(x, complete_set, k, h):
-  # Extract features (all columns except the last one) from the dataset
-  features = complete_set[:, :-1]
-  # Compute squared Euclidean distances between the query point and all points in the dataset
-  squared_distances = np.sum((features - x) ** 2, axis=1)
-  # Find the indices of the k nearest neighbors
-  top_k_indices = np.argpartition(squared_distances, k)[:k]
-  # Get the squared distances of the k nearest neighbors
-  squared_distances_top_k = squared_distances[top_k_indices]
-  # Extract the class labels of the k nearest neighbors
-  class_labels = complete_set[top_k_indices, -1]
-  # Calculate the dimensionality of the feature space
-  n_features = x.shape[0]
-  # Compute the normalization factor for the Gaussian kernel
-  normalization = 1.0 / ((2 * np.pi * h**2) ** (n_features / 2))
-  # Compute the weights using the Gaussian kernel
-  weights = normalization * np.exp(-0.5 * squared_distances_top_k / (h**2))
-  return weights, class_labels
-
-# Function to classify a single query point using kNN
-def mykNN(x, complete_set, k, h):
-  # Prepare kNN by computing weights and class labels
-  weights, class_labels = preparekNN(x, complete_set, k, h)
-  # Compute the weighted sum of class labels
-  weighted_sum = np.dot(weights, class_labels)
-  # Return the sign of the weighted sum as the predicted class
-  return np.sign(weighted_sum)
-
-# Function to map a single query point to a characteristic space
-def to_characteristic_space(x, complete_set, k, h):
-  # Prepare kNN by computing kernel values and class labels
-  kernel_vals, class_labels = preparekNN(x, complete_set, k, h)
-  # Compute the sum of kernel values for class 1
-  Q1 = np.sum(kernel_vals[class_labels == 1])
-  # Compute the sum of kernel values for other classes
-  Q2 = np.sum(kernel_vals[class_labels != 1])
-  return Q1, Q2
-
-# Function to prepare kNN for a batch of query points
-def preparekNN_batch(X, complete_set, k, h):
-  # Extract features (all columns except the last one) from the dataset
-  features = complete_set[:, :-1]
-  # Compute squared Euclidean distances between each query point and all points in the dataset
-  squared_distances = np.sum((X[:, np.newaxis] - features) ** 2, axis=2)
-  # Find the indices of the k nearest neighbors for each query point
-  top_k_indices = np.argpartition(squared_distances, k, axis=1)[:, :k]
-  # Get the squared distances of the k nearest neighbors for each query point
-  batch_distances = np.take_along_axis(squared_distances, top_k_indices, axis=1)
-  # Extract the class labels of the k nearest neighbors for each query point
-  batch_labels = complete_set[top_k_indices, -1]
-  # Calculate the dimensionality of the feature space
-  n_features = X.shape[1]
-  # Compute the normalization factor for the Gaussian kernel
-  normalization = 1.0 / ((2 * np.pi * h**2) ** (n_features / 2))
-  # Compute the weights using the Gaussian kernel for each query point
-  batch_weights = normalization * np.exp(-0.5 * batch_distances / (h**2))
-  return batch_weights, batch_labels
-
-# Function to classify a batch of query points using kNN
-def mykNN_batch(X, complete_set, k, h):
-  # Prepare kNN by computing weights and class labels for the batch
-  batch_weights, batch_labels = preparekNN_batch(X, complete_set, k, h)
-  # Compute the weighted sum of class labels for each query point
-  weighted_sums = np.sum(batch_weights * batch_labels, axis=1)
-  # Return the sign of the weighted sums as the predicted classes
-  return np.sign(weighted_sums)
-
-# Function to map a batch of query points to a characteristic space
-def to_characteristic_space_batch(X, complete_set, k, h):
-  # Prepare kNN by computing kernel values and class labels for the batch
-  batch_kernel_vals, batch_labels = preparekNN_batch(X, complete_set, k, h)
-  # Compute the sum of kernel values for class 1 for each query point
-  Q1 = np.sum(batch_kernel_vals * (batch_labels == 1), axis=1)
-  # Compute the sum of kernel values for other classes for each query point
-  Q2 = np.sum(batch_kernel_vals * (batch_labels != 1), axis=1)
-  return Q1, Q2
+def mykNN_batch(Xt: np.ndarray, X: np.ndarray, Y: np.ndarray, k: int, h: float) -> np.ndarray:
+  """
+  Weighted k-nearest neighbors classifier
+  
+  Parameters:
+    Xt: target data, numpy array of shape (n_samples_t, n_features)
+    X: known data, numpy array of shape (n_samples, n_features)
+    Y: known labels, numpy array of shape (n_samples, 1) or (n_samples,)
+    k: number of neighbors to use
+    h: bandwidth of the kernel
+    
+  Returns:
+    Yt: predicted labels, numpy array of shape (n_samples_t, 1)
+    
+  Weights are computed using the multivariate normal distribution PDF
+  (ignoring the constant factor) as:
+    weight = exp(-d^2 / (2 * h^2))
+  where d is the Euclidean distance between the target and neighbor.
+  """
+  # Ensure Y is a 1D array for easier indexing if needed
+  Y = Y.flatten()
+  
+  n_t = Xt.shape[0]
+  
+  # Compute squared Euclidean distances between each Xt and each X
+  # Using the identity: ||a-b||^2 = ||a||^2 + ||b||^2 - 2 a.b
+  Xt_norm_sq = np.sum(Xt**2, axis=1, keepdims=True)  # (n_t, 1)
+  X_norm_sq = np.sum(X**2, axis=1, keepdims=True).T     # (1, n)
+  dists_sq = Xt_norm_sq + X_norm_sq - 2 * Xt.dot(X.T)    # (n_t, n)
+  
+  # Find the indices of the k nearest neighbors for each target sample.
+  # argpartition gives k smallest entries but not sorted.
+  neighbor_idx = np.argpartition(dists_sq, kth=k-1, axis=1)[:, :k]
+  
+  # Gather the corresponding squared distances and labels for these neighbors.
+  neighbor_dists_sq = np.take_along_axis(dists_sq, neighbor_idx, axis=1)
+  neighbor_labels = Y[neighbor_idx]  # shape (n_t, k)
+  
+  # Compute weights using the kernel function (ignoring constant factor).
+  weights = np.exp(- neighbor_dists_sq / (2 * h**2))  # shape (n_t, k)
+  
+  # For each target sample, accumulate the weights for each label.
+  pred_labels = np.empty(n_t, dtype=Y.dtype)
+  for i in range(n_t):
+    # Get labels and weights for the i-th target sample.
+    labels_i = neighbor_labels[i]
+    weights_i = weights[i]
+    
+    # Use np.unique to sum weights for each distinct label.
+    unique_labels, inverse = np.unique(labels_i, return_inverse=True)
+    weighted_sums = np.zeros_like(unique_labels, dtype=np.float64)
+    # Sum weights for each unique label.
+    np.add.at(weighted_sums, inverse, weights_i)
+    
+    # Predict the label with the maximum weight.
+    pred_labels[i] = unique_labels[np.argmax(weighted_sums)]
+      
+  return pred_labels.reshape(-1, 1)

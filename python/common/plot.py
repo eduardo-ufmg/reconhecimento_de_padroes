@@ -87,5 +87,40 @@ def plot_accuracyk(k_values, average_accuracies, dataset_name, num_instances, nu
   output_path = os.path.join(output_dir, f'{dataset_name}_{kfold_rd_state}.png')
   plt.savefig(output_path)
 
-  # Display the plot
-  # plt.show() # Uncomment this line to display the plot in the console
+
+def plot_characteristic_space(QX, YX, QG, YG, dataset_name):
+  """Plot the characteristic space of the kNN classifier."""
+
+  # Create a figure and axis
+  fig, ax = plt.subplots(figsize=(10, 6))
+  # Create a custom color map
+  cmap = ListedColormap(['#FFAAAA', '#AAAAFF'])
+  # Plot the first class
+  ax.scatter(QX[YX == -1, 0], QX[YX == -1, 1], c='red', marker='o', edgecolor='k')
+  # Plot the second class
+  ax.scatter(QX[YX == 1, 0], QX[YX == 1, 1], c='blue', marker='o', edgecolor='k')
+  # Plot the grid points
+  ax.scatter(QG[YG == -1, 0], QG[YG == -1, 1], c='red', marker='x')
+  ax.scatter(QG[YG == 1, 0], QG[YG == 1, 1], c='blue', marker='x')
+  # Set the title
+  ax.set_title(f'Characteristic Space for {dataset_name} Dataset')
+
+  # Create output directory for saving the plot
+  output_dir = './output'
+  os.makedirs(output_dir, exist_ok=True)
+  # Save the plot to a file
+  output_path = os.path.join(output_dir, f'{dataset_name}_characteristic_space.png')
+  plt.savefig(output_path)
+  plt.close(fig)
+
+
+def plot_kNN_results(X, Y, G, P, QX, QG, dataset_name):
+  """Plot the kNN decision boundary and characteristic space."""
+
+  # Plot the decision boundary
+  plot_decision_boundary(X, Y, G, P, dataset_name)
+
+  # Plot the characteristic space
+  plot_characteristic_space(QX, Y, QG, P, dataset_name)
+
+  plt.show()
