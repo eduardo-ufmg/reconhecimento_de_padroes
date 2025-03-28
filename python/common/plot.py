@@ -3,21 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-def plot_dataset(X1, X2, dataset_name):
-  """Plot the dataset with two classes."""
-
-  # Create a figure and axis
-  fig, ax = plt.subplots(figsize=(10, 6))
-  # Create a custom color map
-  cmap = ListedColormap(['#FFAAAA', '#AAAAFF'])
-  # Plot the first class
-  ax.scatter(X1[:, 0], X1[:, 1], c='red', marker='o', edgecolor='k')
-  # Plot the second class
-  ax.scatter(X2[:, 0], X2[:, 1], c='blue', marker='x')
-  # Set the title
-  ax.set_title(f'{dataset_name} Dataset')
-
-
 def plot_decision_boundary(X, Y, G, P, dataset_name):
   """Plot the decision boundary of a classifier."""
   fig, ax = plt.subplots(figsize=(10, 6))
@@ -91,23 +76,23 @@ def plot_accuracyk(k_values, average_accuracies, dataset_name, num_instances, nu
 def plot_characteristic_space(QX, YX, QG, YG, dataset_name):
   """Plot the characteristic space of the kNN classifier."""
 
-  # Create a figure and axis
   fig, ax = plt.subplots(figsize=(10, 6))
-  # Create a custom color map
-  cmap = ListedColormap(['#FFAAAA', '#AAAAFF'])
-  # Plot the first class
-  ax.scatter(QX[YX == -1, 0], QX[YX == -1, 1], c='red', marker='o', edgecolor='k')
-  # Plot the second class
-  ax.scatter(QX[YX == 1, 0], QX[YX == 1, 1], c='blue', marker='o', edgecolor='k')
-  # Plot the grid points
-  ax.scatter(QG[YG == -1, 0], QG[YG == -1, 1], c='red', marker='x')
-  ax.scatter(QG[YG == 1, 0], QG[YG == 1, 1], c='blue', marker='x')
-  # Set the title
+  
+  # Plot grid points based on their predicted labels with lower alpha
+  # Assuming QG is of shape (2, n_samples)
+  ax.scatter(QG[0, YG == 1], QG[1, YG == 1], c='blue', marker='x', alpha=0.1)
+  ax.scatter(QG[0, YG == -1], QG[1, YG == -1], c='red', marker='x', alpha=0.1)
+  
+  # Plot training points based on their true labels
+  ax.scatter(QX[0, YX == 1], QX[1, YX == 1], c='blue', marker='o', edgecolor='k')
+  ax.scatter(QX[0, YX == -1], QX[1, YX == -1], c='red', marker='o', edgecolor='k')
+  
   ax.set_title(f'Characteristic Space for {dataset_name} Dataset')
-
+  
   # Create output directory for saving the plot
   output_dir = './output'
   os.makedirs(output_dir, exist_ok=True)
+  
   # Save the plot to a file
   output_path = os.path.join(output_dir, f'{dataset_name}_characteristic_space.png')
   plt.savefig(output_path)
