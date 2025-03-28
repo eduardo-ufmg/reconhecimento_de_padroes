@@ -41,7 +41,7 @@ def plot_decision_boundary(X, Y, G, P, dataset_name):
   ax.set_title(f'Decision Boundary for {dataset_name} Dataset')
 
   # Create output directory for saving the plot
-  output_dir = './outputs'
+  output_dir = './output'
   os.makedirs(output_dir, exist_ok=True)
   
   # Save the plot to a file
@@ -59,7 +59,7 @@ def plot_errors(errors, dataset_name):
   plt.grid(True)
 
   # Create output directory for saving the plot
-  output_dir = './outputs'
+  output_dir = './output'
   os.makedirs(output_dir, exist_ok=True)
 
   # Save the plot to a file

@@ -1,0 +1,45 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{pgffor}
+
+\lstset{
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+
+\graphicspath{{../../python/perceptron/output/}}
+
+\begin{document}
+
+\title{Relatório perceptron}
+\author{Eduardo}
+\date{\today}
+\maketitle
+
+A figura~\ref{fig:decisao} apresenta a superfície de decisão gerada pelo modelo perceptron. Essa superfície ilustra como o modelo separa as diferentes classes no espaço de entrada, destacando as regiões atribuídas a cada classe com base nos dados de treinamento.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{blobs_decision_boundary.png}
+  \caption{Superfície de decisão}
+  \label{fig:decisao}
+\end{figure}
+
+A figura~\ref{fig:errors} mostra a evolução do erro ao longo das épocas durante o treinamento do modelo perceptron.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{blobs_errors.png}
+  \caption{Erro por época}
+  \label{fig:errors}
+\end{figure}
+
+\end{document}
