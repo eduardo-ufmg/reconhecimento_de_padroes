@@ -1,89 +1,86 @@
 import numpy as np
 
-from sklearn.datasets import make_moons, make_circles
+from sklearn.datasets import make_blobs
+from typing import Tuple
 
-# Function to generate synthetic datasets based on the specified type
-def generate_dataset(dataset_type, n_samples, noise):
-  # Set random seed for reproducibility
-  np.random.seed(0)
-  # Calculate the number of samples per class
-  n_per_class = n_samples // 2
-  
-  # Generate data for 'blobs' dataset
-  if dataset_type == 'blobs':
-    # Create two Gaussian blobs with added noise
-    data1 = np.random.multivariate_normal([2, 2], [[0.5, 0], [0, 0.5]], n_per_class) + noise * np.random.randn(n_per_class, 2)
-    data2 = np.random.multivariate_normal([-2, -2], [[0.5, 0], [0, 0.5]], n_per_class) + noise * np.random.randn(n_per_class, 2)
-    # Assign labels to the blobs
-    labels1 = np.ones(n_per_class)
-    labels2 = -np.ones(n_per_class)
-  
-  # Generate data for 'spirals' dataset
-  elif dataset_type == 'spirals':
-    # Create two spirals with added noise
-    t = np.linspace(0, 4 * np.pi, n_per_class)
-    data1 = np.column_stack([t * np.cos(t), t * np.sin(t)]) + noise * np.random.randn(n_per_class, 2)
-    data2 = np.column_stack([-t * np.cos(t), -t * np.sin(t)]) + noise * np.random.randn(n_per_class, 2)
-    # Assign labels to the spirals
-    labels1 = np.ones(n_per_class)
-    labels2 = -np.ones(n_per_class)
-  
-  # Generate data for 'moons' dataset
-  elif dataset_type == 'moons':
-    # Use sklearn's make_moons function to generate data
-    data, labels = make_moons(n_samples, noise=noise, random_state=0)
-    # Separate data into two classes
-    data1 = data[labels == 1]
-    data2 = data[labels == 0]
-    # Assign labels to the classes
-    labels1 = np.ones(n_per_class)
-    labels2 = -np.ones(n_per_class)
-  
-  # Generate data for 'circles' dataset
-  elif dataset_type == 'circles':
-    # Use sklearn's make_circles function to generate data
-    data, labels = make_circles(n_samples, noise=noise, factor=0.5, random_state=0)
-    # Separate data into two classes
-    data1 = data[labels == 1]
-    data2 = data[labels == 0]
-    # Assign labels to the classes
-    labels1 = np.ones(n_per_class)
-    labels2 = -np.ones(n_per_class)
-  
-  # Generate data for 'xor' dataset
-  elif dataset_type == 'xor':
-    # Create XOR pattern with added noise
-    data1 = np.vstack([
-      np.random.randn(n_per_class // 2, 2) + [2, 2],
-      np.random.randn(n_per_class // 2, 2) - [2, 2]
-    ]) + noise * np.random.randn(n_per_class, 2)
-    data2 = np.vstack([
-      np.random.randn(n_per_class // 2, 2) + [-2, 2],
-      np.random.randn(n_per_class // 2, 2) - [-2, 2]
-    ]) + noise * np.random.randn(n_per_class, 2)
-    # Assign labels to the XOR pattern
-    labels1 = np.ones(n_per_class)
-    labels2 = -np.ones(n_per_class)
-  
-  # Raise an error if the dataset type is unknown
+def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_state: int=None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+  """
+    Generate a dataset of type given by dataset_type with n_samples total samples and added noise
+    dataset_type: type of dataset to generate (blobs, spirals, xor)
+    n_samples: total number of samples to generate
+    noise: amount of noise to add to the dataset
+    random_state: random state for reproducibility
+    return: tuple of (X1, Y1, X2, Y2)
+      X1: matrix of input features for class 1 (n_samples, n_features)
+      Y1: vector of target classes for class 1 (n_samples)
+      X2: matrix of input features for class 2 (n_samples, n_features)
+      Y2: vector of target classes for class 2 (n_samples)
+    Classes are -1 and 1
+    Input is a column vector of row vectors
+  """
+
+  if dataset_type == "blobs":
+    # Generate a dataset of blobs
+    X, Y = make_blobs(n_samples=n_samples, centers=2, cluster_std=noise, random_state=random_state)
+
+    # Convert the target classes to -1 and 1
+    Y[Y == 0] = -1
+    Y[Y == 1] = 1
+
+    # Split the dataset into two classes
+    X1 = X[Y == -1]
+    Y1 = Y[Y == -1]
+    X2 = X[Y == 1]
+    Y2 = Y[Y == 1]
+
+  elif dataset_type == "spirals":
+    # Compute the number of samples per class
+    spc = n_samples // 2
+
+    # Generate the first spiral
+    theta1 = np.linspace(0, 4 * np.pi, spc)
+    r1 = np.linspace(0, np.pi, spc)
+    x1 = r1 * np.sin(theta1) + np.random.normal(0, noise, spc)
+    y1 = r1 * np.cos(theta1) + np.random.normal(0, noise, spc)
+    X1 = np.column_stack((x1, y1))
+    Y1 = np.ones(spc)
+
+    # Generate the second spiral rotated by pi radians
+    theta2 = np.linspace(0, 4 * np.pi, spc)
+    r2 = np.linspace(0, np.pi, spc)
+    x2 = r2 * np.sin(theta2 + np.pi) + np.random.normal(0, noise, spc)
+    y2 = r2 * np.cos(theta2 + np.pi) + np.random.normal(0, noise, spc)
+    X2 = np.column_stack((x2, y2))
+    Y2 = -np.ones(spc)
+
+  elif dataset_type == "xor":
+    # Generate the XOR dataset
+    centers1 = np.array([[-1, -1], [1, 1]])
+    X1, Y1 = make_blobs(n_samples=n_samples // 2, centers=centers1, cluster_std=noise, random_state=random_state)
+    Y1.fill(-1)
+
+    centers2 = np.array([[-1, 1], [1, -1]])
+    X2, Y2 = make_blobs(n_samples=n_samples // 2, centers=centers2, cluster_std=noise, random_state=random_state)
+    Y2.fill(1)
+
   else:
-    raise ValueError("Unknown dataset type")
-  
-  # Combine data and labels into a complete dataset
-  complete_set = np.vstack([
-    np.hstack([data1, labels1.reshape(-1, 1)]),
-    np.hstack([data2, labels2.reshape(-1, 1)])
-  ])
-  return data1, labels1, data2, labels2, complete_set
+    raise ValueError("Invalid dataset type. Choose from 'blobs', 'spirals', or 'xor'.")
 
-# Function to generate a grid for visualization
-def generate_grid(complete_set, resolution=100):
-  # Determine the range of the grid based on the dataset
-  x_min, x_max = complete_set[:, 0].min() - 1, complete_set[:, 0].max() + 1
-  y_min, y_max = complete_set[:, 1].min() - 1, complete_set[:, 1].max() + 1
-  # Create a mesh grid with the specified resolution
-  xx, yy = np.meshgrid(np.linspace(x_min, x_max, resolution),
-             np.linspace(y_min, y_max, resolution))
-  # Flatten the grid into a 2D array of points
-  X = np.c_[xx.ravel(), yy.ravel()]
-  return X, xx, yy
+  return X1, Y1, X2, Y2
+
+def generate_grid(X: np.ndarray, step: float=0.01) -> np.ndarray:
+  """
+    Generate a grid of points for plotting decision boundaries.
+    X: matrix of input features (n_samples, n_features)
+    step: step size for the grid
+    return
+      G: column vector of row vectors
+  """
+
+  # Create a grid of points
+  x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+  y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+  xx, yy = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
+  G = np.c_[xx.ravel(), yy.ravel()]
+
+  return G

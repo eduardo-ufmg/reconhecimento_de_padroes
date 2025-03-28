@@ -100,14 +100,14 @@ if __name__ == "__main__":
   for _ in range(5):
     kfold_rd_state = rdgen.integers(65536)
 
-    # Dataset 1: Process with windowing
-    X, y = load_prepare_uciset(891)
-    windows, num_inst, num_feat = window_bigset(X, y, window_size=10000)
-    plot_k_for_windows('cdc_diabetes_health_indicators', windows, num_inst, num_feat, kfold_rd_state)
+    # # Dataset 1: Process with windowing
+    # X, y = load_prepare_uciset(891)
+    # windows, num_inst, num_feat = window_bigset(X, y, window_size=10000)
+    # plot_k_for_windows('cdc_diabetes_health_indicators', windows, num_inst, num_feat, kfold_rd_state)
     
-    # Dataset 2: Direct processing
-    X, y = load_prepare_uciset(329)
-    plot_k_for_set('diabetic_retinopathy_debrecen', X, y, kfold_rd_state)
+    # # Dataset 2: Direct processing
+    # X, y = load_prepare_uciset(329)
+    # plot_k_for_set('diabetic_retinopathy_debrecen', X, y, kfold_rd_state)
     
     # Dataset 3: Direct processing
     X, y = load_prepare_uciset(357)
