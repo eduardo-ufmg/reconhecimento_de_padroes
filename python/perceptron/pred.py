@@ -21,3 +21,21 @@ def pred(x: np.ndarray, w: np.ndarray, t: float) -> int:
   z = np.dot(w, x)
   # Return the predicted class
   return 1 if z >= 0 else -1
+
+def pred_batch(X: np.ndarray, w: np.ndarray, t: float) -> np.ndarray:
+  """
+    Predict the class of each input sample in X using the perceptron model
+    X: matrix of input samples (n_samples, n_features)
+    w: vector of weights
+    t: threshold
+    return: predicted classes (1 or -1)
+  """
+
+  # Append -1 to each input sample
+  X = np.hstack((X, -np.ones((X.shape[0], 1))))
+  # Append the threshold to the weight vector
+  w = np.append(w, t)
+  # Compute the dot product for all samples
+  z = np.dot(X, w)
+  # Return the predicted classes
+  return np.where(z >= 0, 1, -1)

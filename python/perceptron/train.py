@@ -1,6 +1,6 @@
 import numpy as np
 
-from perceptron.pred import pred
+from perceptron.pred import pred, pred_batch
 
 def train(X: np.ndarray, Y: np.ndarray, w: np.ndarray, t: float, eta: float, epochs: int) -> tuple[np.ndarray, float, np.ndarray]:
   """
@@ -41,5 +41,41 @@ def train(X: np.ndarray, Y: np.ndarray, w: np.ndarray, t: float, eta: float, epo
     if n_errors == 0:
       break
     
+  # Return the final weights, threshold, and errors
+  return w, t, np.array(errors)
+
+def train_batch(X: np.ndarray, Y: np.ndarray, w: np.ndarray, t: float, eta: float, epochs: int) -> tuple[np.ndarray, float, np.ndarray]:
+  """
+    Train the perceptron model using the given data
+    X: matrix of input features (n_samples, n_features)
+    Y: vector of target classes (n_samples)
+    w: guess vector of weights (n_features)
+    t: guess threshold
+    eta: learning rate
+    epochs: number of epochs
+    return: tuple of (weights, threshold, errors)
+  """
+
+  # Initialize the error list
+  errors = []
+
+  for epoch in range(epochs):
+    # Predict the class of all input samples
+    Y_pred = pred_batch(X, w, t)
+
+    # Compute the number of errors
+    n_errors = np.sum(Y_pred != Y)
+
+    # Append the number of errors to the list
+    errors.append(n_errors)
+
+    # Stop training if there are no errors
+    if n_errors == 0:
+      break
+
+    # Update the weights and threshold
+    w += eta * (Y - Y_pred) @ X
+    t += eta * np.sum(Y - Y_pred) * (-1)
+
   # Return the final weights, threshold, and errors
   return w, t, np.array(errors)

@@ -33,12 +33,38 @@ def plot_decision_boundary(X, Y, G, P, dataset_name):
   ax.contourf(x_coords, y_coords, Z, cmap=cmap, alpha=0.3)
   
   # Plot the data points with original styling
-  class_minus1 = X[Y == -1]
-  class1 = X[Y == 1]
-  ax.scatter(class_minus1[:, 0], class_minus1[:, 1], c='red', marker='o', edgecolor='k')
-  ax.scatter(class1[:, 0], class1[:, 1], c='blue', marker='x')
+  X1 = X[Y == -1]
+  X2 = X[Y == 1]
+  ax.scatter(X1[:, 0], X1[:, 1], c='red', marker='o', edgecolor='k')
+  ax.scatter(X2[:, 0], X2[:, 1], c='blue', marker='x')
   
   ax.set_title(f'Decision Boundary for {dataset_name} Dataset')
+
+  # Create output directory for saving the plot
+  output_dir = './outputs'
+  os.makedirs(output_dir, exist_ok=True)
+  
+  # Save the plot to a file
+  output_path = os.path.join(output_dir, f'{dataset_name}_decision_boundary.png')
+  plt.savefig(output_path)
+
+
+def plot_errors(errors, dataset_name):
+  """Plot the training errors over iterations."""
+  plt.figure(figsize=(10, 6))
+  plt.plot(errors, marker='o', linestyle='-', color='b')
+  plt.title(f'Training Errors ({dataset_name} Dataset)')
+  plt.xlabel('Iteration')
+  plt.ylabel('Number of Errors')
+  plt.grid(True)
+
+  # Create output directory for saving the plot
+  output_dir = './outputs'
+  os.makedirs(output_dir, exist_ok=True)
+
+  # Save the plot to a file
+  output_path = os.path.join(output_dir, f'{dataset_name}_errors.png')
+  plt.savefig(output_path)
 
 
 def plot_accuracyk(k_values, average_accuracies, dataset_name, num_instances, num_features, kfold_rd_state):
