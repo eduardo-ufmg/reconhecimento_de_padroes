@@ -34,7 +34,30 @@ def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_sta
     Y2 = Y[Y == 1]
 
   elif dataset_type == "spirals":
-    raise NotImplementedError("Spiral dataset generation is not implemented yet.")
+    # Generate the spirals dataset
+    n_class1 = n_samples // 2
+    n_class2 = n_samples - n_class1
+
+    # Generate class -1 (first spiral)
+    theta1 = np.linspace(0, 4 * np.pi, n_class1)
+    r1 = np.linspace(0.0, 10, n_class1)
+    x1 = r1 * np.sin(theta1)
+    y1 = r1 * np.cos(theta1)
+    X1 = np.column_stack((x1, y1))
+    Y1 = np.full(n_class1, -1)
+
+    # Generate class 1 (second spiral)
+    theta2 = np.linspace(0, 4 * np.pi, n_class2)
+    r2 = np.linspace(0.0, 10, n_class2)
+    x2 = r2 * np.sin(theta2 + np.pi)
+    y2 = r2 * np.cos(theta2 + np.pi)
+    X2 = np.column_stack((x2, y2))
+    Y2 = np.full(n_class2, 1)
+
+    # Add Gaussian noise
+    if noise > 0:
+      X1 += np.random.normal(scale=noise, size=X1.shape)
+      X2 += np.random.normal(scale=noise, size=X2.shape)
 
   elif dataset_type == "xor":
     # Generate the XOR dataset

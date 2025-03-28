@@ -78,10 +78,10 @@ def plot_characteristic_space(QX, YX, QG, YG, dataset_name):
 
   fig, ax = plt.subplots(figsize=(10, 6))
   
-  # Plot grid points based on their predicted labels with lower alpha
+  # Plot grid points based on their predicted labels
   # Assuming QG is of shape (2, n_samples)
-  ax.scatter(QG[0, YG == 1], QG[1, YG == 1], c='blue', marker='x', alpha=0.1)
-  ax.scatter(QG[0, YG == -1], QG[1, YG == -1], c='red', marker='x', alpha=0.1)
+  ax.scatter(QG[0, YG == 1], QG[1, YG == 1], c='blue', marker='x')
+  ax.scatter(QG[0, YG == -1], QG[1, YG == -1], c='red', marker='x')
   
   # Plot training points based on their true labels
   ax.scatter(QX[0, YX == 1], QX[1, YX == 1], c='blue', marker='o', edgecolor='k')
