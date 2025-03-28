@@ -15,7 +15,7 @@
   postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 }
 
-\graphicspath{{../../python/kNN/k_optimization/results/}}
+\graphicspath{{../../python/kNN/k_optimization/results/}, {../../python/kNN/output/}}
 
 \begin{document}
 
@@ -50,5 +50,27 @@ As figuras a seguir apresentam a relação entre número de vizinhos, \texttt{k}
 \end{figure}
 
 Nota-se que o número ótimo de vizinhos muda conforme o conjunto de dados. Para o encontrar, uma forma eficiente e automática é a aplicação de um otimizador que busque \texttt{k} que maximize a precisão média.
+
+\section*{Exercício 2}
+
+As figuras a  seguir apresentam pares de superfície de decisão e espaço característico para diferentes conjuntos sinteticos.
+
+\foreach \dataset in {blobs, moons, spirals, xor} {
+  \begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{\dataset\_decision\_boundary.png}
+      \caption{Superfície de decisão para o conjunto de dados \texttt{\dataset}.}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{\dataset\_characteristic\_space.png}
+      \caption{Espaço característico para o conjunto de dados \texttt{\dataset}.}
+    \end{subfigure}
+    \caption{Superfície de decisão e espaço característico para o conjunto de dados \texttt{\dataset}.}
+  \end{figure}
+}
 
 \end{document}
