@@ -1,0 +1,33 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{csvsimple}
+
+\begin{document}
+
+\title{Relatório de Aplicação do Perceptron}
+\author{Eduardo}
+\date{\today}
+\maketitle
+
+\section*{Resultados do K-Fold}
+
+Os resultados obtidos para cada fold do K-Fold estão apresentados na Tabela~\ref{tab:kfold_results}.
+
+\begin{table}[H]
+  \centering
+  \caption{Resultados do K-Fold}
+  \label{tab:kfold_results}
+  \csvautotabular{./kfold_results.csv}
+\end{table}
+
+\section*{Conclusão}
+
+Os resultados obtidos demonstram que o modelo Perceptron apresentou uma precisão média de 83\% ao longo das 10 iterações do K-Fold, com um desvio padrão de 14\%. Isso indica que o modelo possui um desempenho consistente, mas com alguma variação entre os folds. A alta precisão em alguns folds, como 95\%, sugere que o modelo é capaz de capturar bem os padrões em determinados subconjuntos dos dados. No entanto, a menor precisão de 42\% em um dos folds aponta para possíveis limitações do modelo em lidar com certos cenários ou distribuições dos dados. Ajustes nos hiperparâmetros ou técnicas adicionais de pré-processamento podem ser explorados para melhorar a robustez do modelo.
+
+\end{document}
