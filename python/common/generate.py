@@ -104,3 +104,24 @@ def generate_grid(X: np.ndarray, step: float=0.01) -> np.ndarray:
   G = np.c_[xx.ravel(), yy.ravel()]
 
   return G
+
+from typing import Callable
+
+def generate_reg(f: Callable, n_samples: int, noise: float, random_state: int=None) -> Tuple[np.ndarray, np.ndarray]:
+  """
+    Generate a noisy set of points in the tridimensional space from a generator function
+    f: vectorizable generator function
+    n_samples: number of samples
+    noise: noise level
+    random_state: seed for the randomizer
+    returns:
+      tuple of samples (n_samples, n_features) and targets (n_samples)
+  """
+
+  if random_state is not None:
+    np.random.seed(random_state)
+
+  X = np.random.uniform(low=-10, high=10, size=[n_samples, 2])
+  Y = f(X) + np.random.normal(scale=noise, size=n_samples)
+
+  return [X, Y]
