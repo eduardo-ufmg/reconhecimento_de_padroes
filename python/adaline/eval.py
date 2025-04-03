@@ -1,21 +1,17 @@
+import os
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from common.generate import generate_reg
 from adaline.train import train_pseudoinv
 from adaline.pred import pred
 
-def linear(X: np.ndarray) -> np.ndarray:
-  """
-  Generate a linear target function.
-  f(x, y) = 2*x + 3*y
-  """
-  return 2 * X[:, 0] + 3 * X[:, 1]
-
 if __name__ == '__main__':
-  # Generate a dataset using the parabolic function
-  X, y = generate_reg(linear, n_samples=100, noise=1)
+  # Load the Boston housing dataset
+  data_url = "http://lib.stat.cmu.edu/datasets/boston"
+  raw_df = pd.read_csv(data_url, sep=r"\s+", skiprows=22, header=None)
+  X = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
+  y = raw_df.values[1::2, 2]
 
   # Initialize K-Fold cross-validation
   kf = KFold(n_splits=10, shuffle=True, random_state=42)
@@ -43,10 +39,7 @@ if __name__ == '__main__':
   error_stats_df = pd.DataFrame(error_stats)
 
   # Save the error statistics to a CSV file
-  error_stats_df.to_csv('error_stats.csv', index=False)
+  os.makedirs('./adaline/output/', exist_ok=True)
+  error_stats_df.to_csv('./adaline/output/error_stats.csv', index=False)
 
   print("Error statistics saved to 'error_stats.csv'.")
-
-
-
-
