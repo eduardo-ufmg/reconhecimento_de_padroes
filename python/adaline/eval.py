@@ -40,14 +40,18 @@ if __name__ == '__main__':
 
     # Plot the true vs predicted values for the current fold
     ax = axes[fold]
-    ax.plot(y_test, marker='o', linestyle='-', alpha=0.7)
-    ax.plot(y_pred, marker='x', linestyle='--', alpha=0.7)
+    ax.plot(y_test, marker='o', linestyle='-', alpha=0.7, label='True Values' if fold == 0 else "")
+    ax.plot(y_pred, marker='x', linestyle='--', alpha=0.7, label='Predicted Values' if fold == 0 else "")
     ax.set_title(f'Fold {fold + 1}')
     ax.set_xlabel('Sample Index')
     ax.set_ylabel('Target Value')
 
+  # Add a single legend for the entire figure
+  handles, labels = axes[0].get_legend_handles_labels()
+  fig.legend(handles, labels, loc='upper center', ncol=2, fontsize='large')
+
   # Adjust layout for better visualization
-  plt.tight_layout()
+  plt.tight_layout(rect=[0, 0, 1, 0.95])  # Leave space for the legend
 
   # Save the plot to a file
   os.makedirs('./adaline/output/', exist_ok=True)

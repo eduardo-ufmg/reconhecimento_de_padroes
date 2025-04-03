@@ -1,0 +1,57 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{csvsimple}
+
+\begin{document}
+
+\title{Relatório de Adaline e Perceptron}
+\author{Eduardo}
+\date{\today}
+\maketitle
+
+\section*{Adaline}
+
+Os resultados obtidos para cada fold do K-Fold estão apresentados na Tabela~\ref{tab:error_stats}.
+
+\begin{table}[H]
+  \centering
+  \caption{Resultados do K-Fold}
+  \label{tab:error_stats}
+  \csvautotabular{./error_stats.csv}
+\end{table}
+
+A figura \ref{fig:fold_predictions} compara as previsões do Adaline com os valores reais para cada fold do K-Fold. 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{./fold_predictions.png}
+  \caption{Comparação entre previsões e valores reais do Adaline}
+  \label{fig:fold_predictions}
+\end{figure}
+
+\section*{Conclusão Adaline}
+
+Por sua simplicidade, o modelo apresenta resultados satisfatórios para este conjunto de dados. Entretanto, redes com mais camadas podem ser mais adequadas para capturar padrões complexos.
+
+\section*{Perceptron}
+
+Os resultados obtidos para cada fold do K-Fold estão apresentados na Tabela~\ref{tab:kfold_results}.
+
+\begin{table}[H]
+  \centering
+  \caption{Resultados do K-Fold}
+  \label{tab:kfold_results}
+  \csvautotabular{./kfold_results.csv}
+\end{table}
+
+\section*{Conclusão Perceptron}
+
+Os resultados obtidos demonstram que o modelo Perceptron apresentou uma precisão média de 83\% ao longo das 10 iterações do K-Fold, com um desvio padrão de 14\%. Isso indica que o modelo possui um desempenho consistente, mas com alguma variação entre os folds. A alta precisão em alguns folds, como 95\%, sugere que o modelo é capaz de capturar bem os padrões em determinados subconjuntos dos dados. No entanto, a menor precisão de 42\% em um dos folds aponta para possíveis limitações do modelo em lidar com certos cenários ou distribuições dos dados. Ajustes nos hiperparâmetros ou técnicas adicionais de pré-processamento podem ser explorados para melhorar a robustez do modelo.
+
+\end{document}
