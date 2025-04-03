@@ -1,0 +1,33 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{csvsimple}
+
+\begin{document}
+
+\title{Relatório RBF}
+\author{Eduardo}
+\date{\today}
+\maketitle
+
+\section*{Seleção de K}
+
+A tabela ~\ref{tab:kfold_results} apresenta os resultados do K-Fold para $K = 13$. Para a seleção de \texttt{K}, uma busca linear entre 2 e 20 foi realizada. Foi selecionado o valor de \texttt{K} que apresentou a maior precisão média.
+
+\begin{table}[H]
+  \centering
+  \caption{Resultados do K-Fold para $K = 13$}
+  \label{tab:kfold_results}
+  \csvautotabular{./kfold_results.csv}
+\end{table}
+
+\section*{Conclusão}
+
+O treinamento mais custoso, em relação ao do Perceptron, do RBF, se justifica pela sua maior precisão.
+
+\end{document}
