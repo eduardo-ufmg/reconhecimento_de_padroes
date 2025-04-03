@@ -12,11 +12,51 @@
 
 ### Seleção Interna de Variáveis
 
+A seleção das variáveis é parte intríseca do treino do modelo.
+
+#### Árvore de Decisão
+
+- Para cada variável, avalia o ganho de informação em diferentes partições
+- Partições com maior ganho ficam mais próximas da raiz
+
+**Principais problemas**
+- Pequenas mudanças nos dados podem levar a estruturas completamente diferentes - instabilidade
+- Erros são fortemente cumulativos
+
+#### Floresta Aleatória
+
+Agrega multiplas árvores de decisão, com algumas modificações:
+- Cada árvore é construída sobre um subconjunto dos dados
+- Na construção de cada nó, um subconjunto das variáveis é considerado
+- Cada árvore vota conforme seu resultado e a classificação é feita a partir destes
+
+**Principais problemas**
+- Mitiga, mas não resolve a instabilidade
+- Aumenta o custo computacional
+
 ### Filtragem de Variáveis
 
-### Métodos Encapsulados
+Analisa, estatisticamente, a relação entre cada variável e as classes do problema. Mantém aquelas que são fortes indicadores de classe.
 
-## Random Forest
+**Exemplo**: Retirar variáveis cuja variança seja baixa no conjunto completo de dados, visto que estas tendem a não ser relevantes para a classificação.
+
+**Principais problemas**:
+- Por avaliar cada variável individualmente, pode remover aquelas que participam de relações úteis para a classificação
+- Pelo mesmo motivo, pode manter variáveis redundantes
+
+### Métodos Encapsuladores
+
+Encapsula um modelo em um problema de optimização.
+1. Seleciona um subconjunto das variáveis
+2. Treina o modelo sobre este subconjunto
+3. Avalia o modelo conforme uma métrica apropriada
+4. Seleciona o modelo com melhor performance
+
+**Principal problema**: o mais caro computacionalmente
+
+## RKNN
+
+
 
 ## Métricas para Seleção
 
