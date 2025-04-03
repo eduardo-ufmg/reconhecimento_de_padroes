@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 
 from adaline.train import train_pseudoinv
@@ -17,6 +18,8 @@ if __name__ == '__main__':
   kf = KFold(n_splits=10, shuffle=True, random_state=42)
 
   error_stats = []
+  fig, axes = plt.subplots(5, 2, figsize=(15, 20))  # Create a 5x2 grid of subplots
+  axes = axes.flatten()  # Flatten the axes array for easy indexing
 
   for fold, (train_index, test_index) in enumerate(kf.split(X)):
     # Split the data into training and testing sets
@@ -35,11 +38,26 @@ if __name__ == '__main__':
     # Append the error statistics for the fold
     error_stats.append({'fold': fold + 1, 'mse': mse})
 
+    # Plot the true vs predicted values for the current fold
+    ax = axes[fold]
+    ax.plot(y_test, marker='o', linestyle='-', alpha=0.7)
+    ax.plot(y_pred, marker='x', linestyle='--', alpha=0.7)
+    ax.set_title(f'Fold {fold + 1}')
+    ax.set_xlabel('Sample Index')
+    ax.set_ylabel('Target Value')
+
+  # Adjust layout for better visualization
+  plt.tight_layout()
+
+  # Save the plot to a file
+  os.makedirs('./adaline/output/', exist_ok=True)
+  plt.savefig('./adaline/output/fold_predictions.png')
+
   # Convert error statistics to a DataFrame
   error_stats_df = pd.DataFrame(error_stats)
 
   # Save the error statistics to a CSV file
-  os.makedirs('./adaline/output/', exist_ok=True)
   error_stats_df.to_csv('./adaline/output/error_stats.csv', index=False)
 
   print("Error statistics saved to 'error_stats.csv'.")
+  print("Prediction plots saved to 'fold_predictions.png'.")
