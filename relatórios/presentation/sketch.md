@@ -54,12 +54,33 @@ Encapsula um modelo em um problema de optimização.
 
 **Principal problema**: o mais caro computacionalmente
 
-## RKNN
+## RKNN-FS
 
+- Para um conjunto de dados com *p* variáveis, *r* classificadores *kNN* são treinados em subconjuntos aleatórios de $m \approx \sqrt{p}$ variáveis
+- Cada classificador é treinado sobre todas as amostras. *Bootstraping* não é necessário, já que, por não serem hierárquicos, os classificadores são naturalmente estáveis
+- A classificação é dada pelo voto majoritário entre os classificadores
 
+### *Feature Support*
 
-## Métricas para Seleção
+- Cada variável *f* é atribuída a *M* classificadores, que formam o conjunto *C(f)*. Cada classificador recebe o conjunto *F(c)* de variáveis
+- Quando um classificador acerta sua predição, as variáveis usadas por ele recebem uma pontuação positiva
+- Quando erra, recebem uma pontuação negativa
+- A pontuação, por rodada, de cada variável, é a média das pontuações atribuídas por cada classificador $c \in C(f)$
+- Variáveis mais relevantes para a classificação têm pontuação maior
+
+### Seleção de Variáveis
+
+#### Remoção geométrica
+1. A cada iteração, a metade menos relevante das variáveis é descartada
+2. Após todas as iterações, a quantidade de variáveis que resulta na maior precisão é encontrada
+3. As variáveis presentes na iteração anterior a esta são passadas para a próxima etapa
+
+#### Remoção linear
+1. A cada iteração, um número fixo (*1*, na aplicação citada) de variáveis é removido
+2. Após todas as iterações, o conjunto de variáveis mais relevantes é selecionada para o modelo
 
 ## Implementação
+
+
 
 ## Resultados
