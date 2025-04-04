@@ -1,38 +1,31 @@
 import numpy as np
+from typing import NamedTuple
 
-def train(X1: np.ndarray, y1: int, X2: np.ndarray, y2: int
-          ) -> tuple[float, np.ndarray, np.ndarray, int, float, np.ndarray, np.ndarray, int]:
+class GaussianParams(NamedTuple):
+  prior: float
+  mean: np.ndarray
+  cov: np.ndarray
+  n_samples: int
+  label: int
+
+def train(X1: np.ndarray, y1: int, X2: np.ndarray, y2: int) -> tuple[GaussianParams, GaussianParams]:
   """
-  Train a Gaussian mixture model for two classes.
+  Train Gaussian models for two classes with regularized covariance matrices.
   
   Parameters:
-    X1 (np.ndarray): The data points for class 1.
-    y1 (int): The label for class 1.
-    X2 (np.ndarray): The data points for class 2.
-    y2 (int): The label for class 2.
+    X1 (np.ndarray): Data points for class 1.
+    y1 (int): Label for class 1.
+    X2 (np.ndarray): Data points for class 2.
+    y2 (int): Label for class 2.
   
   Returns:
-    tuple: A tuple containing the parameters of the Gaussian mixture model:
-      - float: Prior probability of class 1.
-      - np.ndarray: Mean vector of class 1.
-      - np.ndarray: Covariance matrix of class 1.
-      - int: Number of data points in class 1.
-      - float: Prior probability of class 2.
-      - np.ndarray: Mean vector of class 2.
-      - np.ndarray: Covariance matrix of class 2.
-      - int: Number of data points in class 2.
+    tuple: GaussianParams for both classes.
   """
-  N1 = X1.shape[0]
-  N2 = X2.shape[0]
-  N = N1 + N2
+  def compute_params(X: np.ndarray, y: int) -> GaussianParams:
+    n = X.shape[0]
+    mean = np.mean(X, axis=0)
+    cov = np.cov(X.T) + 1e-6 * np.eye(X.shape[1])  # Regularization
+    label = y
+    return GaussianParams(prior=n/(n + X2.shape[0]), mean=mean, cov=cov, n_samples=n, label=label)
 
-  P1 = N1 / N
-  P2 = N2 / N
-
-  M1 = np.mean(X1, axis=0)
-  M2 = np.mean(X2, axis=0)
-
-  S1 = np.cov(X1.T)
-  S2 = np.cov(X2.T)
-
-  return P1, M1, S1, N1, P2, M2, S2, N2
+  return compute_params(X1, y1), compute_params(X2, y2)
