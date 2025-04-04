@@ -294,7 +294,6 @@ def run_real_world_tests():
           'Train Time (s)': metrics['train_time'],
           'Prediction Time (s)': metrics['pred_time'],
           'Num Features': num_features,
-          'Total Features': total_features
       })
   
   results_df = pd.DataFrame(rows)
