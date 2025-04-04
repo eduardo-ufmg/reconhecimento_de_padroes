@@ -1,9 +1,14 @@
 import numpy as np
+import pandas as pd
+from ucimlrepo import fetch_ucirepo
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from urllib.request import urlopen
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (accuracy_score, precision_score, 
                              recall_score, f1_score, confusion_matrix)
+
 import time
 
 def compute_supports(X, y, r, k):
@@ -35,9 +40,9 @@ def compute_supports(X, y, r, k):
     base_idx, query_idx = indices[:split], indices[split:]
     
     X_base = X[base_idx][:, selected]
-    y_base = y[base_idx]
+    y_base = np.array(y)[base_idx]
     X_query = X[query_idx][:, selected]
-    y_query = y[query_idx]
+    y_query = np.array(y)[query_idx]
 
     # Train KNN and predict
     knn = KNeighborsClassifier(n_neighbors=k)
@@ -61,7 +66,7 @@ def compute_supports(X, y, r, k):
 
   return support_values, np.mean(accuracies)
 
-def rknn_feature_selection(X, y, k=3, r=1000, q=0.5, d=1):
+def rknn_feature_selection(X, y, k=3, r=100, q=0.5, d=1):
   """
   RKNN-FS two-stage backward elimination (Table 2).
   
@@ -199,20 +204,105 @@ def compare_models(X, y, test_size=0.3, random_state=42, k=3, r=100):
   
   return results, selected_features
 
-# Example usage with synthetic data
+def load_leukemia():
+  """Golub et al. (1999) Leukemia dataset (n=72, p=7129)"""
+  url = "https://web.stanford.edu/~hastie/CASI_files/DATA/leukemia_big.csv"
+  df = pd.read_csv(url, index_col=0).T
+  y = pd.Series(df.index).str.contains('ALL').astype(int).values
+  X = df.values
+  return X, y
+
+def load_dbworld():
+  "Filannino, M. (2011). DBWorld e-mails [Dataset]."
+  "UCI Machine Learning Repository. https://doi.org/10.24432/C5589M"
+
+  return X, y
+
+
+def load_gastrointestinal():
+  """Load the gastrointestinal lesions dataset.
+  
+  Returns:
+      X (pd.DataFrame): Features including light type and raw features.
+      y (pd.Series): Target labels indicating lesion type (3, 1, 2).
+  """
+  # Read the dataset without headers
+  df = pd.read_csv("./rknnfs/data/gastrointestinal+lesions+in+regular+colonoscopy/data.txt", header=None)
+  
+  # Transpose the DataFrame to have samples as rows
+  df_transposed = df.T
+  
+  # Extract the target variable y (class labels) from the second column
+  y = df_transposed[1].astype(int)
+  
+  # Extract features X by dropping the lesion name and class label columns
+  X = df_transposed.drop(columns=[0, 1])
+  
+  # Convert all feature columns to numeric (assuming no non-numeric values in features)
+  X = X.apply(pd.to_numeric, errors='coerce')
+
+  return X, y
+
+def load_periodchanger():
+  "Gül, Ş. & RAHIM, F. (2021). Period Changer [Dataset]."
+  "UCI Machine Learning Repository. https://doi.org/10.24432/C5B31D"
+
+  return X, y
+
+def load_toxicity():
+  "Gül, Ş. & RAHIM, F. (2021). Toxicity [Dataset]."
+  "UCI Machine Learning Repository. https://doi.org/10.24432/C59313."
+  
+  toxicity = fetch_ucirepo(id=728)
+  X = toxicity.data.features
+  y = toxicity.data.targets
+
+  return X, y
+
+def run_real_world_tests():
+  """Run comparison on real 'small n, large p' datasets"""
+  datasets = {
+    'Gastrointestinal': load_gastrointestinal,
+    'Leukemia': load_leukemia
+  }
+  
+  results = {}
+  
+  for name, loader in datasets.items():
+    print(f"\n{'='*40}\nProcessing {name}\n{'='*40}")
+    X, y = loader()
+    
+    # Preprocessing
+    X = StandardScaler().fit_transform(X)  # Z-score normalization
+    X_train, X_test, y_train, y_test = train_test_split(
+      X, y, test_size=0.3, random_state=42, stratify=y
+    )
+    
+    # Run comparisons with conservative parameters
+    dataset_results, selected = compare_models(
+      X_train, y_train, 
+      test_size=0.3,  # Actual test set already created
+      k=3, 
+      r=200,  # Reduced for computation time
+      random_state=42
+    )
+    
+    results[name] = {
+      'metrics': dataset_results,
+      'selected_features': len(selected),
+      'total_features': X.shape[1]
+    }
+  
+  # Print summary
+  print("\n\n=== Final Summary ===")
+  for dataset, res in results.items():
+    print(f"\n{dataset}:")
+    print(f"Selected features: {res['selected_features']}/{res['total_features']}")
+    for model, metrics in res['metrics'].items():
+      print(f"  {model}:")
+      print(f"  Accuracy: {metrics['accuracy']:.3f} | "
+          f"F1: {metrics['f1']:.3f} | "
+          f"Train Time: {metrics['train_time']:.1f}s")
+
 if __name__ == "__main__":
-  from sklearn.datasets import make_classification
-  
-  # Generate more complex synthetic data
-  X, y = make_classification(
-    n_samples=1000, 
-    n_features=50, 
-    n_informative=10,
-    n_redundant=5,
-    n_classes=3,
-    random_state=42
-  )
-  
-  # Run comparison
-  results, selected_features = compare_models(X, y, k=3, r=200)
-  print(f"\nSelected features ({len(selected_features)}): {selected_features}")
+  run_real_world_tests()
