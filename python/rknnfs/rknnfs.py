@@ -212,13 +212,6 @@ def load_leukemia():
   X = df.values
   return X, y
 
-def load_dbworld():
-  "Filannino, M. (2011). DBWorld e-mails [Dataset]."
-  "UCI Machine Learning Repository. https://doi.org/10.24432/C5589M"
-
-  return X, y
-
-
 def load_gastrointestinal():
   """Load the gastrointestinal lesions dataset.
   
@@ -259,13 +252,14 @@ def load_toxicity():
   
   toxicity = fetch_ucirepo(id=728)
   X = toxicity.data.features
-  y = toxicity.data.targets
+  y = toxicity.data.targets.to_numpy().ravel()
 
   return X, y
 
 def run_real_world_tests():
   """Run comparison on real 'small n, large p' datasets"""
   datasets = {
+    'Toxicity': load_toxicity,
     'Period Changer': load_periodchanger,
     'Gastrointestinal': load_gastrointestinal,
     'Leukemia': load_leukemia
