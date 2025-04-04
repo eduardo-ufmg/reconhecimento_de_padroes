@@ -3,33 +3,14 @@ import matplotlib.pyplot as plt
 
 from scipy.stats import multivariate_normal
 
-from bayes.pred import pred, pred_multivariate
+from common.generate import generate_dataset
+from bayes.train import train
+from bayes.pred import pred_multivariate
 
-def unidimensional(samples: int=100):
-  X1 = np.random.normal(loc=-np.random.uniform(0, 5), scale=np.random.uniform(0, 2), size=samples)
-  X2 = np.random.normal(loc=+np.random.uniform(0, 5), scale=np.random.uniform(0, 2), size=samples)
+def bidimensional(type: str, samples: int, noise: float):
+  X1, _, X2, _ = generate_dataset(type, samples, noise)
 
-  X = np.linspace(min(X1) - 1, max(X2) + 1, 1000)
-
-  y = pred(X, X1, 0, X2, 1)
-
-  plt.figure(figsize=(10, 6))
-  plt.plot(X, y, label="Decision Boundary", color="blue")
-  plt.scatter(X1, np.zeros_like(X1), color="red", alpha=0.6)
-  plt.scatter(X2, np.zeros_like(X2), color="blue", alpha=0.6)
-  plt.xlabel("X")
-  plt.ylabel("Class Label")
-  plt.title("Decision Boundary and Data Distribution")
-  plt.grid(True)
-  plt.show()
-
-def bidimensional(samples: int=100):
-  X1 = np.random.multivariate_normal(mean=[-np.random.uniform(0, 5), -np.random.uniform(0, 5)],
-                                     cov=np.eye(2) * np.random.uniform(0, 2),
-                                     size=samples)
-  X2 = np.random.multivariate_normal(mean=[+np.random.uniform(0, 5), +np.random.uniform(0, 5)],
-                                     cov=np.eye(2) * np.random.uniform(0, 2),
-                                     size=samples)
+  P1, M1, S1, N1, P2, M2, S2, N2 = train(X1, 0, X2, 1)
 
   X = np.linspace(min(X1[:, 0]) - 1, max(X2[:, 0]) + 1, 100)
   Y = np.linspace(min(X1[:, 1]) - 1, max(X2[:, 1]) + 1, 100)
@@ -37,7 +18,10 @@ def bidimensional(samples: int=100):
   XX, YY = np.meshgrid(X, Y)
   grid = np.c_[XX.ravel(), YY.ravel()]
 
-  Z = pred_multivariate(grid, X1, 0, X2, 1)
+  Z = pred_multivariate(grid,
+                        X1, 0, P1, M1, S1, N1,
+                        X2, 1, P2, M2, S2, N2,
+                        'gaussian_mix', ())
   Z = Z.reshape(XX.shape)
 
   fig, axes = plt.subplots(1, 2, figsize=(20, 8))
@@ -75,4 +59,4 @@ def bidimensional(samples: int=100):
 if __name__ == "__main__":
   SAMPLES = 1000
 
-  bidimensional(SAMPLES)
+  bidimensional('moons', SAMPLES, 0.1)

@@ -1,7 +1,7 @@
 import numpy as np
 
 from sklearn.datasets import make_blobs, make_moons
-from typing import Tuple
+from typing import Tuple, Callable
 
 def generate_dataset(dataset_type: str, n_samples: int, noise: float, random_state: int=None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
   """
@@ -104,8 +104,6 @@ def generate_grid(X: np.ndarray, step: float=0.01) -> np.ndarray:
   G = np.c_[xx.ravel(), yy.ravel()]
 
   return G
-
-from typing import Callable
 
 def generate_reg(f: Callable, n_samples: int, noise: float, random_state: int=None) -> Tuple[np.ndarray, np.ndarray]:
   """
