@@ -244,8 +244,12 @@ def load_gastrointestinal():
   return X, y
 
 def load_periodchanger():
-  "Gül, Ş. & RAHIM, F. (2021). Period Changer [Dataset]."
-  "UCI Machine Learning Repository. https://doi.org/10.24432/C5B31D"
+  """Gül, Ş. & RAHIM, F. (2021). Period Changer [Dataset].
+  UCI Machine Learning Repository. https://doi.org/10.24432/C5B31D"""
+  
+  df = pd.read_csv("./rknnfs/data/period+changer-2/data.csv")
+  X = df.iloc[:, :-1]  # All columns except the last
+  y = df.iloc[:, -1]   # Last column 'Class' as the target
 
   return X, y
 
@@ -262,6 +266,7 @@ def load_toxicity():
 def run_real_world_tests():
   """Run comparison on real 'small n, large p' datasets"""
   datasets = {
+    'Period Changer': load_periodchanger,
     'Gastrointestinal': load_gastrointestinal,
     'Leukemia': load_leukemia
   }
