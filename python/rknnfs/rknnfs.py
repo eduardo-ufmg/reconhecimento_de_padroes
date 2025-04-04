@@ -1,0 +1,218 @@
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import (accuracy_score, precision_score, 
+                             recall_score, f1_score, confusion_matrix)
+import time
+
+def compute_supports(X, y, r, k):
+  """
+  Compute feature supports using bidirectional voting (Table 1).
+  
+  Args:
+    X (np.ndarray): Input data (n_samples, n_features).
+    y (np.ndarray): Target labels (n_samples,).
+    r (int): Number of KNN models to train.
+    k (int): Number of neighbors for KNN.
+  
+  Returns:
+    np.ndarray: Support scores for each feature.
+    float: Average accuracy of all KNN models.
+  """
+  n_samples, p_current = X.shape
+  m = int(np.sqrt(p_current))  # Features per KNN
+  supports = np.zeros(p_current)
+  counts = np.zeros(p_current)
+  accuracies = []
+
+  for _ in range(r):
+    # Randomly select m features
+    selected = np.random.choice(p_current, size=m, replace=False)
+    # Dynamic partition: split data into base and query
+    indices = np.random.permutation(n_samples)
+    split = n_samples // 2
+    base_idx, query_idx = indices[:split], indices[split:]
+    
+    X_base = X[base_idx][:, selected]
+    y_base = y[base_idx]
+    X_query = X[query_idx][:, selected]
+    y_query = y[query_idx]
+
+    # Train KNN and predict
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_base, y_base)
+    pred = knn.predict(X_query)
+    acc = accuracy_score(y_query, pred)
+    accuracies.append(acc)
+
+    # Update supports for selected features
+    for f in selected:
+      supports[f] += acc
+      counts[f] += 1
+
+  # Compute average support (avoid division by zero)
+  support_values = np.zeros(p_current)
+  for f in range(p_current):
+    if counts[f] > 0:
+      support_values[f] = supports[f] / counts[f]
+    else:
+      support_values[f] = 0.0  # Unselected features
+
+  return support_values, np.mean(accuracies)
+
+def rknn_feature_selection(X, y, k=3, r=1000, q=0.5, d=1):
+  """
+  RKNN-FS two-stage backward elimination (Table 2).
+  
+  Args:
+    X (np.ndarray): Input data (n_samples, n_features).
+    y (np.ndarray): Target labels (n_samples,).
+    k (int): Number of neighbors for KNN.
+    r (int): Number of KNN models per iteration.
+    q (float): Proportion of features to drop in Stage 1.
+    d (int): Number of features to drop per iteration in Stage 2.
+  
+  Returns:
+    np.ndarray: Indices of selected features.
+  """
+  n_samples, p = X.shape
+  remaining_features = np.arange(p)
+  accuracies_stage1, feature_subsets_stage1 = [], []
+
+  # Stage 1: Geometric Elimination
+  current_p = p
+  while current_p > 4:  # Minimum 4 features
+    current_X = X[:, remaining_features]
+    support_values, avg_acc = compute_supports(current_X, y, r, k)
+    accuracies_stage1.append(avg_acc)
+    feature_subsets_stage1.append(remaining_features.copy())
+
+    # Keep top (1-q) features
+    num_keep = max(int(current_p * (1 - q)), 1)
+    sorted_indices = np.argsort(-support_values)
+    remaining_features = remaining_features[sorted_indices[:num_keep]]
+    current_p = len(remaining_features)
+
+  # Find pre-max iteration (best before peak)
+  if accuracies_stage1:
+    max_idx = np.argmax(accuracies_stage1)
+    pre_max_idx = max(0, max_idx - 1)
+    remaining_features = feature_subsets_stage1[pre_max_idx]
+  else:
+    remaining_features = np.arange(p)  # Fallback
+
+  # Stage 2: Linear Reduction
+  accuracies_stage2, feature_subsets_stage2 = [], []
+  current_p = len(remaining_features)
+  num_iterations = (current_p - 4) // d
+
+  for _ in range(num_iterations):
+    current_X = X[:, remaining_features]
+    support_values, avg_acc = compute_supports(current_X, y, r, k)
+    accuracies_stage2.append(avg_acc)
+    feature_subsets_stage2.append(remaining_features.copy())
+
+    # Remove d features with lowest support
+    sorted_indices = np.argsort(-support_values)
+    remaining_features = remaining_features[sorted_indices[:-d]]
+    current_p = len(remaining_features)
+    if current_p <= 4:
+      break
+
+  # Select best from Stage 2
+  if accuracies_stage2:
+    best_idx = np.argmax(accuracies_stage2)
+    best_features = feature_subsets_stage2[best_idx]
+  else:
+    best_features = remaining_features  # Fallback
+
+  return best_features
+
+def evaluate_model(model, X_train, y_train, X_test, y_test):
+  """Helper function to train and evaluate a model"""
+  start_time = time.time()
+  model.fit(X_train, y_train)
+  train_time = time.time() - start_time
+  
+  start_pred = time.time()
+  y_pred = model.predict(X_test)
+  pred_time = time.time() - start_pred
+  
+  return {
+    'accuracy': accuracy_score(y_test, y_pred),
+    'precision': precision_score(y_test, y_pred, average='macro'),
+    'recall': recall_score(y_test, y_pred, average='macro'),
+    'f1': f1_score(y_test, y_pred, average='macro'),
+    'confusion_matrix': confusion_matrix(y_test, y_pred),
+    'train_time': train_time,
+    'pred_time': pred_time
+  }
+
+def compare_models(X, y, test_size=0.3, random_state=42, k=3, r=100):
+  """Compare performance of different models"""
+  # Split data
+  X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=test_size, random_state=random_state
+  )
+  
+  # 1. RKNN-FS + kNN
+  print("Running RKNN feature selection...")
+  selected_features = rknn_feature_selection(X_train, y_train, k=k, r=r)
+  X_train_selected = X_train[:, selected_features]
+  X_test_selected = X_test[:, selected_features]
+  
+  # 2. kNN with all features
+  print("\nTraining comparison models...")
+  results = {}
+  
+  # Model 1: kNN with selected features
+  knn_selected = KNeighborsClassifier(n_neighbors=k)
+  results['kNN (RKNN-FS)'] = evaluate_model(
+    knn_selected, X_train_selected, y_train, X_test_selected, y_test
+  )
+  
+  # Model 2: kNN with all features
+  knn_all = KNeighborsClassifier(n_neighbors=k)
+  results['kNN (All Features)'] = evaluate_model(
+    knn_all, X_train, y_train, X_test, y_test
+  )
+  
+  # Model 3: Random Forest with all features
+  rf = RandomForestClassifier(n_estimators=100, random_state=random_state)
+  results['Random Forest'] = evaluate_model(
+    rf, X_train, y_train, X_test, y_test
+  )
+  
+  # Print results
+  print("\nComparison Results:")
+  for model_name, metrics in results.items():
+    print(f"\n{model_name}:")
+    print(f"  Accuracy:   {metrics['accuracy']:.4f}")
+    print(f"  Precision:  {metrics['precision']:.4f}")
+    print(f"  Recall:   {metrics['recall']:.4f}")
+    print(f"  F1-Score:   {metrics['f1']:.4f}")
+    print(f"  Train Time: {metrics['train_time']:.2f}s")
+    print(f"  Pred Time:  {metrics['pred_time']:.2f}s")
+    print("  Confusion Matrix:")
+    print(metrics['confusion_matrix'])
+  
+  return results, selected_features
+
+# Example usage with synthetic data
+if __name__ == "__main__":
+  from sklearn.datasets import make_classification
+  
+  # Generate more complex synthetic data
+  X, y = make_classification(
+    n_samples=1000, 
+    n_features=50, 
+    n_informative=10,
+    n_redundant=5,
+    n_classes=3,
+    random_state=42
+  )
+  
+  # Run comparison
+  results, selected_features = compare_models(X, y, k=3, r=200)
+  print(f"\nSelected features ({len(selected_features)}): {selected_features}")
