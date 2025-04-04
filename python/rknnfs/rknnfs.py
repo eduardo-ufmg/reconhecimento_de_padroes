@@ -8,8 +8,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (accuracy_score, precision_score, 
                              recall_score, f1_score, confusion_matrix)
-
 import time
+import matplotlib.pyplot as plt
 
 def compute_supports(X, y, r, k):
   """
@@ -162,13 +162,11 @@ def compare_models(X, y, test_size=0.3, random_state=42, k=3, r=100):
   )
   
   # 1. RKNN-FS + kNN
-  print("Running RKNN feature selection...")
   selected_features = rknn_feature_selection(X_train, y_train, k=k, r=r)
   X_train_selected = X_train[:, selected_features]
   X_test_selected = X_test[:, selected_features]
   
   # 2. kNN with all features
-  print("\nTraining comparison models...")
   results = {}
   
   # Model 1: kNN with selected features
@@ -188,19 +186,6 @@ def compare_models(X, y, test_size=0.3, random_state=42, k=3, r=100):
   results['Random Forest'] = evaluate_model(
     rf, X_train, y_train, X_test, y_test
   )
-  
-  # Print results
-  print("\nComparison Results:")
-  for model_name, metrics in results.items():
-    print(f"\n{model_name}:")
-    print(f"  Accuracy:   {metrics['accuracy']:.4f}")
-    print(f"  Precision:  {metrics['precision']:.4f}")
-    print(f"  Recall:   {metrics['recall']:.4f}")
-    print(f"  F1-Score:   {metrics['f1']:.4f}")
-    print(f"  Train Time: {metrics['train_time']:.2f}s")
-    print(f"  Pred Time:  {metrics['pred_time']:.2f}s")
-    print("  Confusion Matrix:")
-    print(metrics['confusion_matrix'])
   
   return results, selected_features
 
@@ -272,17 +257,17 @@ def run_real_world_tests():
     X, y = loader()
     
     # Preprocessing
-    X = StandardScaler().fit_transform(X)  # Z-score normalization
+    X = StandardScaler().fit_transform(X)
     X_train, X_test, y_train, y_test = train_test_split(
       X, y, test_size=0.3, random_state=42, stratify=y
     )
     
-    # Run comparisons with conservative parameters
+    # Run comparisons
     dataset_results, selected = compare_models(
       X_train, y_train, 
-      test_size=0.3,  # Actual test set already created
+      test_size=0.3,
       k=3, 
-      r=200,  # Reduced for computation time
+      r=200,
       random_state=42
     )
     
@@ -292,16 +277,47 @@ def run_real_world_tests():
       'total_features': X.shape[1]
     }
   
-  # Print summary
-  print("\n\n=== Final Summary ===")
-  for dataset, res in results.items():
-    print(f"\n{dataset}:")
-    print(f"Selected features: {res['selected_features']}/{res['total_features']}")
-    for model, metrics in res['metrics'].items():
-      print(f"  {model}:")
-      print(f"  Accuracy: {metrics['accuracy']:.3f} | "
-          f"F1: {metrics['f1']:.3f} | "
-          f"Train Time: {metrics['train_time']:.1f}s")
+  # Collect all results into a DataFrame
+  rows = []
+  for dataset_name, res in results.items():
+    total_features = res['total_features']
+    selected_features = res['selected_features']
+    for model_name, metrics in res['metrics'].items():
+      num_features = selected_features if model_name == 'kNN (RKNN-FS)' else total_features
+      rows.append({
+          'Dataset': dataset_name,
+          'Model': model_name,
+          'Accuracy': metrics['accuracy'],
+          'Precision': metrics['precision'],
+          'Recall': metrics['recall'],
+          'F1': metrics['f1'],
+          'Train Time (s)': metrics['train_time'],
+          'Prediction Time (s)': metrics['pred_time'],
+          'Num Features': num_features,
+          'Total Features': total_features
+      })
+  
+  results_df = pd.DataFrame(rows)
+  
+  # Save to CSV
+  results_df.to_csv('./rknnfs/output/model_comparison_results.csv', index=False)
+  
+  # Create and save plotted table
+  plt.figure(figsize=(12, 8))
+  ax = plt.gca()
+  ax.axis('off')
+  plt.title("Model Performance Comparison")
+  table = ax.table(
+      cellText=results_df.round(3).values,
+      colLabels=results_df.columns,
+      loc='center',
+      cellLoc='center'
+  )
+  table.auto_set_font_size(False)
+  table.set_fontsize(10)
+  table.scale(1.2, 1.2)
+  plt.savefig('./rknnfs/output/model_comparison_table.png', bbox_inches='tight', dpi=300)
+  plt.close()
 
 if __name__ == "__main__":
   run_real_world_tests()
