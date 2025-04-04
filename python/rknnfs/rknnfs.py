@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from urllib.request import urlopen
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (accuracy_score, precision_score, 
                              recall_score, f1_score, confusion_matrix)
@@ -151,14 +152,14 @@ def evaluate_model(model, X_train, y_train, X_test, y_test):
     'f1': f1_score(y_test, y_pred, average='macro'),
     'confusion_matrix': confusion_matrix(y_test, y_pred),
     'train_time': train_time,
-    'pred_time': pred_time
+    'pred_time': pred_time,
+    'num_features': X_train.shape[1]  # Added num_features
   }
 
 def compare_models(X, y, test_size=0.3, random_state=42, k=3, r=100):
   """Compare performance of different models"""
-  # Split data
   X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=test_size, random_state=random_state
+      X, y, test_size=test_size, random_state=random_state
   )
   
   # 1. RKNN-FS + kNN
@@ -166,25 +167,32 @@ def compare_models(X, y, test_size=0.3, random_state=42, k=3, r=100):
   X_train_selected = X_train[:, selected_features]
   X_test_selected = X_test[:, selected_features]
   
-  # 2. kNN with all features
   results = {}
   
   # Model 1: kNN with selected features
   knn_selected = KNeighborsClassifier(n_neighbors=k)
   results['kNN (RKNN-FS)'] = evaluate_model(
-    knn_selected, X_train_selected, y_train, X_test_selected, y_test
+      knn_selected, X_train_selected, y_train, X_test_selected, y_test
   )
   
   # Model 2: kNN with all features
   knn_all = KNeighborsClassifier(n_neighbors=k)
   results['kNN (All Features)'] = evaluate_model(
-    knn_all, X_train, y_train, X_test, y_test
+      knn_all, X_train, y_train, X_test, y_test
   )
   
-  # Model 3: Random Forest with all features
-  rf = RandomForestClassifier(n_estimators=100, random_state=random_state)
-  results['Random Forest'] = evaluate_model(
-    rf, X_train, y_train, X_test, y_test
+  # Model 3: Random Forest with feature selection
+  # Step 1: Train RF to get feature importances
+  rf_selector = RandomForestClassifier(n_estimators=100, random_state=random_state)
+  rf_selector.fit(X_train, y_train)
+  # Step 2: Select features based on importance
+  sfm = SelectFromModel(rf_selector, threshold='mean', prefit=True)
+  X_train_rf_selected = sfm.transform(X_train)
+  X_test_rf_selected = sfm.transform(X_test)
+  # Step 3: Train and evaluate RF on selected features
+  rf_selected = RandomForestClassifier(n_estimators=100, random_state=random_state)
+  results['Random Forest (FS)'] = evaluate_model(
+      rf_selected, X_train_rf_selected, y_train, X_test_rf_selected, y_test
   )
   
   return results, selected_features
@@ -244,10 +252,10 @@ def load_toxicity():
 def run_real_world_tests():
   """Run comparison on real 'small n, large p' datasets"""
   datasets = {
-    'Toxicity': load_toxicity,
-    'Period Changer': load_periodchanger,
-    'Gastrointestinal': load_gastrointestinal,
-    'Leukemia': load_leukemia
+      'Toxicity': load_toxicity,
+      'Period Changer': load_periodchanger,
+      'Gastrointestinal': load_gastrointestinal,
+      'Leukemia': load_leukemia
   }
   
   results = {}
@@ -259,31 +267,28 @@ def run_real_world_tests():
     # Preprocessing
     X = StandardScaler().fit_transform(X)
     X_train, X_test, y_train, y_test = train_test_split(
-      X, y, test_size=0.3, random_state=42, stratify=y
+        X, y, test_size=0.3, random_state=42, stratify=y
     )
     
     # Run comparisons
     dataset_results, selected = compare_models(
-      X_train, y_train, 
-      test_size=0.3,
-      k=3, 
-      r=200,
-      random_state=42
+        X_train, y_train, 
+        test_size=0.3,
+        k=3, 
+        r=200,
+        random_state=42
     )
     
     results[name] = {
-      'metrics': dataset_results,
-      'selected_features': len(selected),
-      'total_features': X.shape[1]
+        'metrics': dataset_results,
+        'selected_features_rknnfs': len(selected),
+        'total_features': X.shape[1]
     }
   
-  # Collect all results into a DataFrame
+  # Collect results into DataFrame
   rows = []
   for dataset_name, res in results.items():
-    total_features = res['total_features']
-    selected_features = res['selected_features']
     for model_name, metrics in res['metrics'].items():
-      num_features = selected_features if model_name == 'kNN (RKNN-FS)' else total_features
       rows.append({
           'Dataset': dataset_name,
           'Model': model_name,
@@ -293,12 +298,10 @@ def run_real_world_tests():
           'F1': metrics['f1'],
           'Train Time (s)': metrics['train_time'],
           'Prediction Time (s)': metrics['pred_time'],
-          'Num Features': num_features,
+          'Num Features': metrics['num_features'],  # Directly from evaluate_model
       })
   
   results_df = pd.DataFrame(rows)
-  
-  # Save to CSV
   results_df.to_csv('./rknnfs/output/model_comparison_results.csv', index=False)
   
   # Create and save plotted table
