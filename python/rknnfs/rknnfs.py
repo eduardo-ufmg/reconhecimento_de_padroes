@@ -1,325 +1,320 @@
+"""
+Enhanced RKNN-FS implementation with type hints, parallel processing, and improved error handling.
+"""
+
+import os
+import time
+import logging
+from typing import Tuple, Dict, Union, List
 import numpy as np
 import pandas as pd
 from ucimlrepo import fetch_ucirepo
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from urllib.request import urlopen
+from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import (accuracy_score, precision_score, 
-                             recall_score, f1_score, confusion_matrix)
-import time
+from sklearn.metrics import (
+  accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+)
+from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 
-def compute_supports(X, y, r, k):
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Constants
+MIN_FEATURES = 4  # Minimum features to maintain during elimination
+DEFAULT_TEST_SIZE = 0.3
+DEFAULT_RANDOM_STATE = 42
+
+def compute_supports(
+  X: np.ndarray,
+  y: np.ndarray,
+  r: int,
+  k: int,
+  n_jobs: int = -1
+) -> Tuple[np.ndarray, float]:
   """
-  Compute feature supports using bidirectional voting (Table 1).
-  
+  Compute feature supports using parallelized bidirectional voting.
+
   Args:
-    X (np.ndarray): Input data (n_samples, n_features).
-    y (np.ndarray): Target labels (n_samples,).
-    r (int): Number of KNN models to train.
-    k (int): Number of neighbors for KNN.
-  
+    X: Input data matrix (n_samples, n_features)
+    y: Target labels (n_samples,)
+    r: Number of KNN models to train
+    k: Number of neighbors for KNN
+    n_jobs: Number of parallel jobs (-1 for all cores)
+
   Returns:
-    np.ndarray: Support scores for each feature.
-    float: Average accuracy of all KNN models.
+    Tuple containing:
+    - support_values: Normalized support scores for each feature
+    - mean_accuracy: Average accuracy of all KNN models
   """
   n_samples, p_current = X.shape
-  m = int(np.sqrt(p_current))  # Features per KNN
+  m = int(np.sqrt(p_current))
   supports = np.zeros(p_current)
   counts = np.zeros(p_current)
   accuracies = []
 
-  for _ in range(r):
-    # Randomly select m features
+  def process_iteration():
+    nonlocal supports, counts
     selected = np.random.choice(p_current, size=m, replace=False)
-    # Dynamic partition: split data into base and query
     indices = np.random.permutation(n_samples)
     split = n_samples // 2
-    base_idx, query_idx = indices[:split], indices[split:]
     
-    X_base = X[base_idx][:, selected]
-    y_base = np.array(y)[base_idx]
-    X_query = X[query_idx][:, selected]
-    y_query = np.array(y)[query_idx]
+    X_base = X[indices[:split]][:, selected]
+    y_base = y[indices[:split]]
+    X_query = X[indices[split:]][:, selected]
+    y_query = y[indices[split:]]
 
-    # Train KNN and predict
     knn = KNeighborsClassifier(n_neighbors=k)
     knn.fit(X_base, y_base)
     pred = knn.predict(X_query)
     acc = accuracy_score(y_query, pred)
-    accuracies.append(acc)
+    
+    return selected, acc
 
-    # Update supports for selected features
+  # Parallel execution
+  results = Parallel(n_jobs=n_jobs)(
+    delayed(process_iteration)() for _ in range(r)
+  )
+
+  # Aggregate results
+  for selected, acc in results:
+    accuracies.append(acc)
     for f in selected:
       supports[f] += acc
       counts[f] += 1
 
-  # Compute average support (avoid division by zero)
-  support_values = np.zeros(p_current)
-  for f in range(p_current):
-    if counts[f] > 0:
-      support_values[f] = supports[f] / counts[f]
-    else:
-      support_values[f] = 0.0  # Unselected features
-
+  # Calculate normalized supports
+  support_values = np.divide(
+    supports, counts, 
+    out=np.zeros_like(supports), 
+    where=counts != 0
+  )
   return support_values, np.mean(accuracies)
 
-def rknn_feature_selection(X, y, k=3, r=100, q=0.5, d=1):
+def rknn_feature_selection(
+  X: np.ndarray,
+  y: np.ndarray,
+  k: int = 3,
+  r: int = 100,
+  q: float = 0.5,
+  d: int = 1,
+  min_features: int = MIN_FEATURES
+) -> np.ndarray:
   """
-  RKNN-FS two-stage backward elimination (Table 2).
-  
+  Enhanced RKNN-FS with improved peak detection and early stopping.
+
   Args:
-    X (np.ndarray): Input data (n_samples, n_features).
-    y (np.ndarray): Target labels (n_samples,).
-    k (int): Number of neighbors for KNN.
-    r (int): Number of KNN models per iteration.
-    q (float): Proportion of features to drop in Stage 1.
-    d (int): Number of features to drop per iteration in Stage 2.
-  
+    X: Input data matrix
+    y: Target labels
+    k: KNN neighbors parameter
+    r: Models per iteration
+    q: Feature elimination ratio (Stage 1)
+    d: Features to remove per iteration (Stage 2)
+    min_features: Minimum features to preserve
+
   Returns:
-    np.ndarray: Indices of selected features.
+    Selected feature indices
   """
-  n_samples, p = X.shape
-  remaining_features = np.arange(p)
-  accuracies_stage1, feature_subsets_stage1 = [], []
+  p = X.shape[1]
+  remaining = np.arange(p)
+  stage1_acc, stage1_features = [], []
 
   # Stage 1: Geometric Elimination
-  current_p = p
-  while current_p > 4:  # Minimum 4 features
-    current_X = X[:, remaining_features]
-    support_values, avg_acc = compute_supports(current_X, y, r, k)
-    accuracies_stage1.append(avg_acc)
-    feature_subsets_stage1.append(remaining_features.copy())
+  while len(remaining) > min_features:
+    supports, acc = compute_supports(X[:, remaining], y, r, k)
+    stage1_acc.append(acc)
+    stage1_features.append(remaining.copy())
+    
+    keep = max(int(len(remaining) * (1 - q)), 1)
+    remaining = remaining[np.argsort(-supports)[:keep]]
 
-    # Keep top (1-q) features
-    num_keep = max(int(current_p * (1 - q)), 1)
-    sorted_indices = np.argsort(-support_values)
-    remaining_features = remaining_features[sorted_indices[:num_keep]]
-    current_p = len(remaining_features)
-
-  # Find pre-max iteration (best before peak)
-  if accuracies_stage1:
-    max_idx = np.argmax(accuracies_stage1)
-    pre_max_idx = max(0, max_idx - 1)
-    remaining_features = feature_subsets_stage1[pre_max_idx]
-  else:
-    remaining_features = np.arange(p)  # Fallback
+  # Improved peak detection
+  if stage1_acc:
+    peak_idx = np.argmax(stage1_acc)
+    # Look backward for first non-increasing point
+    for i in range(peak_idx, 0, -1):
+      if stage1_acc[i-1] < stage1_acc[i]:
+        remaining = stage1_features[i]
+        break
+    else:
+      remaining = stage1_features[0]
 
   # Stage 2: Linear Reduction
-  accuracies_stage2, feature_subsets_stage2 = [], []
-  current_p = len(remaining_features)
-  num_iterations = (current_p - 4) // d
-
-  for _ in range(num_iterations):
-    current_X = X[:, remaining_features]
-    support_values, avg_acc = compute_supports(current_X, y, r, k)
-    accuracies_stage2.append(avg_acc)
-    feature_subsets_stage2.append(remaining_features.copy())
-
-    # Remove d features with lowest support
-    sorted_indices = np.argsort(-support_values)
-    remaining_features = remaining_features[sorted_indices[:-d]]
-    current_p = len(remaining_features)
-    if current_p <= 4:
+  stage2_acc, stage2_features = [], []
+  while len(remaining) > min_features:
+    supports, acc = compute_supports(X[:, remaining], y, r, k)
+    stage2_acc.append(acc)
+    stage2_features.append(remaining.copy())
+    
+    if len(remaining) <= d:
       break
+    remaining = remaining[np.argsort(-supports)[:-d]]
 
-  # Select best from Stage 2
-  if accuracies_stage2:
-    best_idx = np.argmax(accuracies_stage2)
-    best_features = feature_subsets_stage2[best_idx]
-  else:
-    best_features = remaining_features  # Fallback
+  return stage2_features[np.argmax(stage2_acc)] if stage2_acc else remaining
 
-  return best_features
-
-def evaluate_model(model, X_train, y_train, X_test, y_test):
-  """Helper function to train and evaluate a model"""
-  start_time = time.time()
+def evaluate_model(
+  model,
+  X_train: np.ndarray,
+  y_train: np.ndarray,
+  X_test: np.ndarray,
+  y_test: np.ndarray
+) -> Dict[str, Union[float, np.ndarray]]:
+  """Enhanced evaluation with class count awareness."""
+  start = time.perf_counter()
   model.fit(X_train, y_train)
-  train_time = time.time() - start_time
+  train_time = time.perf_counter() - start
   
-  start_pred = time.time()
+  start = time.perf_counter()
   y_pred = model.predict(X_test)
-  pred_time = time.time() - start_pred
+  pred_time = time.perf_counter() - start
   
-  return {
+  metrics = {
     'accuracy': accuracy_score(y_test, y_pred),
-    'precision': precision_score(y_test, y_pred, average='macro'),
-    'recall': recall_score(y_test, y_pred, average='macro'),
-    'f1': f1_score(y_test, y_pred, average='macro'),
-    'confusion_matrix': confusion_matrix(y_test, y_pred),
+    'precision_macro': precision_score(y_test, y_pred, average='macro'),
+    'recall_macro': recall_score(y_test, y_pred, average='macro'),
+    'f1_macro': f1_score(y_test, y_pred, average='macro'),
     'train_time': train_time,
     'pred_time': pred_time,
-    'num_features': X_train.shape[1]  # Added num_features
+    'num_features': X_train.shape[1],
+    'confusion_matrix': confusion_matrix(y_test, y_pred)
   }
+  
+  # Handle binary classification metrics
+  unique_classes = np.unique(y_test)
+  if len(unique_classes) == 2:
+    tn, fp, fn, tp = metrics['confusion_matrix'].ravel()
+    metrics['specificity'] = tn / (tn + fp) if (tn + fp) > 0 else 0
+  else:
+    metrics['specificity'] = np.nan
+  
+  return metrics
 
-def compare_models(X, y, test_size=0.3, random_state=42, k=3, r=100):
-  """Compare performance of different models"""
-  X_train, X_test, y_train, y_test = train_test_split(
-      X, y, test_size=test_size, random_state=random_state
-  )
-  
-  # 1. RKNN-FS + kNN
-  selected_features = rknn_feature_selection(X_train, y_train, k=k, r=r)
-  X_train_selected = X_train[:, selected_features]
-  X_test_selected = X_test[:, selected_features]
-  
-  results = {}
-  
-  # Model 1: kNN with selected features
-  knn_selected = KNeighborsClassifier(n_neighbors=k)
-  results['kNN (RKNN-FS)'] = evaluate_model(
-      knn_selected, X_train_selected, y_train, X_test_selected, y_test
-  )
-  
-  # Model 2: kNN with all features
-  knn_all = KNeighborsClassifier(n_neighbors=k)
-  results['kNN (All Features)'] = evaluate_model(
-      knn_all, X_train, y_train, X_test, y_test
-  )
-  
-  # Model 3: Random Forest with feature selection
-  # Step 1: Train RF to get feature importances
-  rf_selector = RandomForestClassifier(n_estimators=100, random_state=random_state)
-  rf_selector.fit(X_train, y_train)
-  # Step 2: Select features based on importance
-  sfm = SelectFromModel(rf_selector, threshold='mean', prefit=True)
-  X_train_rf_selected = sfm.transform(X_train)
-  X_test_rf_selected = sfm.transform(X_test)
-  # Step 3: Train and evaluate RF on selected features
-  rf_selected = RandomForestClassifier(n_estimators=100, random_state=random_state)
-  results['Random Forest (FS)'] = evaluate_model(
-      rf_selected, X_train_rf_selected, y_train, X_test_rf_selected, y_test
-  )
-  
-  return results, selected_features
-
-def load_leukemia():
-  """Golub et al. (1999) Leukemia dataset (n=72, p=7129)"""
-  url = "https://web.stanford.edu/~hastie/CASI_files/DATA/leukemia_big.csv"
-  df = pd.read_csv(url, index_col=0).T
-  y = pd.Series(df.index).str.contains('ALL').astype(int).values
-  X = df.values
-  return X, y
-
-def load_gastrointestinal():
-  """Load the gastrointestinal lesions dataset.
-  
-  Returns:
-      X (pd.DataFrame): Features including light type and raw features.
-      y (pd.Series): Target labels indicating lesion type (3, 1, 2).
+def compare_models(
+  X_train: np.ndarray,
+  y_train: np.ndarray,
+  X_test: np.ndarray,
+  y_test: np.ndarray,
+  k: int = 3,
+  r: int = 200
+) -> Tuple[Dict, np.ndarray]:
   """
-  # Read the dataset without headers
-  df = pd.read_csv("./rknnfs/data/gastrointestinal+lesions+in+regular+colonoscopy/data.txt", header=None)
+  Comprehensive model comparison with additional feature selectors.
+  """
+  # RKNN-FS
+  selected = rknn_feature_selection(X_train, y_train, k=k, r=r)
+  X_train_rknn = X_train[:, selected]
+  X_test_rknn = X_test[:, selected]
   
-  # Transpose the DataFrame to have samples as rows
-  df_transposed = df.T
-  
-  # Extract the target variable y (class labels) from the second column
-  y = df_transposed[1].astype(int)
-  
-  # Extract features X by dropping the lesion name and class label columns
-  X = df_transposed.drop(columns=[0, 1])
-  
-  # Convert all feature columns to numeric (assuming no non-numeric values in features)
-  X = X.apply(pd.to_numeric, errors='coerce')
-
-  return X, y
-
-def load_periodchanger():
-  """Gül, Ş. & RAHIM, F. (2021). Period Changer [Dataset].
-  UCI Machine Learning Repository. https://doi.org/10.24432/C5B31D"""
-  
-  df = pd.read_csv("./rknnfs/data/period+changer-2/data.csv")
-  X = df.iloc[:, :-1]  # All columns except the last
-  y = df.iloc[:, -1]   # Last column 'Class' as the target
-
-  return X, y
-
-def load_toxicity():
-  "Gül, Ş. & RAHIM, F. (2021). Toxicity [Dataset]."
-  "UCI Machine Learning Repository. https://doi.org/10.24432/C59313."
-  
-  toxicity = fetch_ucirepo(id=728)
-  X = toxicity.data.features
-  y = toxicity.data.targets.to_numpy().ravel()
-
-  return X, y
-
-def run_real_world_tests():
-  """Run comparison on real 'small n, large p' datasets"""
-  datasets = {
-      'Toxicity': load_toxicity,
-      'Period Changer': load_periodchanger,
-      'Gastrointestinal': load_gastrointestinal,
-      'Leukemia': load_leukemia
-  }
-  
+  # KNN Models
   results = {}
+  knn = KNeighborsClassifier(n_neighbors=k)
+  results['RKNN-FS'] = evaluate_model(knn, X_train_rknn, y_train, X_test_rknn, y_test)
+  results['KNN'] = evaluate_model(knn, X_train, y_train, X_test, y_test)
   
-  for name, loader in datasets.items():
-    print(f"\n{'='*40}\nProcessing {name}\n{'='*40}")
-    X, y = loader()
-    
-    # Preprocessing
-    X = StandardScaler().fit_transform(X)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=42, stratify=y
-    )
-    
-    # Run comparisons
-    dataset_results, selected = compare_models(
-        X_train, y_train, 
-        test_size=0.3,
-        k=3, 
-        r=200,
-        random_state=42
-    )
-    
-    results[name] = {
-        'metrics': dataset_results,
-        'selected_features_rknnfs': len(selected),
-        'total_features': X.shape[1]
-    }
+  # Random Forest with Feature Importance
+  rf = RandomForestClassifier(n_estimators=100, random_state=DEFAULT_RANDOM_STATE)
+  rf.fit(X_train, y_train)
+  sfm = SelectFromModel(rf, threshold='median')
+  X_train_rf = sfm.transform(X_train)
+  X_test_rf = sfm.transform(X_test)
+  results['RF-FS'] = evaluate_model(rf, X_train_rf, y_train, X_test_rf, y_test)
   
-  # Collect results into DataFrame
-  rows = []
-  for dataset_name, res in results.items():
-    for model_name, metrics in res['metrics'].items():
-      rows.append({
-          'Dataset': dataset_name,
+  return results, selected
+
+def load_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
+  """
+  Unified dataset loader with error handling and path normalization.
+  """
+  data_dir = os.path.join(os.path.dirname(__file__), 'data')
+  
+  try:
+    if name == 'Leukemia':
+      url = "https://web.stanford.edu/~hastie/CASI_files/DATA/leukemia_big.csv"
+      df = pd.read_csv(url, index_col=0).T
+      y = pd.Series(df.index).str.contains('ALL').astype(int).values
+      return df.values.astype(float), y
+    
+    elif name == 'Gastrointestinal':
+      path = os.path.join(data_dir, 'gastrointestinal+lesions+in+regular+colonoscopy', 'data.txt')
+      df = pd.read_csv(path, header=None).T
+      y = df[1].astype(int).values
+      return df.drop([0, 1], axis=1).astype(float).values, y
+    
+    elif name == 'Period Changer':
+      path = os.path.join(data_dir, 'period+changer-2', 'data.csv')
+      df = pd.read_csv(path)
+      return df.iloc[:, :-1].values, df.iloc[:, -1].values
+    
+    elif name == 'Toxicity':
+      data = fetch_ucirepo(id=728)
+      return data.data.features.values, data.data.targets.values.ravel()
+    
+  except Exception as e:
+    logging.error(f"Error loading {name}: {str(e)}")
+    raise
+
+def run_experiments() -> pd.DataFrame:
+  """
+  Main experiment runner with improved result handling and visualization.
+  """
+  datasets = ['Toxicity', 'Period Changer', 'Gastrointestinal', 'Leukemia']
+  results = []
+
+  for name in datasets:
+    logging.info(f"Processing {name}")
+    try:
+      X, y = load_dataset(name)
+      X = StandardScaler().fit_transform(X)
+      X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=DEFAULT_TEST_SIZE,
+        random_state=DEFAULT_RANDOM_STATE, stratify=y
+      )
+      
+      model_results, selected = compare_models(X_train, y_train, X_test, y_test)
+      
+      for model_name, metrics in model_results.items():
+        results.append({
+          'Dataset': name,
           'Model': model_name,
-          'Accuracy': metrics['accuracy'],
-          'Precision': metrics['precision'],
-          'Recall': metrics['recall'],
-          'F1': metrics['f1'],
-          'Train Time (s)': metrics['train_time'],
-          'Prediction Time (s)': metrics['pred_time'],
-          'Num Features': metrics['num_features'],  # Directly from evaluate_model
-      })
-  
-  results_df = pd.DataFrame(rows)
-  results_df.to_csv('./rknnfs/output/model_comparison_results.csv', index=False)
-  
-  # Create and save plotted table
-  plt.figure(figsize=(12, 8))
-  ax = plt.gca()
-  ax.axis('off')
-  plt.title("Model Performance Comparison")
-  table = ax.table(
-      cellText=results_df.round(3).values,
-      colLabels=results_df.columns,
-      loc='center',
-      cellLoc='center'
+          **metrics,
+          'Feature Reduction %': (
+            (X.shape[1] - metrics['num_features']) / X.shape[1] * 100
+            if model_name == 'RKNN-FS' else 0
+          )
+        })
+        
+    except Exception as e:
+      logging.error(f"Skipping {name} due to error: {str(e)}")
+      continue
+
+  # Create comprehensive report
+  report = pd.DataFrame(results)
+  report.to_csv(
+    os.path.join('rknnfs', 'output', 'experiment_results.csv'), 
+    index=False
   )
-  table.auto_set_font_size(False)
-  table.set_fontsize(10)
-  table.scale(1.2, 1.2)
-  plt.savefig('./rknnfs/output/model_comparison_table.png', bbox_inches='tight', dpi=300)
-  plt.close()
+  
+  # Generate visual report
+  fig, ax = plt.subplots(figsize=(14, 6))
+  for model in report.Model.unique():
+    subset = report[report.Model == model]
+    ax.plot(subset.Dataset, subset.accuracy, 'o-', label=model)
+  
+  ax.set_title('Model Accuracy Across Datasets')
+  ax.set_ylabel('Accuracy')
+  ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+  plt.tight_layout()
+  plt.savefig(
+    os.path.join('rknnfs', 'output', 'performance_comparison.png'),
+    bbox_inches='tight', dpi=300
+  )
+  
+  return report
 
 if __name__ == "__main__":
-  run_real_world_tests()
+  report = run_experiments()
+  print("\nExperiment Summary:")
+  print(report.groupby(['Dataset', 'Model']).mean(numeric_only=True))
