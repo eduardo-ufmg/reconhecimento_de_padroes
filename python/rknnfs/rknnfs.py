@@ -216,7 +216,7 @@ def compare_models(
   # Random Forest with Feature Importance
   rf = RandomForestClassifier(n_estimators=100, random_state=DEFAULT_RANDOM_STATE)
   rf.fit(X_train, y_train)
-  sfm = SelectFromModel(rf, threshold='median')
+  sfm = SelectFromModel(rf)
   X_train_rf = sfm.transform(X_train)
   X_test_rf = sfm.transform(X_test)
   results['RF-FS'] = evaluate_model(rf, X_train_rf, y_train, X_test_rf, y_test)
@@ -280,11 +280,7 @@ def run_experiments() -> pd.DataFrame:
         results.append({
           'Dataset': name,
           'Model': model_name,
-          **metrics,
-          'Feature Reduction %': (
-            (X.shape[1] - metrics['num_features']) / X.shape[1] * 100
-            if model_name == 'RKNN-FS' else 0
-          )
+          **metrics
         })
         
     except Exception as e:
@@ -304,4 +300,3 @@ if __name__ == "__main__":
   report = run_experiments()
   print("\nExperiment Summary:")
   print(report.groupby(['Dataset', 'Model']).mean(numeric_only=True))
-  
