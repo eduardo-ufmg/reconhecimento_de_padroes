@@ -1,11 +1,7 @@
-"""
-Enhanced RKNN-FS implementation with type hints, parallel processing, and improved error handling.
-"""
-
 import os
 import time
 import logging
-from typing import Tuple, Dict, Union, List
+from typing import Tuple, Dict, Union
 import numpy as np
 import pandas as pd
 from ucimlrepo import fetch_ucirepo
@@ -18,7 +14,6 @@ from sklearn.metrics import (
   accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 )
 from joblib import Parallel, delayed
-import matplotlib.pyplot as plt
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -50,6 +45,7 @@ def compute_supports(
     - support_values: Normalized support scores for each feature
     - mean_accuracy: Average accuracy of all KNN models
   """
+
   n_samples, p_current = X.shape
   m = int(np.sqrt(p_current))
   supports = np.zeros(p_current)
@@ -98,13 +94,13 @@ def rknn_feature_selection(
   X: np.ndarray,
   y: np.ndarray,
   k: int = 3,
-  r: int = 100,
+  r: int = 500,
   q: float = 0.5,
   d: int = 1,
   min_features: int = MIN_FEATURES
 ) -> np.ndarray:
   """
-  Enhanced RKNN-FS with improved peak detection and early stopping.
+  RKNN-FS with peak detection and early stopping.
 
   Args:
     X: Input data matrix
@@ -118,6 +114,7 @@ def rknn_feature_selection(
   Returns:
     Selected feature indices
   """
+  
   p = X.shape[1]
   remaining = np.arange(p)
   stage1_acc, stage1_features = [], []
@@ -131,7 +128,7 @@ def rknn_feature_selection(
     keep = max(int(len(remaining) * (1 - q)), 1)
     remaining = remaining[np.argsort(-supports)[:keep]]
 
-  # Improved peak detection
+  # Peak detection
   if stage1_acc:
     peak_idx = np.argmax(stage1_acc)
     # Look backward for first non-increasing point
@@ -162,7 +159,8 @@ def evaluate_model(
   X_test: np.ndarray,
   y_test: np.ndarray
 ) -> Dict[str, Union[float, np.ndarray]]:
-  """Enhanced evaluation with class count awareness."""
+  """Evaluation with class count awareness."""
+  
   start = time.perf_counter()
   model.fit(X_train, y_train)
   train_time = time.perf_counter() - start
@@ -201,8 +199,9 @@ def compare_models(
   r: int = 200
 ) -> Tuple[Dict, np.ndarray]:
   """
-  Comprehensive model comparison with additional feature selectors.
+  Comprehensive model comparison with feature selectors.
   """
+  
   # RKNN-FS
   selected = rknn_feature_selection(X_train, y_train, k=k, r=r)
   X_train_rknn = X_train[:, selected]
@@ -228,6 +227,7 @@ def load_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
   """
   Unified dataset loader with error handling and path normalization.
   """
+
   data_dir = os.path.join(os.path.dirname(__file__), 'data')
   
   try:
@@ -258,8 +258,9 @@ def load_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
 
 def run_experiments() -> pd.DataFrame:
   """
-  Main experiment runner with improved result handling and visualization.
+  Main experiment runner with result handling.
   """
+  
   datasets = ['Toxicity', 'Period Changer', 'Gastrointestinal', 'Leukemia']
   results = []
 
@@ -293,23 +294,8 @@ def run_experiments() -> pd.DataFrame:
   # Create comprehensive report
   report = pd.DataFrame(results)
   report.to_csv(
-    os.path.join('rknnfs', 'output', 'experiment_results.csv'), 
+    os.path.join('rknnfs', 'output', 'results.csv'), 
     index=False
-  )
-  
-  # Generate visual report
-  fig, ax = plt.subplots(figsize=(14, 6))
-  for model in report.Model.unique():
-    subset = report[report.Model == model]
-    ax.plot(subset.Dataset, subset.accuracy, 'o-', label=model)
-  
-  ax.set_title('Model Accuracy Across Datasets')
-  ax.set_ylabel('Accuracy')
-  ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-  plt.tight_layout()
-  plt.savefig(
-    os.path.join('rknnfs', 'output', 'performance_comparison.png'),
-    bbox_inches='tight', dpi=300
   )
   
   return report
@@ -318,3 +304,4 @@ if __name__ == "__main__":
   report = run_experiments()
   print("\nExperiment Summary:")
   print(report.groupby(['Dataset', 'Model']).mean(numeric_only=True))
+  
