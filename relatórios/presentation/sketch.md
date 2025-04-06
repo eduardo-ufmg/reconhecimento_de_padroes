@@ -64,7 +64,6 @@ Encapsula um modelo em um problema de optimização.
 
 - Cada variável *f* é atribuída a *M* classificadores, que formam o conjunto *C(f)*. Cada classificador recebe o conjunto *F(c)* de variáveis
 - Quando um classificador acerta sua predição, as variáveis usadas por ele recebem uma pontuação positiva
-- Quando erra, recebem uma pontuação negativa
 - A pontuação, por rodada, de cada variável, é a média das pontuações atribuídas por cada classificador $c \in C(f)$
 - Variáveis mais relevantes para a classificação têm pontuação maior
 
@@ -81,6 +80,33 @@ Encapsula um modelo em um problema de optimização.
 
 ## Implementação
 
-
+- $ \text{support}(f) = \frac{1}{|C(f)|}\sum_{\text{kNN}\in{}C(f)}\text{acc}(\text{kNN}) $
+- $ \text{number\_of\_iterations\_stg1} = \lfloor \ln(4/\text{current\_number\_of\_features}) / \ln(1-\text{elimination\_rate}) \rfloor $
+- $ \text{number\_of\_iterations\_stg2} = \lfloor (\text{current\_number\_of\_features}-4)/\text{elimination\_const} \rfloor $
+- a cada iteração, computa $ \text{support}(f) \forall f $, mantém os *p* melhores e atualiza *p*
 
 ## Resultados
+
+## Complexidade
+
+$ O(rk2^{\sqrt{p}}n\log{}n) $
+
+## Sugestões de parâmetros
+
+- $ k \in [1, 3] $
+- $ m \approx \sqrt{p} $
+- $ r \lt 1000 $
+
+## Métricas
+
+<placeholder for table 5>
+
+<placeholder for table 6>
+
+<placeholder for table 7>
+
+<placeholder for table 8>
+
+<placeholder for table 9>
+
+<placeholder for table 10>
