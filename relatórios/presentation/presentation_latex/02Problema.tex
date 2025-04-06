@@ -4,8 +4,33 @@
 
 É comum, principalmente em problemas de bioinformática, que haja muito mais variáveis do que amostras. Isso é ruim, dado que a condição $ p > n $, para \textit{p} variáveis e \textit{n} amostras, leva a
 \begin{itemize}
-    \item alto custo computacional \textrightarrow mais memória ocupada; dados irrelevantes são avaliados
-    \item overfitting \textrightarrow o modelo pode aprender relações que só existem naquele conjunto de dados
+    \item alto custo computacional: mais memória ocupada; dados irrelevantes são avaliados
+    \item overfitting: o modelo pode aprender relações que só existem naquele conjunto de dados
 \end{itemize}
 
+\end{frame}
+
+\begin{frame}
+\begin{table}[ht]
+    \centering
+    \caption{Microarray gene expression datasets, Group II}
+    \label{tab:group2}
+    \scalebox{0.8}{
+    \begin{tabular}{lrrrrr}
+    \toprule
+    Dataset & Sample Size, \( n \) & No. of Genes, \( p \) & No. of classes, \( c \) & \( p/n \) & \( p \times c/n \) \\
+    \midrule
+    Lymphoma          & 62  & 4026 & 3 & 65 & 195 \\
+    Leukemia          & 38  & 3051 & 2 & 80 & 161 \\
+    Breast.3. Classes & 95  & 4869 & 3 & 51 & 154 \\
+    SRBCT             & 63  & 2308 & 4 & 37 & 147 \\
+    Shipp             & 77  & 5469 & 2 & 71 & 142 \\
+    Breast.2. Classes & 77  & 4869 & 2 & 63 & 126 \\
+    Prostate          & 102 & 6033 & 2 & 59 & 118 \\
+    Khan              & 83  & 2308 & 4 & 28 & 111 \\
+    Colon             & 62  & 2000 & 2 & 32 & 65  \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table}
 \end{frame}

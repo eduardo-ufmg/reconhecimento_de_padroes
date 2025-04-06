@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
-  accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+  accuracy_score, confusion_matrix
 )
 from joblib import Parallel, delayed
 
@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Constants
 MIN_FEATURES = 4  # Minimum features to maintain during elimination
 DEFAULT_TEST_SIZE = 0.3
-DEFAULT_RANDOM_STATE = 42
+DEFAULT_RANDOM_STATE = None
 
 def compute_supports(
   X: np.ndarray,
@@ -171,22 +171,11 @@ def evaluate_model(
   
   metrics = {
     'accuracy': accuracy_score(y_test, y_pred),
-    'precision_macro': precision_score(y_test, y_pred, average='macro'),
-    'recall_macro': recall_score(y_test, y_pred, average='macro'),
-    'f1_macro': f1_score(y_test, y_pred, average='macro'),
     'train_time': train_time,
     'pred_time': pred_time,
     'num_features': X_train.shape[1],
     'confusion_matrix': confusion_matrix(y_test, y_pred)
   }
-  
-  # Handle binary classification metrics
-  unique_classes = np.unique(y_test)
-  if len(unique_classes) == 2:
-    tn, fp, fn, tp = metrics['confusion_matrix'].ravel()
-    metrics['specificity'] = tn / (tn + fp) if (tn + fp) > 0 else 0
-  else:
-    metrics['specificity'] = np.nan
   
   return metrics
 
@@ -290,7 +279,7 @@ def run_experiments() -> pd.DataFrame:
   # Create comprehensive report
   report = pd.DataFrame(results)
   report.to_csv(
-    os.path.join('rknnfs', 'output', 'results.csv'), 
+    os.path.join('output', 'results.csv'), 
     index=False
   )
   
