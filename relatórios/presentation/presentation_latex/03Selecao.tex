@@ -1,0 +1,80 @@
+\section{Seleção de Variáveis}
+
+\subsection{Seleção Interna de Variáveis}
+
+\begin{frame}
+
+A seleção das variáveis é parte intríseca do treino do modelo.
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Árvore de Decisão}
+
+\begin{itemize}
+    \item Para cada variável, avalia o ganho de informação em diferentes partições
+    \item Partições com maior ganho ficam mais próximas da raiz
+\end{itemize}
+
+\vspace{1cm}
+
+\textbf{Principais problemas}
+\begin{itemize}
+    \item Pequenas mudanças nos dados podem levar a estruturas completamente diferentes - instabilidade
+    \item Erros são fortemente cumulativos
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Floresta Aleatória}
+
+Agrega multiplas árvores de decisão, com algumas modificações
+\begin{itemize}
+    \item Cada árvore é construída sobre um subconjunto dos dados
+    \item Na construção de cada nó, um subconjunto das variáveis é considerado
+    \item Cada árvore vota conforme seu resultado e a classificação é feita a partir destes
+\end{itemize}
+
+\vspace{1cm}
+
+\textbf{Principais problemas}
+\begin{itemize}
+    \item Mitiga, mas não resolve a instabilidade
+    \item Aumenta o custo computacional
+\end{itemize}
+
+\end{frame}
+
+\subsection{Filtragem de Variáveis}
+
+\begin{frame}
+
+Analisa, estatisticamente, a relação entre cada variável e as classes do problema. Mantém aquelas que são fortes indicadores de classe.
+
+\textbf{Exemplo}: Retirar variáveis cuja variança seja baixa no conjunto completo de dados, visto que estas tendem a não ser relevantes para a classificação.
+
+\textbf{Principais problemas}
+Por não considerar a relação entre variáveis,
+\begin{itemize}
+    \item pode remover aquelas que participam de relações úteis para a classificação
+    \item pode manter variáveis redundantes
+\end{itemize}
+\end{frame}
+
+\subsection{Métodos Encapsuladores}
+\begin{frame}
+    Encapsula o modelo em um problema de optimização.
+    \begin{itemize}
+        \item Seleciona um subconjunto das variáveis
+        \item Treina o modelo sobre este subconjunto
+        \item Avalia o modelo conforme uma métrica apropriada
+        \item Seleciona o modelo com melhor performance
+    \end{itemize}
+
+\textbf{Principal problema}: custo computacional elevado
+\end{frame}
+
+

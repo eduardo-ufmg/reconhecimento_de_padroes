@@ -87,17 +87,17 @@ Encapsula um modelo em um problema de optimização.
 
 ## Resultados
 
-## Complexidade
+### Complexidade
 
 $ O(rk2^{\sqrt{p}}n\log{}n) $
 
-## Sugestões de parâmetros
+### Sugestões de parâmetros
 
 - $ k \in [1, 3] $
 - $ m \approx \sqrt{p} $
 - $ r \lt 1000 $
 
-## Métricas
+### Métricas
 
 <placeholder for table 5>
 

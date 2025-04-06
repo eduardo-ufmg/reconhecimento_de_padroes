@@ -1,0 +1,43 @@
+\section{RKNN-FS}
+
+\begin{frame}
+  
+\begin{itemize}
+    \item Para um conjunto de dados com \textit{p} variáveis, \textit{r} classificadores \textit{kNN} são treinados em subconjuntos aleatórios de $m \approx \sqrt{p}$ variáveis
+    \item Cada classificador é treinado sobre todas as amostras. \textit{Bootstraping} não é necessário, já que, por não serem hierárquicos, os classificadores são naturalmente estáveis
+    \item A classificação é dada pelo voto majoritário entre os classificadores
+\end{itemize}
+
+\end{frame}
+
+\subsection{\textit{Feature Support}}
+
+\begin{frame}
+
+\begin{itemize}
+    \item Cada variável \textit{f} é atribuída a \textit{M} classificadores, que formam o conjunto \textit{C(f)}. Cada classificador recebe o conjunto \textit{F(c)} de variáveis
+    \item Quando um classificador acerta sua predição, as variáveis usadas por ele recebem uma pontuação positiva
+    \item A pontuação, por rodada, de cada variável, é a média das pontuações atribuídas por cada classificador $c \in C(f)$
+    \item Variáveis mais relevantes para a classificação têm pontuação maior
+\end{itemize}
+
+\end{frame}
+
+\subsection{Seleção de Variáveis}
+
+\begin{frame}
+\frametitle{Remoção Geométrica}
+\begin{itemize}
+    \item A cada iteração, a metade menos relevante das variáveis é descartada
+    \item Após todas as iterações, a quantidade de variáveis que resulta na maior precisão é encontrada
+    \item As variáveis presentes na iteração anterior a esta são passadas para a próxima etapa
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Remoção Linear}
+\begin{itemize}
+    \item A cada iteração, um número fixo de variáveis é removido
+    \item Após todas as iterações, o conjunto de variáveis mais relevantes é selecionada para o modelo
+\end{itemize}
+\end{frame}
