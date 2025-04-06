@@ -1,66 +1,187 @@
-\section{Outras Estruturas}
+\section{Resultados}
 
-\subsection{V-MOSFET}
-
+\subsection{Complexidade}
 \begin{frame}
-
-    \begin{columns}[t]
-    
-        \begin{column}{7cm}
-
-            \begin{itemize}
-                \item Primeira estrutura;
-                \item Dificil Fabricação;
-                \item Instabilidade em uso prolongado;
-                \item Ponta da porta prejudica a tensão de bloqueio
-            \end{itemize}
-
-        \end{column}
-
-        \begin{column}{7cm}
-
-            \begin{figure}[!htbp]
-                \centering
-                \caption{Estrutura V-MOSFET}
-                \includegraphics[scale=0.2]{imagens/vmosfet.png}
-                \\\small{\textbf{Fonte:} \cite{sze2012semiconductor}}%
-            \end{figure}
-
-        \end{column}
-
-    \end{columns}
-
+    \[ O(rk2^{\sqrt{p}}n\log{}n) \]
 \end{frame}
 
+\subsection{Sugestões de parâmetros}
+\begin{frame}
+\begin{itemize}
+    \item $ k \in [1, 3] $
+    \item $ m \approx \sqrt{p} $
+    \item $ r < 1000 $
+\end{itemize}
+\end{frame}
 
-\subsection{U-MOSFET}
+\subsection{Métricas}
+\begin{frame}
+\begin{table}[ht]
+    \centering
+    \caption{Comparative performance with gene selection, Group I}
+    \label{tab:group1_perf}
+    \scalebox{0.8}{
+    \begin{tabular}{lrrrrrrrrrr}
+    \toprule
+    Dataset & \( p \times c/n \) & \multicolumn{3}{c}{Mean Accuracy} & \multicolumn{3}{c}{Standard Deviation} & \multicolumn{3}{c}{Coefficient of Variation} \\
+    \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
+        & & RF & R1NN & R3NN & RF & R1NN & R3NN & RF & R1NN & R3NN \\
+    \midrule
+    Ramaswamy & 1267 & 0.577 & 0.726 & 0.704 & 0.019 & 0.013 & 0.013 & 3.231 & 1.775 & 1.796 \\
+    Staunton & 859 & 0.561 & 0.692 & 0.663 & 0.042 & 0.026 & 0.031 & 7.485 & 3.802 & 4.669 \\
+    Nutt & 829 & 0.671 & 0.903 & 0.834 & 0.051 & 0.030 & 0.031 & 7.619 & 3.268 & 3.674 \\
+    Su & 792 & 0.862 & 0.901 & 0.888 & 0.016 & 0.015 & 0.014 & 1.884 & 1.624 & 1.567 \\
+    NCI & 688 & 0.813 & 0.854 & 0.836 & 0.033 & 0.027 & 0.023 & 4.083 & 3.135 & 2.796 \\
+    Brain & 666 & 0.969 & 0.958 & 0.940 & 0.025 & 0.013 & 0.018 & 2.574 & 1.323 & 1.875 \\
+    Armstrong & 468 & 0.936 & 0.993 & 0.980 & 0.020 & 0.009 & 0.013 & 2.166 & 0.938 & 1.345 \\
+    Pomeroy & 329 & 0.858 & 0.933 & 0.863 & 0.025 & 0.016 & 0.017 & 2.892 & 1.762 & 1.991 \\
+    Bhattacharjee & 310 & 0.934 & 0.956 & 0.954 & 0.015 & 0.006 & 0.006 & 1.572 & 0.620 & 0.618 \\
+    Adenocarcinoma & 260 & 0.942 & 0.939 & 0.859 & 0.018 & 0.017 & 0.032 & 1.948 & 1.808 & 3.675 \\
+    Golub & 222 & 0.943 & 0.986 & 0.986 & 0.022 & 0.003 & 0.004 & 2.328 & 0.289 & 0.369 \\
+    Singh & 206 & 0.889 & 0.952 & 0.931 & 0.024 & 0.014 & 0.018 & 2.718 & 1.427 & 1.920 \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table}
+\end{frame}
 
 \begin{frame}
+\begin{table}[ht]
+    \centering
+    \caption{Comparative performance with gene selection, Group II}
+    \label{tab:group2_perf}
+    \scalebox{0.8}{
+    \begin{tabular}{lrrrrrrrrrr}
+    \toprule
+    Dataset & \( p \times c/n \) & \multicolumn{3}{c}{Mean Accuracy} & \multicolumn{3}{c}{Standard Deviation} & \multicolumn{3}{c}{Coefficient of Variation} \\
+    \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
+        & & RF & R1NN & R3NN & RF & R1NN & R3NN & RF & R1NN & R3NN \\
+    \midrule
+    Lymphoma & 195 & 0.993 & 1.000 & 1.000 & 0.012 & 0.000 & 0.000 & 1.162 & 0.000 & 0.000 \\
+    Leukemia & 161 & 1.000 & 0.999 & 0.999 & 0.000 & 0.006 & 0.004 & 0.000 & 0.596 & 0.427 \\
+    Breast.3. & 154 & 0.778 & 0.793 & 0.761 & 0.024 & 0.037 & 0.035 & 3.023 & 4.665 & 4.639 \\
+    SRBCT & 147 & 0.982 & 0.998 & 0.996 & 0.010 & 0.005 & 0.007 & 0.967 & 0.470 & 0.684 \\
+    Shipp & 142 & 0.865 & 0.997 & 0.991 & 0.033 & 0.008 & 0.011 & 3.757 & 0.800 & 1.077 \\
+    Breast.2. & 126 & 0.838 & 0.841 & 0.822 & 0.024 & 0.052 & 0.042 & 2.894 & 6.206 & 5.049 \\
+    Prostate & 118 & 0.947 & 0.941 & 0.917 & 0.007 & 0.011 & 0.016 & 0.703 & 1.154 & 1.701 \\
+    Khan & 111 & 0.985 & 0.994 & 0.994 & 0.006 & 0.006 & 0.008 & 0.643 & 0.608 & 0.809 \\
+    Colon & 65 & 0.894 & 0.944 & 0.910 & 0.010 & 0.013 & 0.025 & 1.163 & 1.337 & 2.733 \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table}
+\end{frame}
 
-    \begin{columns}[t]
-    
-        \begin{column}{7cm}
+\begin{frame}
+\begin{table}[ht]
+    \centering
+    \caption{Average gene set size and standard deviation, Group I}
+    \label{tab:group1_size}
+    \scalebox{0.8}{
+    \begin{tabular}{lrrrrrrrr}
+    \toprule
+    Dataset & \( p \times c/n \) & \multicolumn{3}{c}{Mean Feature Set Size} & \multicolumn{3}{c}{Standard Deviation} \\
+    \cmidrule(lr){3-5} \cmidrule(lr){6-8}
+        & & RF & R1NN & R3NN & RF & R1NN & R3NN \\
+    \midrule
+    Ramaswamy & 1267 & 907 & 336 & 275 & 666 & 34 & 52 \\
+    Staunton & 859 & 185 & 74 & 60 & 112 & 12 & 11 \\
+    Nutt & 829 & 146 & 49 & 49 & 85 & 6 & 4 \\
+    Su & 792 & 858 & 225 & 216 & 421 & 9 & 26 \\
+    NCI & 688 & 126 & 187 & 163 & 118 & 41 & 33 \\
+    Brain & 666 & 18 & 137 & 120 & 13 & 42 & 42 \\
+    Armstrong & 468 & 249 & 76 & 73 & 1011 & 16 & 12 \\
+    Pomeroy & 329 & 69 & 89 & 82 & 70 & 15 & 13 \\
+    Bhattacharjee & 310 & 33 & 148 & 146 & 29 & 15 & 10 \\
+    Adenocarcinoma & 260 & 8 & 38 & 11 & 4 & 20 & 11 \\
+    Golub & 222 & 12 & 27 & 21 & 8 & 5 & 5 \\
+    Singh & 206 & 26 & 25 & 13 & 32 & 6 & 6 \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table}
+\end{frame}
 
-            \begin{itemize}
-                \item Estrutura mais nova;
-                \item Menor R\textsubscript{on};
-                \item Possibilitado por tecnologia usada em DRAM;
-                \item Melhor desempenho em altas frequências
-            \end{itemize}
+\begin{frame}
+\begin{table}[ht]
+    \centering
+    \caption{Average gene set size and standard deviation, Group II}
+    \label{tab:group2_size}
+    \scalebox{0.8}{
+    \begin{tabular}{lrrrrrrrr}
+    \toprule
+    Dataset & \( p \times c/n \) & \multicolumn{3}{c}{Mean Feature Set Size} & \multicolumn{3}{c}{Standard Deviation} \\
+    \cmidrule(lr){3-5} \cmidrule(lr){6-8}
+        & & RF & R1NN & R3NN & RF & R1NN & R3NN \\
+    \midrule
+    Lymphoma & 195 & 75 & 114 & 103 & 30 & 49 & 44 \\
+    Leukemia & 161 & 2 & 28 & 36 & 0 & 22 & 18 \\
+    Breast.3. & 154 & 47 & 43 & 36 & 35 & 23 & 8 \\
+    SRBCT & 147 & 49 & 65 & 64 & 50 & 8 & 9 \\
+    Shipp & 142 & 13 & 46 & 48 & 23 & 9 & 6 \\
+    Breast.2. & 126 & 32 & 23 & 15 & 29 & 16 & 10 \\
+    Prostate & 118 & 16 & 32 & 15 & 10 & 10 & 11 \\
+    Khan & 111 & 17 & 67 & 36 & 5 & 11 & 14 \\
+    Colon & 65 & 21 & 37 & 36 & 18 & 5 & 5 \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table}
+\end{frame}
 
-        \end{column}
+\begin{frame}
+\begin{table}[ht]
+    \centering
+    \caption{Execution time comparison, Group I}
+    \label{tab:group1_time}
+    \scalebox{0.8}{
+    \begin{tabular}{lrrrrrr}
+    \toprule
+    Dataset & \( p \times c/n \) & \multicolumn{3}{c}{Time (min)} & \multicolumn{2}{c}{Ratio} \\
+    \cmidrule(lr){3-5} \cmidrule(lr){6-7}
+        & & RF & R1NN & R3NN & RF/R1NN & RF/R3NN \\
+    \midrule
+    Ramaswamy & 1267 & 22335 & 4262 & 4324 & 5.2 & 5.2 \\
+    Staunton & 859 & 3310 & 744 & 753 & 4.4 & 4.4 \\
+    Nutt & 829 & 176 & 195 & 195 & 0.9 & 0.9 \\
+    Su & 792 & 3592 & 1284 & 1279 & 2.8 & 2.8 \\
+    NCI & 688 & 142 & 177 & 178 & 0.8 & 0.8 \\
+    Brain & 666 & 92 & 124 & 125 & 0.7 & 0.7 \\
+    Armstrong & 468 & 327 & 301 & 297 & 1.1 & 1.1 \\
+    Pomeroy & 329 & 296 & 319 & 320 & 0.9 & 0.9 \\
+    Bhattacharjee & 310 & 4544 & 1725 & 1733 & 2.6 & 2.6 \\
+    Adenocarcinoma & 260 & 274 & 272 & 273 & 1.0 & 1.0 \\
+    Golub & 222 & 160 & 224 & 224 & 0.7 & 0.7 \\
+    Singh & 206 & 646 & 503 & 498 & 1.3 & 1.3 \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table}
+\end{frame}
 
-        \begin{column}{7cm}
-
-            \begin{figure}[!htbp]
-                \centering
-                \caption{Estrutura U-MOSFET}
-                \includegraphics[scale=0.2]{imagens/umosfet.png}
-                \\\small{\textbf{Fonte:} \cite{sze2012semiconductor}}%
-            \end{figure}
-
-        \end{column}
-
-    \end{columns}
-
+\begin{frame}
+\begin{table}[ht]
+    \centering
+    \caption{Execution time comparison, Group II}
+    \label{tab:group2_time}
+    \scalebox{0.8}{
+    \begin{tabular}{lrrrrrr}
+    \toprule
+    Dataset & \( p \times c/n \) & \multicolumn{3}{c}{Time (min)} & \multicolumn{2}{c}{Ratio} \\
+    \cmidrule(lr){3-5} \cmidrule(lr){6-7}
+        & & RF & R1NN & R3NN & RF/R1NN & RF/R3NN \\
+    \midrule
+    Lymphoma & 195 & 57 & 146 & 147 & 0.4 & 0.4 \\
+    Leukemia & 161 & 18 & 74 & 74 & 0.3 & 0.2 \\
+    Breast.3. & 154 & 310 & 332 & 334 & 0.9 & 0.9 \\
+    SRBCT & 147 & 97 & 177 & 178 & 0.5 & 0.5 \\
+    Shipp & 142 & 238 & 293 & 286 & 0.8 & 0.8 \\
+    Breast.2. & 126 & 167 & 221 & 222 & 0.8 & 0.8 \\
+    Prostate & 118 & 370 & 389 & 391 & 1.0 & 0.9 \\
+    Khan & 111 & 745 & 452 & 451 & 1.6 & 1.7 \\
+    Colon & 65 & 75 & 156 & 157 & 0.5 & 0.5 \\
+    \bottomrule
+    \end{tabular}
+    }
+\end{table}
 \end{frame}

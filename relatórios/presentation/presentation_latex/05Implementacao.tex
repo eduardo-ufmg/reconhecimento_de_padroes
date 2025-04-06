@@ -1,66 +1,10 @@
-\section{Outras Estruturas}
-
-\subsection{V-MOSFET}
+\section{Implementação}
 
 \begin{frame}
-
-    \begin{columns}[t]
-    
-        \begin{column}{7cm}
-
-            \begin{itemize}
-                \item Primeira estrutura;
-                \item Dificil Fabricação;
-                \item Instabilidade em uso prolongado;
-                \item Ponta da porta prejudica a tensão de bloqueio
-            \end{itemize}
-
-        \end{column}
-
-        \begin{column}{7cm}
-
-            \begin{figure}[!htbp]
-                \centering
-                \caption{Estrutura V-MOSFET}
-                \includegraphics[scale=0.2]{imagens/vmosfet.png}
-                \\\small{\textbf{Fonte:} \cite{sze2012semiconductor}}%
-            \end{figure}
-
-        \end{column}
-
-    \end{columns}
-
-\end{frame}
-
-
-\subsection{U-MOSFET}
-
-\begin{frame}
-
-    \begin{columns}[t]
-    
-        \begin{column}{7cm}
-
-            \begin{itemize}
-                \item Estrutura mais nova;
-                \item Menor R\textsubscript{on};
-                \item Possibilitado por tecnologia usada em DRAM;
-                \item Melhor desempenho em altas frequências
-            \end{itemize}
-
-        \end{column}
-
-        \begin{column}{7cm}
-
-            \begin{figure}[!htbp]
-                \centering
-                \caption{Estrutura U-MOSFET}
-                \includegraphics[scale=0.2]{imagens/umosfet.png}
-                \\\small{\textbf{Fonte:} \cite{sze2012semiconductor}}%
-            \end{figure}
-
-        \end{column}
-
-    \end{columns}
-
+\begin{itemize}
+    \item $ \text{support}(f) = \frac{1}{|C(f)|}\sum_{\text{kNN}\in{}C(f)}\text{acc}(\text{kNN}) $
+    \item $ \text{number\_of\_iterations\_stg1} = \lfloor \ln(4/\text{current\_number\_of\_features}) / \ln(1-\text{elimination\_rate}) \rfloor $
+    \item $ \text{number\_of\_iterations\_stg2} = \lfloor (\text{current\_number\_of\_features}-4)/\text{elimination\_const} \rfloor $
+    \item a cada iteração, computa $ \text{support}(f) \forall f $, mantém os \textit{p} melhores e atualiza \textit{p}
+\end{itemize}
 \end{frame}
