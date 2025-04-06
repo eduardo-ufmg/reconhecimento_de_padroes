@@ -1,0 +1,10 @@
+Feature Definitions:
+- X0: Informative feature (true signal)
+- X1: Redundant copy of X0 (r = 0.996)
+- X2: Pure noise feature (r = 0.029 with X0)
+
+SelectKBest Results:
+--------------------------------------------------
+X0: F-score = 3054.3, p-value = 4.996e-275 → SELECTED
+X1: F-score = 2914.2, p-value = 1.316e-268 → SELECTED
+X2: F-score = 0.1, p-value = 7.570e-01 → REJECTED
