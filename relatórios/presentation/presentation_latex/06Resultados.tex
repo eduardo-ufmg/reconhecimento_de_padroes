@@ -2,7 +2,25 @@
 
 \subsection{Complexidade}
 \begin{frame}
-    \[ O(rk2^{\sqrt{p}}n\log{}n) \]
+\textbf{RKNN-FS}
+\begin{itemize}
+    \item \textit{feature support}: $ O(rk2^mn\log{n}) $
+    \item \textit{feature selection}: $ O(rk2^mn\log{n}) $
+    \item algoritmo completo: $ O(rk2^mn\log{n}) $
+\end{itemize}
+
+\vspace{0.5cm}
+
+\textbf{RF-FS}
+\begin{itemize}
+    \item treinamento: $ O(rmn\log{n}) $
+    \item predição: $ O(r\log{n}) $
+\end{itemize}
+
+\vspace{0.5cm}
+
+Para $ m = log{p} $, $ O_{\text{rknnfs}}(rkpn\log{n}) $
+
 \end{frame}
 
 \subsection{Sugestões de parâmetros}
