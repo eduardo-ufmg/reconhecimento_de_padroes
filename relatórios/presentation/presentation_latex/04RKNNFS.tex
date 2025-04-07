@@ -1,13 +1,28 @@
 \section{RKNN-FS}
 
 \begin{frame}
-  
+\frametitle{Parâmetros}
 \begin{itemize}
-    \item Para um conjunto de dados com \textit{p} variáveis, \textit{r} classificadores \textit{kNN} são treinados em subconjuntos aleatórios de $m \approx \sqrt{p}$ variáveis
-    \item Cada classificador é treinado sobre todas as amostras. \textit{Bootstraping} não é necessário, já que, por não serem hierárquicos, os classificadores são naturalmente estáveis
-    \item A classificação é dada pelo voto majoritário entre os classificadores
+    \item \textit{r}: quantidade de KNNs usados
+    \item \textit{q}: taxa de redução de variáveis no primeiro estágio
+    \item \textit{d}: quantidade de variáveis eliminadas no segundo estágio
+    \item \textit{m(p)}: quantidade de variáveis consideradas por cada KNN, tal que \textit{p} é a quantidade de variáveis restantes e $ m(p) < p $
 \end{itemize}
+\end{frame}
 
+\begin{frame}
+\frametitle{Algoritmo}
+\begin{itemize}
+    \item \textit{r} KNNs são criados, cada um com \textit{m(p\textsubscript{0})} variáveis, sendo \textit{p\textsubscript{0}} o total de variáveis
+    \item A cada iteração,
+    \begin{itemize}
+        \item os KNNs são treinados sobre suas \textit{m(p)} variáveis
+        \item A métrica \textit{feature support} é calculada para cada variável
+        \item As variáveis são ordenadas conforme a métrica
+        \item As \textit{p} variáveis mais relevantes são mantidas, com \textit{p} computado conforme o estágio
+    \end{itemize}
+    \item As variáveis restantes ao fim de todas as etapas de eliminação são passadas para o KNN de inferência
+\end{itemize}
 \end{frame}
 
 \subsection{\textit{Feature Support}}
@@ -16,8 +31,8 @@
 
 \begin{itemize}
     \item Cada variável \textit{f} é atribuída a \textit{M} classificadores, que formam o conjunto \textit{C(f)}. Cada classificador recebe o conjunto \textit{F(c)} de variáveis
-    \item Quando um classificador acerta sua predição, as variáveis usadas por ele recebem uma pontuação positiva
-    \item A pontuação, por rodada, de cada variável, é a média das pontuações atribuídas por cada classificador $c \in C(f)$
+    \item Quando um classificador \textit{c} acerta sua predição, as variáveis $f \in F(c)$ recebem uma pontuação positiva
+    \item A pontuação de cada variável \textit{f} é a média das pontuações atribuídas por cada classificador $c \in C(f)$
     \item Variáveis mais relevantes para a classificação têm pontuação maior
 \end{itemize}
 

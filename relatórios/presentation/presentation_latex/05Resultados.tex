@@ -4,9 +4,8 @@
 \begin{frame}
 \textbf{RKNN-FS}
 \begin{itemize}
-    \item \textit{feature support}: $ O(rk2^mn\log{n}) $
-    \item \textit{feature selection}: $ O(rk2^mn\log{n}) $
-    \item algoritmo completo: $ O(rk2^mn\log{n}) $
+    \item treinamento: $ O(rk2^mn\log{n}) $
+    \item inferencia: $ O(km_\text{selected}n) $
 \end{itemize}
 
 \vspace{0.5cm}
@@ -14,12 +13,12 @@
 \textbf{RF-FS}
 \begin{itemize}
     \item treinamento: $ O(rmn\log{n}) $
-    \item predição: $ O(r\log{n}) $
+    \item inferencia: $ O(r\log{n}) $
 \end{itemize}
 
 \vspace{0.5cm}
 
-Para $ m = log{p} $, $ O_{\text{rknnfs}}(rkpn\log{n}) $
+Para $ m = log{p} $, $ O_{\text{treinamento}}(rkpn\log{n}) $
 
 \end{frame}
 
