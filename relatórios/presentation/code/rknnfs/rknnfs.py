@@ -4,6 +4,7 @@ import logging
 from typing import Tuple, Dict, Union
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from ucimlrepo import fetch_ucirepo
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
@@ -259,30 +260,48 @@ def run_experiments() -> pd.DataFrame:
       X, y = load_dataset(name)
       X = StandardScaler().fit_transform(X)
       X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=DEFAULT_TEST_SIZE,
-        random_state=DEFAULT_RANDOM_STATE, stratify=y
+          X, y, test_size=DEFAULT_TEST_SIZE,
+          random_state=DEFAULT_RANDOM_STATE, stratify=y
       )
       
       model_results, selected = compare_models(X_train, y_train, X_test, y_test)
       
       for model_name, metrics in model_results.items():
-        results.append({
-          'Dataset': name,
-          'Model': model_name,
-          **metrics
-        })
-        
+          results.append({
+              'Dataset': name,
+              'Model': model_name,
+              **metrics
+          })
+          
     except Exception as e:
       logging.error(f"Skipping {name} due to error: {str(e)}")
       continue
 
   # Create comprehensive report
   report = pd.DataFrame(results)
-  report.to_csv(
-    os.path.join('output', 'results.csv'), 
-    index=False
-  )
-  
+
+  # Process the report for the image table
+  grouped = report.groupby(['Dataset', 'Model']).mean(numeric_only=True).reset_index()
+
+  # Format columns
+  sci_cols = ['accuracy', 'train_time', 'pred_time']
+  for col in sci_cols:
+      grouped[col] = grouped[col].apply(lambda x: f"{x:.2e}")
+  grouped['num_features'] = grouped['num_features'].astype(int).astype(str)
+
+  # Create and save the image table
+  plt.figure(figsize=(12, 8))
+  ax = plt.subplot(111, frame_on=False)
+  ax.axis('off')
+  table = pd.plotting.table(ax, grouped, loc='center', cellLoc='center', colWidths=[0.2]*len(grouped.columns))
+  table.auto_set_font_size(False)
+  table.set_fontsize(10)
+  table.scale(1.2, 1.2)
+
+  os.makedirs('output', exist_ok=True)
+  plt.savefig(os.path.join('output', 'results_table.png'), bbox_inches='tight')
+  plt.close()
+
   return report
 
 if __name__ == "__main__":
