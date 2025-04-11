@@ -38,7 +38,10 @@ for dataset_name, (X, y) in datasets:
   
   dataset_results = {}
   
-  for method in methods:
+  # Create a figure with subplots
+  fig, axes = plt.subplots(1, len(methods), figsize=(20, 6))
+  
+  for i, method in enumerate(methods):
     # Train and predict
     model_args0, model_args1 = train(X0_train, [], X1_train, [], method)
     y_pred = pred(X_test, model_args0, model_args1, method)
@@ -49,15 +52,18 @@ for dataset_name, (X, y) in datasets:
     Z = pred(mesh_points, model_args0, model_args1, method)
     Z = Z.reshape(xx.shape)
     
-    # Plot
-    plt.figure(figsize=(8, 6))
-    plt.contourf(xx, yy, Z, alpha=0.8, cmap='RdYlBu')
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap='RdYlBu', edgecolor='k', s=20)
-    plt.xlim(xx.min(), xx.max())
-    plt.ylim(yy.min(), yy.max())
-    plt.title(f'{method.upper()} - {dataset_name}\nAccuracy: {acc:.2f}')
-    plt.savefig(f'bayes/output/{dataset_name}_{method}_boundary.png', bbox_inches='tight')
-    plt.close()
+    # Plot on the corresponding subplot
+    ax = axes[i]
+    ax.contourf(xx, yy, Z, alpha=0.8, cmap='RdYlBu')
+    ax.scatter(X[:, 0], X[:, 1], c=y, cmap='RdYlBu', edgecolor='k', s=20)
+    ax.set_xlim(xx.min(), xx.max())
+    ax.set_ylim(yy.min(), yy.max())
+    ax.set_title(f'{method.upper()} - Accuracy: {acc:.2f}')
+  
+  # Save the figure for the dataset
+  plt.suptitle(f'Decision Boundaries - {dataset_name}')
+  plt.savefig(f'bayes/output/{dataset_name}_boundaries.png', bbox_inches='tight')
+  plt.close()
   
   results[dataset_name] = dataset_results
 
