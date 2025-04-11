@@ -19,7 +19,10 @@ datasets = [
 methods = ['normal', 'gaussian_mix', 'kde']
 results = {}
 
-for dataset_name, (X, y) in datasets:
+# Create a single figure with 3 rows and 3 columns
+fig, axes = plt.subplots(len(datasets), len(methods), figsize=(20, 18))
+
+for row, (dataset_name, (X, y)) in enumerate(datasets):
   X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2
   )
@@ -38,10 +41,7 @@ for dataset_name, (X, y) in datasets:
   
   dataset_results = {}
   
-  # Create a figure with subplots
-  fig, axes = plt.subplots(1, len(methods), figsize=(20, 6))
-  
-  for i, method in enumerate(methods):
+  for col, method in enumerate(methods):
     # Train and predict
     model_args0, model_args1 = train(X0_train, [], X1_train, [], method)
     y_pred = pred(X_test, model_args0, model_args1, method)
@@ -53,19 +53,21 @@ for dataset_name, (X, y) in datasets:
     Z = Z.reshape(xx.shape)
     
     # Plot on the corresponding subplot
-    ax = axes[i]
+    ax = axes[row, col]
     ax.contourf(xx, yy, Z, alpha=0.8, cmap='RdYlBu')
     ax.scatter(X[:, 0], X[:, 1], c=y, cmap='RdYlBu', edgecolor='k', s=20)
     ax.set_xlim(xx.min(), xx.max())
     ax.set_ylim(yy.min(), yy.max())
-    ax.set_title(f'{method.upper()} - Accuracy: {acc:.2f}')
-  
-  # Save the figure for the dataset
-  plt.suptitle(f'Decision Boundaries - {dataset_name}')
-  plt.savefig(f'bayes/output/{dataset_name}_boundaries.png', bbox_inches='tight')
-  plt.close()
+    ax.set_title(f'{dataset_name} - {method.upper()} - Acc: {acc:.2f}')
   
   results[dataset_name] = dataset_results
+
+# Save the single figure
+plt.suptitle('Decision Boundaries')
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+plt.savefig('bayes/output/boundaries.png', bbox_inches='tight')
+plt.show()
+plt.close()
 
 # Print results
 print("Evaluation Results:")
