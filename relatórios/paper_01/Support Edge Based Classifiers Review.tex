@@ -7,8 +7,12 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\graphicspath{{figures/}}
+
 \begin{document}
 
 \title{Support Edge Based Classifiers Review}
@@ -50,14 +54,48 @@ Two key algorithmic improvements are proposed. First, replacing adjacency matric
 The implementation, available at \texttt{https://github.com/eduardo-ufmg/CLAS}, employs C++20 for classifier development. Synthetic datasets—generated via Python's \texttt{sklearn}—are used to evaluate decision boundaries under varying geometric complexities. Python scripts automate performance benchmarking, including accuracy and latency measurements. For hardware evaluation, Vitis HLS synthesizes the classifiers for two platforms: the Alveo U55C (data center-grade FPGA) and Zedboard (embedded FPGA). The HLS workflows are compared against hand-optimized Verilog/VHDL implementations to assess trade-offs in resource utilization and throughput.
 
 \section{Results}
-%
-% figure: blob_good
-% figure: blob_bad
-% figure: spiral
-% figure: moons
-% figure: circles
-% figure: xor
-%
+% Results section figures
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.3\linewidth]{blob_good.png}
+\caption{Good classification results on linearly separable data.}
+\label{fig:blob_good}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.3\linewidth]{blob_bad.png}
+\caption{Bad classification results on linearly separable data.}
+\label{fig:blob_bad}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.3\linewidth]{spiral.png}
+\caption{Classification results on spiral dataset.}
+\label{fig:spiral}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.3\linewidth]{moons.png}
+\caption{Classification results on moons dataset.}
+\label{fig:moons}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.3\linewidth]{circles.png}
+\caption{Classification results on concentric circles dataset.}
+\label{fig:circles}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.3\linewidth]{xor.png}
+\caption{Classification results on XOR dataset.}
+\label{fig:xor}
+\end{figure}
 
 \begin{thebibliography}{00}
 \bibitem{torres2016} L. C. B. Torres, "Classificador por arestas de suporte (CLAS): métodos de aprendizado baseados em Grafos de Gabriel," Manuscript, 2016.
