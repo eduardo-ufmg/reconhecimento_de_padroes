@@ -23,12 +23,7 @@ eduardohbc@ufmg.br}
 \maketitle
 
 \begin{abstract}
-%
-% In this paper, we:
-%   - review the theoretical background of Support Edge based classifiers;
-%   - evaluate its implementation in a modern compiled programming language;
-%   - evaluate possible improvements in the implementation;
-%   - compare a hardware implementation achieved by high-level synthesis with state-of-the-art hardware description language implementations;
+This paper reviews the theoretical foundations of Support Edge-based classifiers, a family of graph-based machine learning algorithms leveraging Gabriel Graphs for decision boundaries. We evaluate their implementation in a modern C++20 framework, focusing on computational efficiency and scalability. Potential algorithmic improvements are explored, including structural optimizations and hardware-aware modifications. Additionally, we compare high-level synthesis (HLS) implementations for embedded platforms against traditional hardware description language (HDL) approaches, assessing their viability for edge computing applications. The study aims to bridge gaps in existing methodologies while providing reproducible code and evaluation pipelines.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -36,14 +31,9 @@ Classification, Machine Learning, Nearest Neighbor, Gabriel Graph, Support Edge
 \end{IEEEkeywords}
 
 \section{Introduction}
-%
-%
-% Talk about each of the references and the room for improvement
-%
-%
+Support Edge-based classifiers, such as CLAS and RCHIP-CLAS, utilize geometric representations like Gabriel Graphs to define large-margin decision boundaries \cite{torres2016}. Prior work by Souza et al. \cite{souza2019} and Arias-Garcia et al. \cite{arias2021,arias2024} has demonstrated their efficacy in embedded systems, yet challenges persist in scalability and hardware optimization. Existing implementations often rely on computationally expensive adjacency matrices and may overlook optimizations in the search for inter-class edges. This review addresses these limitations by proposing algorithmic refinements and evaluating modern hardware synthesis tools. By integrating software optimizations with high-level synthesis workflows, we aim to enhance the feasibility of these classifiers for real-time edge applications.
 
 \section{Theoretical Background}
-%
 %
 % Provide theoretical background on the following topics:
 %   - Gabriel Graph
@@ -52,28 +42,12 @@ Classification, Machine Learning, Nearest Neighbor, Gabriel Graph, Support Edge
 %   - RCHIP-CLAS
 %   - NN-CLAS
 %
-%
 
 \section{Possible Improvements}
-%
-% Possible improvements in the implementation:
-%   - use of adjacency list instead of adjacency matrix
-%   - after filtering, only compute the edge of points of opposite classes
-%   
+Two key algorithmic improvements are proposed. First, replacing adjacency matrices with adjacency lists reduces memory complexity from $O(n^2)$ to $O(n + \left|E|\right)$, where $|E|$ is the number of edges in the Gabriel Graph. This is particularly advantageous for sparse datasets. Second, post-filtering steps can be optimized by computing edges exclusively between points of opposing classes, eliminating redundant intra-class calculations. This approach leverages class label metadata early in the pipeline, reducing computational overhead during graph construction.
 
 \section{Methodology}
-%
-%
-% Describe the methodology used to evaluate the implementation:
-%   - implementation can be accessed in https://github.com/eduardo-ufmg/CLAS
-%   - the classifiers are writen in C++20
-%   - currently, synthetic data is used to evaluate the classifiers
-%   - the data is generated with python3 sklearn
-%   - evaluation scripts are also written in python3 and available in the same repository
-%   - HLS implementation is done using Vitis HLS for two different platforms:
-%     - U55C
-%     - Zedboard
-%
+The implementation, available at \texttt{https://github.com/eduardo-ufmg/CLAS}, employs C++20 for classifier development. Synthetic datasets—generated via Python's \texttt{sklearn}—are used to evaluate decision boundaries under varying geometric complexities. Python scripts automate performance benchmarking, including accuracy and latency measurements. For hardware evaluation, Vitis HLS synthesizes the classifiers for two platforms: the Alveo U55C (data center-grade FPGA) and Zedboard (embedded FPGA). The HLS workflows are compared against hand-optimized Verilog/VHDL implementations to assess trade-offs in resource utilization and throughput.
 
 \section{Results}
 %
@@ -84,8 +58,6 @@ Classification, Machine Learning, Nearest Neighbor, Gabriel Graph, Support Edge
 % figure: circles
 % figure: xor
 %
-
-\section*{References}
 
 \begin{thebibliography}{00}
 \bibitem{torres2016} L. C. B. Torres, "Classificador por arestas de suporte (CLAS): métodos de aprendizado baseados em Grafos de Gabriel," Manuscript, 2016.
