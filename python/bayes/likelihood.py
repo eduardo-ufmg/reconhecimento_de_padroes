@@ -37,6 +37,11 @@ def likelihood_normal(X, params0, params1):
   Q0 = multivariate_normal.pdf(X, mean=mean0, cov=cov0)
   Q1 = multivariate_normal.pdf(X, mean=mean1, cov=cov1)
 
+  # Normalize the likelihoods
+  Q = Q0 + Q1
+  Q0 /= np.sum(Q)
+  Q1 /= np.sum(Q)
+
   return Q0, Q1
 
 def likelihood_gaussian_mix(X, params0, params1):
