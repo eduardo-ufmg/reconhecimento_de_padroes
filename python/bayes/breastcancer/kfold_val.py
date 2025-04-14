@@ -1,6 +1,7 @@
+import os
 import numpy as np
 import pandas as pd
-import os
+import matplotlib.pyplot as plt
 
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import KFold
@@ -8,6 +9,7 @@ from sklearn.metrics import accuracy_score
 
 from bayes.train import train
 from bayes.pred import pred
+from bayes.likelihood import likelihood
 
 # Load the breast cancer dataset
 (X, y) = load_breast_cancer(return_X_y=True, as_frame=True)
@@ -42,6 +44,17 @@ for fold, (train_index, test_index) in enumerate(kf.split(X)):
   accuracy = accuracy_score(y_test, y_pred)
   accuracies.append(accuracy)
   print(f"Fold {fold + 1}: Accuracy = {accuracy:.4f}")
+
+  # Transform to likelihood space
+  Q0train, Q1train = likelihood(X0_train, model_args0, model_args1, method='normal')
+  Q0test, Q1test = likelihood(X0_test, model_args0, model_args1, method='normal')
+
+  # Plot the likelihood space (Q0 as x-axis, Q1 as y-axis)
+  # Plot train as circles
+  # Plot test as squares
+  # Class 0 as blue, Class 1 as red
+  # All the plots as subfigures of the same figure
+  # Save plot to output directory
 
 # Calculate the average accuracy
 average_accuracy = np.mean(accuracies)

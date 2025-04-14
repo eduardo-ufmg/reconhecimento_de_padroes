@@ -17,7 +17,7 @@ y = np.where(y == 0, -1, 1)  # Convert to -1/1 labels
 # Configuration
 k_values = range(2, 21)  # Test cluster quantities from 2 to 20
 n_folds = 10
-kf = KFold(n_splits=n_folds, shuffle=True, random_state=42)
+kf = KFold(n_splits=n_folds, shuffle=True)
 
 # Store results for each K
 k_results = {k: [] for k in k_values}
@@ -40,7 +40,7 @@ for k in k_values:
     X_test_scaled = scaler.transform(X_test)
     
     # Cluster training data
-    kmeans = KMeans(n_clusters=k, n_init=10, random_state=42)
+    kmeans = KMeans(n_clusters=k, n_init=10)
     kmeans.fit(X_train_scaled)
     centers = kmeans.cluster_centers_
     

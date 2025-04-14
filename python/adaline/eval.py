@@ -15,7 +15,7 @@ if __name__ == '__main__':
   y = raw_df.values[1::2, 2]
 
   # Initialize K-Fold cross-validation
-  kf = KFold(n_splits=10, shuffle=True, random_state=42)
+  kf = KFold(n_splits=10, shuffle=True)
 
   error_stats = []
   fig, axes = plt.subplots(5, 2, figsize=(15, 20))  # Create a 5x2 grid of subplots
