@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score
 from bayes.train import train
 from bayes.pred import pred
 from bayes.likelihood import likelihood
+from selection.featsel import drop_highcorr
 
 # Load the breast cancer dataset
 (X, y) = load_breast_cancer(return_X_y=True, as_frame=True)
@@ -17,6 +18,8 @@ from bayes.likelihood import likelihood
 # Preprocess X to remove invalid data and ensure all values are float
 X = X.dropna()  # Remove rows with missing values
 X = X.astype(float)  # Convert all values to float
+
+X = drop_highcorr(X, y, threshold=0.8)  # Drop highly correlated features
 
 # Perform k-fold cross-validation
 kf = KFold(n_splits=10, shuffle=True)

@@ -21,6 +21,7 @@ def train(X0, X1, method):
   }
   if method not in methods:
     raise ValueError(f"Unknown method: {method}")
+    
   return methods[method](X0, X1)
 
 def train_normal(X0, X1):
@@ -40,9 +41,9 @@ def train_normal(X0, X1):
   return (mean0, cov0, prior0), (mean1, cov1, prior1)
 
 def train_gaussian_mix(X0, X1):
-  """Train Gaussian Mixture Models with 2 components."""
+  """Train Gaussian Mixture Models."""
   # Ensure data is sufficient for components
-  n_components = 2
+  n_components = 4
   if len(X0) < n_components:
     raise ValueError(f"X0 has insufficient samples for {n_components} components.")
   if len(X1) < n_components:
