@@ -28,39 +28,30 @@ def likelihood(X, args0, args1, method):
 
 def likelihood_normal(X, params0, params1):
   """Compute likelihood using Gaussian distributions."""
-  mean0, cov0, prior0 = params0
-  mean1, cov1, prior1 = params1
+  mean0, cov0, _ = params0
+  mean1, cov1, _ = params1
   
-  log_likelihood0 = multivariate_normal.logpdf(X, mean=mean0, cov=cov0, allow_singular=True)
-  log_likelihood1 = multivariate_normal.logpdf(X, mean=mean1, cov=cov1, allow_singular=True)
-  
-  log_posterior0 = np.log(prior0) + log_likelihood0
-  log_posterior1 = np.log(prior1) + log_likelihood1
+  likelihood0 = multivariate_normal.pdf(X, mean=mean0, cov=cov0, allow_singular=True)
+  likelihood1 = multivariate_normal.pdf(X, mean=mean1, cov=cov1, allow_singular=True)
 
-  return log_posterior0, log_posterior1
+  return likelihood0, likelihood1
 
 def likelihood_gaussian_mix(X, params0, params1):
   """Compute likelihood using Gaussian Mixture Models."""
-  gmm0, prior0 = params0
-  gmm1, prior1 = params1
+  gmm0, _ = params0
+  gmm1, _ = params1
   
-  log_likelihood0 = gmm0.score_samples(X)
-  log_likelihood1 = gmm1.score_samples(X)
-  
-  log_posterior0 = np.log(prior0) + log_likelihood0
-  log_posterior1 = np.log(prior1) + log_likelihood1
+  likelihood0 = gmm0.score_samples(X)
+  likelihood1 = gmm1.score_samples(X)
 
-  return log_posterior0, log_posterior1
+  return likelihood0, likelihood1
 
 def likelihood_kde(X, params0, params1):
   """Compute likelihood using Kernel Density Estimators."""
-  kde0, prior0 = params0
-  kde1, prior1 = params1
+  kde0, _ = params0
+  kde1, _ = params1
   
-  log_likelihood0 = kde0.score_samples(X)
-  log_likelihood1 = kde1.score_samples(X)
-  
-  log_posterior0 = np.log(prior0) + log_likelihood0
-  log_posterior1 = np.log(prior1) + log_likelihood1
+  likelihood0 = kde0.score_samples(X)
+  likelihood1 = kde1.score_samples(X)
 
-  return log_posterior0, log_posterior1
+  return likelihood0, likelihood1

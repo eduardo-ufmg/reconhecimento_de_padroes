@@ -18,11 +18,15 @@ from bayes.likelihood import likelihood
 X = X.dropna()  # Remove rows with missing values
 X = X.astype(float)  # Convert all values to float
 
-# Perform 10-fold cross-validation
+# Perform k-fold cross-validation
 kf = KFold(n_splits=10, shuffle=True)
 
 # Initialize lists to store results
 accuracies = []
+
+# Initialize the plot for likelihood spaces
+fig, axes = plt.subplots(2, 5, figsize=(20, 8))
+plt.tight_layout(pad=3.0)
 
 for fold, (train_index, test_index) in enumerate(kf.split(X)):
   X_train, X_test = X.iloc[train_index], X.iloc[test_index]
@@ -46,15 +50,19 @@ for fold, (train_index, test_index) in enumerate(kf.split(X)):
   print(f"Fold {fold + 1}: Accuracy = {accuracy:.4f}")
 
   # Transform to likelihood space
-  Q0train, Q1train = likelihood(X0_train, model_args0, model_args1, method='normal')
-  Q0test, Q1test = likelihood(X0_test, model_args0, model_args1, method='normal')
+  Q0train, Q1train = likelihood(X_train, model_args0, model_args1, method='normal')
+  Q0test, Q1test = likelihood(X_test, model_args0, model_args1, method='normal')
 
-  # Plot the likelihood space (Q0 as x-axis, Q1 as y-axis)
-  # Plot train as circles
-  # Plot test as squares
-  # Class 0 as blue, Class 1 as red
-  # All the plots as subfigures of the same figure
-  # Save plot to output directory
+  # Plot the likelihood space for the current fold
+  ax = axes[fold // 5, fold % 5]
+
+  # Colormap the points based on their class
+  ax.scatter(Q0train, Q1train, c=y_train, marker='o', edgecolor='k')
+  ax.scatter(Q0test, Q1test, c=y_test, marker='s', edgecolor='k')
+
+  ax.set_title(f"Fold {fold + 1}")
+  ax.set_xlabel("Q0")
+  ax.set_ylabel("Q1")
 
 # Calculate the average accuracy
 average_accuracy = np.mean(accuracies)
@@ -78,3 +86,7 @@ results["Accuracy"].append(round(std_accuracy, 2))
 results_df = pd.DataFrame(results)
 os.makedirs("./bayes/breastcancer/output", exist_ok=True)
 results_df.to_csv("./bayes/breastcancer/output/kfold_results.csv", index=False)
+
+# Save and show the plot
+plt.savefig("./bayes/breastcancer/output/kfold_likelihood_space.png")
+plt.show()
