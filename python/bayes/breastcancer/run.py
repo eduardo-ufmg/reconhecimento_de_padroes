@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
+import matplotlib.animation as animation
 
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_breast_cancer
@@ -20,7 +21,7 @@ TEST_SIZE = 0.3
 RANDOM_STATE = 0
 BANDWIDTH_RANGE = np.linspace(1e-2, 1e2, 1000)
 N_BEST_WORST = 3
-SELECTION_STEP = 100
+SELECTION_STEP = 10
 
 
 def plot_likelihoods(
@@ -128,65 +129,59 @@ def analyze_bandwidth(
   X_test: pd.DataFrame,
   y_train: pd.Series,
   y_test: pd.Series,
-  step: int = 1  # Added step parameter
+  step: int = SELECTION_STEP
 ) -> None:
-  """Analyze classifier performance with varying bandwidths using step selection."""
+  """Analyze bandwidth with both accuracy plot and animation."""
   n_features = X_train.shape[1]
-  bandwidths = BANDWIDTH_RANGE
+  bandwidths = BANDWIDTH_RANGE[::step]
   accuracies = []
-  
-  # Evaluate bandwidths
+  frame_data = []
+
+  # Precompute all data
   for h in bandwidths:
     H = np.eye(n_features) * h
-    y_pred, *_ = custom_bayes_gaussian(X_train.values, X_test.values, y_train.values, H)
-    accuracies.append(accuracy_score(y_test, y_pred))
-  
-  # Plot accuracy curve
+    y_pred, Q0_tr, Q0_te, Q1_tr, Q1_te = custom_bayes_gaussian(
+      X_train.values, X_test.values, y_train.values, H
+    )
+    acc = accuracy_score(y_test, y_pred)
+    accuracies.append(acc)
+    frame_data.append((h, acc, Q0_tr, Q0_te, Q1_tr, Q1_te))
+
+  # 1. Plot accuracy vs bandwidth
   plt.figure()
   plt.plot(bandwidths, accuracies)
   plt.xlabel("bandwidth")
   plt.ylabel("accuracy")
   plt.savefig(OUTPUT_DIR / "accuracy_vs_bandwidth.png")
   plt.close()
-  
-  # Sort bandwidths by performance
-  sorted_indices = np.argsort(accuracies)
-  
-  # Select best and worst with step
-  best_order = sorted_indices[::-1]  # From best to worst
-  best_indices = best_order[::step][:N_BEST_WORST]
-  best_h = bandwidths[best_indices]
-  
-  worst_indices = sorted_indices[::step][:N_BEST_WORST]
-  worst_h = bandwidths[worst_indices]
-  
-  # Create comparison plot
-  fig, axs = plt.subplots(2, N_BEST_WORST, figsize=(15, 8))
-  
-  for i, h in enumerate(best_h):
-    H = np.eye(n_features) * h
-    y_pred, Q0_tr, Q0_te, Q1_tr, Q1_te = custom_bayes_gaussian(
-      X_train.values, X_test.values, y_train.values, H
-    )
-    acc = accuracy_score(y_test, y_pred)
+
+  # 2. Create animation
+  fig, ax = plt.subplots(figsize=(8, 6))
+  plt.xlabel("Q0")
+  plt.ylabel("Q1")
+
+  def update(frame):
+    h, acc, Q0_tr, Q0_te, Q1_tr, Q1_te = frame_data[frame]
+    ax.clear()
     
-    axs[0, i].scatter(Q0_tr, Q1_tr, c=y_train, edgecolor='k')
-    axs[0, i].scatter(Q0_te, Q1_te, c=y_test, marker='x')
-    axs[0, i].set_title(f"h = {h:.2f}\naccuracy: {acc:.2f}")
+    # Plot training and test data
+    ax.scatter(Q0_tr, Q1_tr, c=y_train, marker='o', edgecolors='k')
+    ax.scatter(Q0_te, Q1_te, c=y_test, marker='x')
+    max_Q0 = max(Q0_tr.max(), Q0_te.max())
+    max_Q1 = max(Q1_tr.max(), Q1_te.max())
+    ax.plot([0, max_Q0], [0, max_Q1], 'k--')
+    ax.set_title(f"Bandwidth: {h:.2f}, Accuracy: {acc:.2f}")
+    return ax
+
+  ani = animation.FuncAnimation(
+    fig,
+    update,
+    frames=len(bandwidths),
+    interval=100
+  )
   
-  for i, h in enumerate(worst_h):
-    H = np.eye(n_features) * h
-    y_pred, Q0_tr, Q0_te, Q1_tr, Q1_te = custom_bayes_gaussian(
-      X_train.values, X_test.values, y_train.values, H
-    )
-    acc = accuracy_score(y_test, y_pred)
-    
-    axs[1, i].scatter(Q0_tr, Q1_tr, c=y_train, edgecolor='k')
-    axs[1, i].scatter(Q0_te, Q1_te, c=y_test, marker='x')
-    axs[1, i].set_title(f"h = {h:.2f}\naccuracy: {acc:.2f}")
-  
-  plt.tight_layout()
-  plt.savefig(OUTPUT_DIR / "bandwidth_comparison.png")
+  OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+  ani.save(OUTPUT_DIR / "bandwidth_animation.gif", writer='pillow', fps=10)
   plt.close()
 
 
@@ -203,7 +198,7 @@ def main():
   
   # Run analyses
   run_default_model(X_train, X_test, y_train, y_test)
-  analyze_bandwidth(X_train, X_test, y_train, y_test, step=SELECTION_STEP)  # Added step argument
+  analyze_bandwidth(X_train, X_test, y_train, y_test)
 
 
 if __name__ == "__main__":
