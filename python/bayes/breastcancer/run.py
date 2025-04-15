@@ -20,6 +20,7 @@ TEST_SIZE = 0.3
 RANDOM_STATE = 0
 BANDWIDTH_RANGE = np.linspace(1e-2, 1e2, 1000)
 N_BEST_WORST = 3
+SELECTION_STEP = 100
 
 
 def plot_likelihoods(
@@ -126,9 +127,10 @@ def analyze_bandwidth(
   X_train: pd.DataFrame,
   X_test: pd.DataFrame,
   y_train: pd.Series,
-  y_test: pd.Series
+  y_test: pd.Series,
+  step: int = 1  # Added step parameter
 ) -> None:
-  """Analyze classifier performance with varying bandwidths."""
+  """Analyze classifier performance with varying bandwidths using step selection."""
   n_features = X_train.shape[1]
   bandwidths = BANDWIDTH_RANGE
   accuracies = []
@@ -149,8 +151,14 @@ def analyze_bandwidth(
   
   # Sort bandwidths by performance
   sorted_indices = np.argsort(accuracies)
-  best_h = bandwidths[sorted_indices[-N_BEST_WORST:]][::-1]
-  worst_h = bandwidths[sorted_indices[:N_BEST_WORST]]
+  
+  # Select best and worst with step
+  best_order = sorted_indices[::-1]  # From best to worst
+  best_indices = best_order[::step][:N_BEST_WORST]
+  best_h = bandwidths[best_indices]
+  
+  worst_indices = sorted_indices[::step][:N_BEST_WORST]
+  worst_h = bandwidths[worst_indices]
   
   # Create comparison plot
   fig, axs = plt.subplots(2, N_BEST_WORST, figsize=(15, 8))
@@ -195,7 +203,7 @@ def main():
   
   # Run analyses
   run_default_model(X_train, X_test, y_train, y_test)
-  analyze_bandwidth(X_train, X_test, y_train, y_test)
+  analyze_bandwidth(X_train, X_test, y_train, y_test, step=SELECTION_STEP)  # Added step argument
 
 
 if __name__ == "__main__":
