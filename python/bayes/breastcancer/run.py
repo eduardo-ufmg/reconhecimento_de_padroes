@@ -60,13 +60,13 @@ def custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H):
   Q0train = multivariate_normal.pdf(Xtrain, mean=mean0, cov=H)
   Q1train = multivariate_normal.pdf(Xtrain, mean=mean1, cov=H)
 
-  post0 = prior0 * Q0train
-  post1 = prior1 * Q1train
-
-  ypred = np.where(post0 > post1, 0, 1)
-
   Q0test = multivariate_normal.pdf(Xtest, mean=mean0, cov=H)
   Q1test = multivariate_normal.pdf(Xtest, mean=mean1, cov=H)
+
+  post0 = Q0test * prior0
+  post1 = Q1test * prior1
+
+  ypred = np.where(post0 > post1, 0, 1)
 
   return ypred, Q0train, Q0test, Q1train, Q1test
 
@@ -79,6 +79,8 @@ X = X.dropna()  # Remove rows with missing values
 X = X.astype(float)  # Convert all values to float
 
 X = drop_highcorr(X, y, threshold=0.9)  # Drop highly correlated features
+
+nfeat = X.shape[1]
 
 # Perform a random split of the data into train and test sets
 Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.5)
@@ -101,10 +103,11 @@ Q0test, Q1test = likelihood(Xtest, gaussian0, gaussian1, method='normal')
 plot((Q0train, Q0test, Q1train, Q1test, ytrain, ytest), accuracy, 'def_likelihood', show=False)
 
 # Custom bandwidth for Gaussian
-H = np.eye(Xtrain.shape[1]) * 0.5  # Symmetric positive definite matrix with diagonal elements as 0.5
+h = 1
+H = np.diag([h] * nfeat)
 ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
 
 # Calculate accuracy for custom bandwidth
 accuracy_custom = accuracy_score(ytest, ypred_custom)
 
-plot((Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom, ytrain, ytest), accuracy_custom, 'custom_likelihood', show=True)
+plot((Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom, ytrain, ytest), accuracy_custom, f'custom_likelihood_{h}', show=True)
