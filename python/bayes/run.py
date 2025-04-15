@@ -1,13 +1,23 @@
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
 from sklearn.datasets import make_classification, make_moons, make_circles
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-import numpy as np
-import matplotlib.pyplot as plt
-import os
+
+from common.generate import generate_dataset
 from bayes.train import train
 from bayes.pred import pred
 
 N_SAMPLES = 250
+
+def xor(n_samples, noise):
+  X0, Y0, X1, Y1 = generate_dataset('xor', n_samples, noise)
+  X = np.vstack((X0, X1))
+  Y = np.hstack((Y0, Y1))
+
+  return X, Y
 
 # Generate synthetic datasets with reproducibility
 datasets = [
@@ -16,7 +26,8 @@ datasets = [
     n_clusters_per_class=1, class_sep=2
   )),
   ('Moons', make_moons(n_samples=N_SAMPLES, noise=0.3)),
-  ('Circles', make_circles(n_samples=N_SAMPLES, noise=0.2, factor=0.5))
+  ('Circles', make_circles(n_samples=N_SAMPLES, noise=0.2, factor=0.5)),
+  ('XOR', xor(N_SAMPLES, 0.1))
 ]
 
 methods = ['normal', 'gaussian_mix', 'kde']
