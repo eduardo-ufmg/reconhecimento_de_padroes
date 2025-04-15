@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_breast_cancer
@@ -13,150 +14,189 @@ from bayes.pred import pred
 from bayes.likelihood import likelihood
 from selection.featsel import drop_highcorr
 
-def plot(data, acc, name, show=False):
-  Q0train, Q0test, Q1train, Q1test, ytrain, ytest = data
-  maxQ0, maxQ1 = np.max(np.hstack([Q0train, Q0test])), np.max(np.hstack([Q1train, Q1test]))
+# Constants
+OUTPUT_DIR = Path("bayes/breastcancer/output")
+TEST_SIZE = 0.3
+RANDOM_STATE = 0
+BANDWIDTH_RANGE = np.linspace(1e-2, 1e2, 1000)
+N_BEST_WORST = 3
+
+
+def plot_likelihoods(
+  data: tuple,
+  accuracy: float,
+  filename: str,
+  show: bool = False
+) -> None:
+  """Plot likelihoods for training and test data with accuracy annotation."""
+  Q0_train, Q0_test, Q1_train, Q1_test, y_train, y_test = data
+  
+  max_Q0 = max(np.max(Q0_train), np.max(Q0_test))
+  max_Q1 = max(np.max(Q1_train), np.max(Q1_test))
+  
   plt.figure()
-  plt.scatter(Q0train, Q1train, c=ytrain, marker='o', edgecolors='k')
-  plt.scatter(Q0test, Q1test, c=ytest, marker='x')
-  plt.plot([0, maxQ0], [0, maxQ1], 'k--')
-  plt.text(maxQ0 * 0.9, maxQ1 * 0.8, f'acc: {acc:.2f}')
-  plt.savefig(f'bayes/breastcancer/output/{name}.png')
+  plt.scatter(Q0_train, Q1_train, c=y_train, marker='o', edgecolors='k')
+  plt.scatter(Q0_test, Q1_test, c=y_test, marker='x')
+  plt.plot([0, max_Q0], [0, max_Q1], 'k--')
+  plt.xlabel("Q0")
+  plt.ylabel("Q1")
+  plt.title(f"acc: {accuracy:.2f}")
+  
+  OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+  plt.savefig(OUTPUT_DIR / f"{filename}.png")
   if show:
     plt.show()
   plt.close()
 
-def custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H):
+
+def custom_bayes_gaussian(
+  X_train: np.ndarray,
+  X_test: np.ndarray,
+  y_train: np.ndarray,
+  bandwidth_matrix: np.ndarray
+) -> tuple:
   """
-  Instead of using the covariance matrix, this function
-  uses a custom bandwidth for each feature
+  Bayesian classifier with custom diagonal covariance matrix.
+  
   Args:
-    Xtrain: training data
-    Xtest: test data
-    ytrain: training labels
-    ytest: test labels
-    H: bandwidth list
+    X_train: Training features
+    X_test: Test features
+    y_train: Training labels
+    bandwidth_matrix: Diagonal covariance matrix components
+    
   Returns:
-    ypred: predicted labels
-    Q0train: likelihood for class 0 on training data
-    Q0test: likelihood for class 0 on test data
-    Q1train: likelihood for class 1 on training data
-    Q1test: likelihood for class 1 on test data
+    Tuple containing predictions and likelihood values
   """
+  # Validate bandwidth matrix
+  if not np.allclose(bandwidth_matrix, bandwidth_matrix.T):
+    raise ValueError("Bandwidth matrix must be symmetric")
+  if np.any(np.linalg.eigvals(bandwidth_matrix) <= 0):
+    raise ValueError("Bandwidth matrix must be positive definite")
 
-  # Ensure H is symmetric positive definite
-  if not np.allclose(H, H.T):
-    raise ValueError("H must be symmetric.")
-  if np.any(np.linalg.eigvals(H) <= 0):
-    raise ValueError("H must be positive definite.")
+  # Class separation
+  X0_train = X_train[y_train == 0]
+  X1_train = X_train[y_train == 1]
+  
+  # Prior probabilities
+  prior0 = len(X0_train) / len(X_train)
+  prior1 = 1 - prior0
+  
+  # Gaussian parameters
+  mean0 = X0_train.mean(axis=0)
+  mean1 = X1_train.mean(axis=0)
+  
+  # Calculate likelihoods
+  Q0_train = multivariate_normal.pdf(X_train, mean=mean0, cov=bandwidth_matrix)
+  Q1_train = multivariate_normal.pdf(X_train, mean=mean1, cov=bandwidth_matrix)
+  Q0_test = multivariate_normal.pdf(X_test, mean=mean0, cov=bandwidth_matrix)
+  Q1_test = multivariate_normal.pdf(X_test, mean=mean1, cov=bandwidth_matrix)
+  
+  # Posterior predictions
+  y_pred = np.argmax(np.vstack([Q0_test*prior0, Q1_test*prior1]).T, axis=1)
+  
+  return y_pred, Q0_train, Q0_test, Q1_train, Q1_test
 
-  X0train, X1train = Xtrain[ytrain == 0], Xtrain[ytrain == 1]
 
-  mean0 = np.mean(X0train, axis=0)
-  mean1 = np.mean(X1train, axis=0)
+def run_default_model(
+  X_train: pd.DataFrame,
+  X_test: pd.DataFrame,
+  y_train: pd.Series,
+  y_test: pd.Series
+) -> None:
+  """Run standard Gaussian Naive Bayes classifier."""
+  # Separate classes
+  X0_train = X_train[y_train == 0]
+  X1_train = X_train[y_train == 1]
+  
+  # Train and predict
+  gaussian0, gaussian1 = train(X0_train, X1_train, method='normal')
+  y_pred = pred(X_test, gaussian0, gaussian1, method='normal')
+  
+  # Calculate metrics
+  accuracy = accuracy_score(y_test, y_pred)
+  Q0_train, Q1_train = likelihood(X_train, gaussian0, gaussian1, method='normal')
+  Q0_test, Q1_test = likelihood(X_test, gaussian0, gaussian1, method='normal')
+  
+  # Plot results
+  plot_data = (Q0_train, Q0_test, Q1_train, Q1_test, y_train, y_test)
+  plot_likelihoods(plot_data, accuracy, "default_likelihood")
 
-  prior0 = len(X0train) / (len(X0train) + len(X1train))
-  prior1 = len(X1train) / (len(X0train) + len(X1train))
 
-  Q0train = multivariate_normal.pdf(Xtrain, mean=mean0, cov=H)
-  Q1train = multivariate_normal.pdf(Xtrain, mean=mean1, cov=H)
-
-  Q0test = multivariate_normal.pdf(Xtest, mean=mean0, cov=H)
-  Q1test = multivariate_normal.pdf(Xtest, mean=mean1, cov=H)
-
-  post0 = Q0test * prior0
-  post1 = Q1test * prior1
-
-  ypred = np.where(post0 > post1, 0, 1)
-
-  return ypred, Q0train, Q0test, Q1train, Q1test
-
-def run_default(X0train, X1train, Xtest, ytrain, ytest):
-  # Train the model
-  gaussian0, gaussian1 = train(X0train, X1train, method='normal')
-
-  # Predict on the test set
-  ypred = pred(Xtest, gaussian0, gaussian1, method='normal')
-
-  # Calculate accuracy
-  accuracy = accuracy_score(ytest, ypred)
-
-  # Calculate likelihood for each class
-  Q0train, Q1train = likelihood(Xtrain, gaussian0, gaussian1, method='normal')
-  Q0test, Q1test = likelihood(Xtest, gaussian0, gaussian1, method='normal')
-
-  plot((Q0train, Q0test, Q1train, Q1test, ytrain, ytest), accuracy, 'def_likelihood', show=False)
-
-def run_bandwidth(X0train, X1train, Xtest, ytrain, ytest):
-  # Custom bandwidth for Gaussian
-  hs = np.linspace(1e-3, 3e2, 1000)
-  accs = []
-
-  for h in hs:
-    H = np.diag([h] * nfeat)
-    ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
-    accuracy_custom = accuracy_score(ytest, ypred_custom)
-    accs.append(accuracy_custom)
-
+def analyze_bandwidth(
+  X_train: pd.DataFrame,
+  X_test: pd.DataFrame,
+  y_train: pd.Series,
+  y_test: pd.Series
+) -> None:
+  """Analyze classifier performance with varying bandwidths."""
+  n_features = X_train.shape[1]
+  bandwidths = BANDWIDTH_RANGE
+  accuracies = []
+  
+  # Evaluate bandwidths
+  for h in bandwidths:
+    H = np.eye(n_features) * h
+    y_pred, *_ = custom_bayes_gaussian(X_train.values, X_test.values, y_train.values, H)
+    accuracies.append(accuracy_score(y_test, y_pred))
+  
+  # Plot accuracy curve
   plt.figure()
-  plt.plot(hs, accs)
-  plt.xlabel('Bandwidth (h)')
-  plt.ylabel('Accuracy')
-  plt.savefig('bayes/breastcancer/output/accuracy_vs_bandwidth.png')
+  plt.plot(bandwidths, accuracies)
+  plt.xlabel("bandwidth")
+  plt.ylabel("accuracy")
+  plt.savefig(OUTPUT_DIR / "accuracy_vs_bandwidth.png")
   plt.close()
-
-  # Sort bandwidths by accuracy
-  sorted_hs_best = [h for _, h in sorted(zip(accs, hs), reverse=True)]
-  sorted_hs_worst = [h for _, h in sorted(zip(accs, hs))]
-
-  fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-
-  for i, h in enumerate(sorted_hs_best[:3]):
-    H = np.diag([h] * nfeat)
-    ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
-    accuracy_custom = accuracy_score(ytest, ypred_custom)
+  
+  # Sort bandwidths by performance
+  sorted_indices = np.argsort(accuracies)
+  best_h = bandwidths[sorted_indices[-N_BEST_WORST:]][::-1]
+  worst_h = bandwidths[sorted_indices[:N_BEST_WORST]]
+  
+  # Create comparison plot
+  fig, axs = plt.subplots(2, N_BEST_WORST, figsize=(15, 8))
+  
+  for i, h in enumerate(best_h):
+    H = np.eye(n_features) * h
+    y_pred, Q0_tr, Q0_te, Q1_tr, Q1_te = custom_bayes_gaussian(
+      X_train.values, X_test.values, y_train.values, H
+    )
+    acc = accuracy_score(y_test, y_pred)
     
-    ax = axes[0, i]
-    maxQ0, maxQ1 = np.max(np.hstack([Q0train_custom, Q0test_custom])), np.max(np.hstack([Q1train_custom, Q1test_custom]))
-    ax.scatter(Q0train_custom, Q1train_custom, c=ytrain, marker='o', edgecolors='k')
-    ax.scatter(Q0test_custom, Q1test_custom, c=ytest, marker='x')
-    ax.plot([0, maxQ0], [0, maxQ1], 'k--')
-    ax.text(maxQ0 * 0.7, maxQ1 * 0.9, f'acc: {accuracy_custom:.2f}\nh: {h:.2f}')
-
-  # Plot the worst 3 bandwidths with their corresponding accuracies (lower row)
-  for i, h in enumerate(sorted_hs_worst[:3]):
-    H = np.diag([h] * nfeat)
-    ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
-    accuracy_custom = accuracy_score(ytest, ypred_custom)
+    axs[0, i].scatter(Q0_tr, Q1_tr, c=y_train, edgecolor='k')
+    axs[0, i].scatter(Q0_te, Q1_te, c=y_test, marker='x')
+    axs[0, i].set_title(f"h = {h:.2f}\naccuracy: {acc:.2f}")
+  
+  for i, h in enumerate(worst_h):
+    H = np.eye(n_features) * h
+    y_pred, Q0_tr, Q0_te, Q1_tr, Q1_te = custom_bayes_gaussian(
+      X_train.values, X_test.values, y_train.values, H
+    )
+    acc = accuracy_score(y_test, y_pred)
     
-    ax = axes[1, i]
-    maxQ0, maxQ1 = np.max(np.hstack([Q0train_custom, Q0test_custom])), np.max(np.hstack([Q1train_custom, Q1test_custom]))
-    ax.scatter(Q0train_custom, Q1train_custom, c=ytrain, marker='o', edgecolors='k')
-    ax.scatter(Q0test_custom, Q1test_custom, c=ytest, marker='x')
-    ax.plot([0, maxQ0], [0, maxQ1], 'k--')
-    ax.text(maxQ0 * 0.7, maxQ1 * 0.1, f'acc: {accuracy_custom:.2f}\nh: {h:.2f}')
-
+    axs[1, i].scatter(Q0_tr, Q1_tr, c=y_train, edgecolor='k')
+    axs[1, i].scatter(Q0_te, Q1_te, c=y_test, marker='x')
+    axs[1, i].set_title(f"h = {h:.2f}\naccuracy: {acc:.2f}")
+  
   plt.tight_layout()
-  plt.savefig('bayes/breastcancer/output/custom_likelihoods.png')
+  plt.savefig(OUTPUT_DIR / "bandwidth_comparison.png")
   plt.close()
 
 
+def main():
+  # Load and prepare data
+  X, y = load_breast_cancer(return_X_y=True, as_frame=True)
+  X = X.dropna().astype(float)
+  X = drop_highcorr(X, y)
+  
+  # Split data
+  X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y
+  )
+  
+  # Run analyses
+  run_default_model(X_train, X_test, y_train, y_test)
+  analyze_bandwidth(X_train, X_test, y_train, y_test)
 
-# Load the breast cancer dataset
-(X, y) = load_breast_cancer(return_X_y=True, as_frame=True)
 
-# Preprocess X to remove invalid data and ensure all values are float
-X = X.dropna()  # Remove rows with missing values
-X = X.astype(float)  # Convert all values to float
-X = drop_highcorr(X, y)
-
-nfeat = X.shape[1]
-
-# Perform a random split of the data into train and test sets
-Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.5, random_state=0)
-
-X0train, X1train = Xtrain[ytrain == 0], Xtrain[ytrain == 1]
-
-run_default(X0train, X1train, Xtest, ytrain, ytest)
-
-run_bandwidth(X0train, X1train, Xtest, ytrain, ytest)
+if __name__ == "__main__":
+  main()
