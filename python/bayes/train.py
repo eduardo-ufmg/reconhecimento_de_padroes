@@ -43,7 +43,7 @@ def train_normal(X0, X1):
 def train_gaussian_mix(X0, X1):
   """Train Gaussian Mixture Models."""
   # Ensure data is sufficient for components
-  n_components = 4
+  n_components = 3
   if len(X0) < n_components:
     raise ValueError(f"X0 has insufficient samples for {n_components} components.")
   if len(X1) < n_components:

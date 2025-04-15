@@ -17,6 +17,8 @@ def xor(n_samples, noise):
   X = np.vstack((X0, X1))
   Y = np.hstack((Y0, Y1))
 
+  Y[Y == -1] = 0
+
   return X, Y
 
 # Generate synthetic datasets with reproducibility
@@ -59,6 +61,7 @@ for row, (dataset_name, (X, y)) in enumerate(datasets):
   dataset_results = {}
   
   for col, method in enumerate(methods):
+
     # Train and predict
     model_args0, model_args1 = train(X0_train, X1_train, method)
     y_pred = pred(X_test, model_args0, model_args1, method)
