@@ -77,8 +77,7 @@ def custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H):
 # Preprocess X to remove invalid data and ensure all values are float
 X = X.dropna()  # Remove rows with missing values
 X = X.astype(float)  # Convert all values to float
-
-X = drop_highcorr(X, y, threshold=0.9)  # Drop highly correlated features
+X = drop_highcorr(X, y)
 
 nfeat = X.shape[1]
 
