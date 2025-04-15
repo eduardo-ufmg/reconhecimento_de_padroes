@@ -24,6 +24,7 @@ def plot(data, acc, name, show=False):
   plt.savefig(f'bayes/breastcancer/output/{name}.png')
   if show:
     plt.show()
+  plt.close()
 
 def custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H):
   """
@@ -82,7 +83,7 @@ X = drop_highcorr(X, y)
 nfeat = X.shape[1]
 
 # Perform a random split of the data into train and test sets
-Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.5)
+Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.5, random_state=0)
 
 X0train, X1train = Xtrain[ytrain == 0], Xtrain[ytrain == 1]
 
@@ -102,11 +103,53 @@ Q0test, Q1test = likelihood(Xtest, gaussian0, gaussian1, method='normal')
 plot((Q0train, Q0test, Q1train, Q1test, ytrain, ytest), accuracy, 'def_likelihood', show=False)
 
 # Custom bandwidth for Gaussian
-h = 1
-H = np.diag([h] * nfeat)
-ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
+hs = np.linspace(1e-3, 3e2, 1000)
+accs = []
 
-# Calculate accuracy for custom bandwidth
-accuracy_custom = accuracy_score(ytest, ypred_custom)
+for h in hs:
+  H = np.diag([h] * nfeat)
+  ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
+  accuracy_custom = accuracy_score(ytest, ypred_custom)
+  accs.append(accuracy_custom)
 
-plot((Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom, ytrain, ytest), accuracy_custom, f'custom_likelihood_{h}', show=True)
+plt.figure()
+plt.plot(hs, accs)
+plt.xlabel('Bandwidth (h)')
+plt.ylabel('Accuracy')
+plt.savefig('bayes/breastcancer/output/accuracy_vs_bandwidth.png')
+plt.close()
+
+# Sort bandwidths by accuracy
+sorted_hs_best = [h for _, h in sorted(zip(accs, hs), reverse=True)]
+sorted_hs_worst = [h for _, h in sorted(zip(accs, hs))]
+
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+
+for i, h in enumerate(sorted_hs_best[:3]):
+  H = np.diag([h] * nfeat)
+  ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
+  accuracy_custom = accuracy_score(ytest, ypred_custom)
+  
+  ax = axes[0, i]
+  maxQ0, maxQ1 = np.max(np.hstack([Q0train_custom, Q0test_custom])), np.max(np.hstack([Q1train_custom, Q1test_custom]))
+  ax.scatter(Q0train_custom, Q1train_custom, c=ytrain, marker='o', edgecolors='k')
+  ax.scatter(Q0test_custom, Q1test_custom, c=ytest, marker='x')
+  ax.plot([0, maxQ0], [0, maxQ1], 'k--')
+  ax.text(maxQ0 * 0.7, maxQ1 * 0.9, f'acc: {accuracy_custom:.2f}\nh: {h:.2f}')
+
+# Plot the worst 3 bandwidths with their corresponding accuracies (lower row)
+for i, h in enumerate(sorted_hs_worst[:3]):
+  H = np.diag([h] * nfeat)
+  ypred_custom, Q0train_custom, Q0test_custom, Q1train_custom, Q1test_custom = custom_bayes_gauss(Xtrain, Xtest, ytrain, ytest, H)
+  accuracy_custom = accuracy_score(ytest, ypred_custom)
+  
+  ax = axes[1, i]
+  maxQ0, maxQ1 = np.max(np.hstack([Q0train_custom, Q0test_custom])), np.max(np.hstack([Q1train_custom, Q1test_custom]))
+  ax.scatter(Q0train_custom, Q1train_custom, c=ytrain, marker='o', edgecolors='k')
+  ax.scatter(Q0test_custom, Q1test_custom, c=ytest, marker='x')
+  ax.plot([0, maxQ0], [0, maxQ1], 'k--')
+  ax.text(maxQ0 * 0.7, maxQ1 * 0.1, f'acc: {accuracy_custom:.2f}\nh: {h:.2f}')
+
+plt.tight_layout()
+plt.savefig('bayes/breastcancer/output/custom_likelihoods.png')
+plt.close()
