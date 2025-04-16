@@ -38,14 +38,57 @@ Classification, Machine Learning, Nearest Neighbor, Gabriel Graph, Support Edge
 Support Edge-based classifiers, such as CLAS and RCHIP-CLAS, utilize geometric representations like Gabriel Graphs to define large-margin decision boundaries \cite{torres2016}. Prior work by Souza et al. \cite{souza2019} and Arias-Garcia et al. \cite{arias2021,arias2024} has demonstrated their efficacy in embedded systems, yet challenges persist in scalability and hardware optimization. Existing implementations often rely on computationally expensive adjacency matrices and may overlook optimizations in the search for inter-class edges. This review addresses these limitations by proposing algorithmic refinements and evaluating modern hardware synthesis tools. By integrating software optimizations with high-level synthesis workflows, we aim to enhance the feasibility of these classifiers for real-time edge applications.
 
 \section{Theoretical Background}
-%
-% Provide theoretical background on the following topics:
-%   - Gabriel Graph
-%   - Support Edge
-%   - CHIP-CLAS
-%   - RCHIP-CLAS
-%   - NN-CLAS
-%
+\subsection{Gabriel Graph}
+The Gabriel Graph (GG) is a planar graph construction where two vertices $\mathbf{x}_i$ and $\mathbf{x}_j$ are connected if no other vertex lies within the hypersphere having the segment between them as diameter \cite{torres2015b}. Formally, for dataset $\mathcal{D} = \{(\mathbf{x}_i,y_i)\}_{i=1}^N$, an edge exists between $\mathbf{x}_i$ and $\mathbf{x}_j$ if:
+
+\begin{equation}
+    \|\mathbf{x}_i - \mathbf{x}_j\|^2 \leq \|\mathbf{x}_i - \mathbf{x}_k\|^2 + \|\mathbf{x}_j - \mathbf{x}_k\|^2 \quad \forall \mathbf{x}_k \in \mathcal{D}
+\end{equation}
+
+This geometric structure captures the intrinsic data topology and forms the foundation for margin-based classification \cite{torres2021}. The GG construction has $O(n\log n)$ complexity when using Delaunay triangulation \cite{souza2019}.
+
+\subsection{Support Edge (SE)}
+Support Edges are GG edges connecting vertices from different classes, located in the inter-class separation region \cite{torres2015}. For a binary classification problem, SEs are defined as:
+
+\begin{equation}
+    \mathcal{SE} = \{(\mathbf{x}_i,\mathbf{x}_j) \in \mathcal{E}\ |\ y_i \neq y_j\}
+\end{equation}
+
+where $\mathcal{E}$ is the GG edge set. The midpoints of SEs define local maximum-margin hyperplanes, analogous to Support Vectors in SVMs \cite{torres2016}.
+
+\subsection{CHIP-CLAS}
+The Complete Hierarchical Integrated Processor Classifier (CHIP-CLAS) combines SE-derived hyperplanes through a Hierarchical Mixture of Experts (HME). Each expert $H_l$ corresponds to a SE midpoint $\mathbf{p}_l$ with classification rule:
+
+\begin{equation}
+    h_l(\mathbf{x}) = \text{sign}(\mathbf{w}_l^T\mathbf{x} - b_l)
+\end{equation}
+    
+where $\mathbf{w}_l = \mathbf{x}_i - \mathbf{x}_j$ and $b_l = \frac{1}{2}(\mathbf{x}_i + \mathbf{x}_j)^T\mathbf{w}_l$. The final output combines experts through distance-based gating weights:
+
+\begin{equation}
+    f(\mathbf{x}) = \text{sign}\left(\sum_{l=1}^m c_l(\mathbf{x})h_l(\mathbf{x})\right)
+\end{equation}
+
+with $c_l(\mathbf{x}) \propto \exp\left(-\frac{\max_k \delta(\mathbf{x},\mathbf{p}_k)^2}{\delta(\mathbf{x},\mathbf{p}_l)}\right)$ \cite{torres2015b}.
+
+\subsection{RCHIP-CLAS}
+The Reduced CHIP-CLAS simplifies computation by using only the nearest SE hyperplane:
+
+\begin{equation}
+    f(\mathbf{x}) = \text{sign}\left(\mathbf{w}_l^T\mathbf{x} - b_l\right) \quad \text{where} \quad l = \arg\min_l \delta(\mathbf{x},\mathbf{p}_l)
+\end{equation}
+
+This reduction eliminates exponential calculations in the gating network, making it more suitable for hardware implementation \cite{arias2021}.
+
+\subsection{NN-CLAS}
+The Nearest Neighbor CLAS variant uses a 1-NN rule on SE vertices:
+
+\begin{equation}
+    f(\mathbf{x}) = y_k \quad \text{where} \quad k = \arg\min_k \delta(\mathbf{x},\mathbf{x}_k), \ \mathbf{x}_k \in \mathcal{SE}
+\end{equation}
+
+This approach reduces memory requirements by storing only SE vertices while maintaining comparable accuracy to k-NN \cite{souza2019}. Hardware implementations achieve 8$\times$ speedup over software versions through parallel distance computation \cite{arias2024}.
+
 
 \section{Possible Improvements}
 Two key algorithmic improvements are proposed. First, replacing adjacency matrices with adjacency lists reduces memory complexity from $O(n^2)$ to $O(n + \left|E|\right)$, where $|E|$ is the number of edges in the Gabriel Graph. This is particularly advantageous for sparse datasets. Second, post-filtering steps can be optimized by computing edges exclusively between points of opposing classes, eliminating redundant intra-class calculations. This approach leverages class label metadata early in the pipeline, reducing computational overhead during graph construction.
