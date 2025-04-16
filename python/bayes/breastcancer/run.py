@@ -226,6 +226,27 @@ def analyze_bandwidth(
 
   OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
   ani.save(OUTPUT_DIR / f"bandwidth_animation_{cov_type}.gif", writer='pillow', fps=10)
+  
+  # Generate static plots for best, mean, and worst cases
+  acc_list = [fd[1] for fd in frame_data]
+  best_idx = np.argmax(acc_list)
+  worst_idx = np.argmin(acc_list)
+  mean_acc = np.mean(acc_list)
+  # Find index closest to mean accuracy
+  mean_idx = np.argmin(np.abs(np.array(acc_list) - mean_acc))
+  
+  cases = [
+      ('best', best_idx),
+      ('worst', worst_idx),
+      ('mean', mean_idx)
+  ]
+  
+  for case_name, idx in cases:
+      h, acc, Q0_tr, Q0_te, Q1_tr, Q1_te = frame_data[idx]
+      plot_data = (Q0_tr, Q0_te, Q1_tr, Q1_te, y_train, y_test)
+      filename = f"likelihood_{cov_type}_{case_name}"
+      plot_likelihoods(plot_data, acc, filename)
+  
   plt.close()
 
 
