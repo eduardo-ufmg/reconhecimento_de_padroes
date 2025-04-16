@@ -19,9 +19,14 @@ from selection.featsel import drop_highcorr
 OUTPUT_DIR = Path("bayes/breastcancer/output")
 TEST_SIZE = 0.3
 RANDOM_STATE = 0
-BANDWIDTH_RANGE = np.linspace(1e-2, 1e2, 1000)
 N_BEST_WORST = 3
 SELECTION_STEP = 10
+
+# Bandwidth ranges per covariance type
+BANDWIDTH_RANGE_DIAG = np.linspace(1e-2, 1.5e2, 1000)
+BANDWIDTH_RANGE_FULL = np.linspace(1e-3, 1e1, 500)
+BANDWIDTH_RANGE_PFEAT = np.linspace(1e-3, 2.5e1, 100)
+BANDWIDTH_RANGE_REG = np.linspace(1e-3, 1e1, 100)
 
 
 def plot_likelihoods(
@@ -133,8 +138,19 @@ def analyze_bandwidth(
   step: int = SELECTION_STEP
 ) -> None:
   """Analyze bandwidth for different covariance structures."""
-  n_features = X_train.shape[1]
-  bandwidths = BANDWIDTH_RANGE[::step]
+  # Select bandwidth range based on covariance type
+  if cov_type == "diagonal":
+    base_range = BANDWIDTH_RANGE_DIAG
+  elif cov_type == "full":
+    base_range = BANDWIDTH_RANGE_FULL
+  elif cov_type == "per_feature":
+    base_range = BANDWIDTH_RANGE_PFEAT
+  elif cov_type == "regularized":
+    base_range = BANDWIDTH_RANGE_REG
+  else:
+    raise ValueError(f"Unknown covariance type: {cov_type}")
+  
+  bandwidths = base_range[::step]
   accuracies = []
   frame_data = []
 
@@ -145,15 +161,13 @@ def analyze_bandwidth(
 
   for h in bandwidths:
     if cov_type == "diagonal":
-      H = np.eye(n_features) * h
+      H = np.eye(X_train.shape[1]) * h
     elif cov_type == "full":
       H = h * empirical_cov
     elif cov_type == "per_feature":
       H = np.diag(feature_variances * h)
     elif cov_type == "regularized":
-      H = empirical_cov + h * np.eye(n_features)
-    else:
-      raise ValueError(f"Unknown covariance type: {cov_type}")
+      H = empirical_cov + h * np.eye(X_train.shape[1])
 
     # Validate matrix and compute
     try:
@@ -168,11 +182,14 @@ def analyze_bandwidth(
     accuracies.append(acc)
     frame_data.append((h, acc, Q0_tr, Q0_te, Q1_tr, Q1_te))
 
+  maxbwint = int(max(bandwidths))
+
   # Plot accuracy vs bandwidth
   plt.figure()
   plt.plot(bandwidths[:len(accuracies)], accuracies)
   plt.xlabel("Bandwidth/Regularization")
   plt.ylabel("Accuracy")
+  plt.xticks(range(0, maxbwint + 1, maxbwint // 10 + 1))
   plt.title(f"Covariance Type: {cov_type}")
   OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
   plt.savefig(OUTPUT_DIR / f"accuracy_{cov_type}.png")
