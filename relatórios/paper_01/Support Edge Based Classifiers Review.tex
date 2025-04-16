@@ -38,57 +38,62 @@ Classification, Machine Learning, Nearest Neighbor, Gabriel Graph, Support Edge
 Support Edge-based classifiers, such as CLAS and RCHIP-CLAS, utilize geometric representations like Gabriel Graphs to define large-margin decision boundaries \cite{torres2016}. Prior work by Souza et al. \cite{souza2019} and Arias-Garcia et al. \cite{arias2021,arias2024} has demonstrated their efficacy in embedded systems, yet challenges persist in scalability and hardware optimization. Existing implementations often rely on computationally expensive adjacency matrices and may overlook optimizations in the search for inter-class edges. This review addresses these limitations by proposing algorithmic refinements and evaluating modern hardware synthesis tools. By integrating software optimizations with high-level synthesis workflows, we aim to enhance the feasibility of these classifiers for real-time edge applications.
 
 \section{Theoretical Background}
-\subsection{Gabriel Graph}
-The Gabriel Graph (GG) is a planar graph construction where two vertices $\mathbf{x}_i$ and $\mathbf{x}_j$ are connected if no other vertex lies within the hypersphere having the segment between them as diameter \cite{torres2015b}. Formally, for dataset $\mathcal{D} = \{(\mathbf{x}_i,y_i)\}_{i=1}^N$, an edge exists between $\mathbf{x}_i$ and $\mathbf{x}_j$ if:
+\subsection{Gabriel Graph (GG)}
+The Gabriel Graph (GG) is a type of planar graph derived from a set of points in a Euclidean space. For a dataset \(\mathcal{D} = \{(\mathbf{x}_i, y_i)\}\), where \(\mathbf{x}_i \in \mathbb{R}^n\) and \(y_i \in \{+1, -1\}\), the GG is constructed such that two vertices \(\mathbf{x}_i\) and \(\mathbf{x}_j\) are connected by an edge if and only if no other vertex \(\mathbf{x}_z\) lies within the hypersphere with \(\mathbf{x}_i\) and \(\mathbf{x}_j\) as its diameter. Formally, this condition is expressed as:
+\[
+\delta^2(\mathbf{x}_i, \mathbf{x}_j) \leq \delta^2(\mathbf{x}_i, \mathbf{x}_z) + \delta^2(\mathbf{x}_j, \mathbf{x}_z), \quad \forall \mathbf{x}_z \in \mathcal{D}, \mathbf{x}_z \neq \mathbf{x}_i, \mathbf{x}_j,
+\]
+where \(\delta(\cdot)\) denotes the Euclidean distance operator. The GG inherently captures the structural relationships between data points and is computationally efficient when built using Delaunay triangulation, reducing its complexity to \(O(n \log n)\) in planar cases \cite{arias2021, torres2015b}.
 
-\begin{equation}
-    \|\mathbf{x}_i - \mathbf{x}_j\|^2 \leq \|\mathbf{x}_i - \mathbf{x}_k\|^2 + \|\mathbf{x}_j - \mathbf{x}_k\|^2 \quad \forall \mathbf{x}_k \in \mathcal{D}
-\end{equation}
+\subsection{Support Edges (SE)}
+Support Edges (SE) are a subset of edges in the GG that connect vertices from opposing classes (\(y_i \neq y_j\)). These edges lie on the separation margin between classes and are analogous to Support Vectors in SVMs. The midpoint \(\mathbf{p}_l = \frac{\mathbf{x}_i + \mathbf{x}_j}{2}\) of each SE defines a local hyperplane \(H_l\) orthogonal to the edge, serving as a maximal margin classifier for the pair \((\mathbf{x}_i, \mathbf{x}_j)\). The SE set \(\mathcal{AS}\) is unique to the dataset and forms the basis for constructing large-margin classifiers \cite{torres2016, torres2015b}.
 
-This geometric structure captures the intrinsic data topology and forms the foundation for margin-based classification \cite{torres2021}. The GG construction has $O(n\log n)$ complexity when using Delaunay triangulation \cite{souza2019}.
-
-\subsection{Support Edge (SE)}
-Support Edges are GG edges connecting vertices from different classes, located in the inter-class separation region \cite{torres2015}. For a binary classification problem, SEs are defined as:
-
-\begin{equation}
-    \mathcal{SE} = \{(\mathbf{x}_i,\mathbf{x}_j) \in \mathcal{E}\ |\ y_i \neq y_j\}
-\end{equation}
-
-where $\mathcal{E}$ is the GG edge set. The midpoints of SEs define local maximum-margin hyperplanes, analogous to Support Vectors in SVMs \cite{torres2016}.
+\subsection{Data Filtering}
+To handle noisy or overlapping data, a quality measure \(q(\mathbf{x}_i)\) filters vertices based on their connectivity in the GG. For a vertex \(\mathbf{x}_i\), let \(\mathcal{A}(\mathbf{x}_i)\) denote its degree (number of connected edges) and \(\hat{\mathcal{A}}(\mathbf{x}_i)\) the number of edges connecting \(\mathbf{x}_i\) to vertices of the same class. The quality measure is defined as:
+\[
+q(\mathbf{x}_i) = \frac{\hat{\mathcal{A}}(\mathbf{x}_i)}{\mathcal{A}(\mathbf{x}_i)}.
+\]
+Vertices with \(q(\mathbf{x}_i) < t^\pm\) (class-specific thresholds) are removed. Thresholds \(t^+\) and \(t^-\) are computed as the average of \(q(\mathbf{x}_i)\) values within each class:
+\[
+t^+ = \frac{1}{|\Omega^+|}\sum_{q(\mathbf{x}_i) \in \Omega^+} q(\mathbf{x}_i), \quad t^- = \frac{1}{|\Omega^-|}\sum_{q(\mathbf{x}_i) \in \Omega^-} q(\mathbf{x}_i),
+\]
+where \(\Omega^\pm\) are the quality measures grouped by class. This step ensures robust SE detection \cite{arias2021, torres2016}.
 
 \subsection{CHIP-CLAS}
-The Complete Hierarchical Integrated Processor Classifier (CHIP-CLAS) combines SE-derived hyperplanes through a Hierarchical Mixture of Experts (HME). Each expert $H_l$ corresponds to a SE midpoint $\mathbf{p}_l$ with classification rule:
-
-\begin{equation}
-    h_l(\mathbf{x}) = \text{sign}(\mathbf{w}_l^T\mathbf{x} - b_l)
-\end{equation}
-    
-where $\mathbf{w}_l = \mathbf{x}_i - \mathbf{x}_j$ and $b_l = \frac{1}{2}(\mathbf{x}_i + \mathbf{x}_j)^T\mathbf{w}_l$. The final output combines experts through distance-based gating weights:
-
-\begin{equation}
-    f(\mathbf{x}) = \text{sign}\left(\sum_{l=1}^m c_l(\mathbf{x})h_l(\mathbf{x})\right)
-\end{equation}
-
-with $c_l(\mathbf{x}) \propto \exp\left(-\frac{\max_k \delta(\mathbf{x},\mathbf{p}_k)^2}{\delta(\mathbf{x},\mathbf{p}_l)}\right)$ \cite{torres2015b}.
+CHIP-CLAS is a large-margin classifier that combines hyperplanes derived from SEs via a Hierarchical Mixture of Experts (HME). Each hyperplane \(H_l\) is defined by:
+\[
+H_l(\mathbf{x}) = \text{sign}(\mathbf{x}^T \mathbf{w}_l - b_l),
+\]
+where \(\mathbf{w}_l = \mathbf{x}_i - \mathbf{x}_j\) (normal vector) and \(b_l = \frac{1}{2}(\mathbf{x}_i + \mathbf{x}_j)^T \mathbf{w}_l\) (bias term). The final classification aggregates weighted outputs from all hyperplanes:
+\[
+f(\mathbf{x}) = \text{sign}\left(\sum_{l=1}^m h_l(\mathbf{x}) c_l(\mathbf{x})\right),
+\]
+with weights \(c_l(\mathbf{x})\) computed as:
+\[
+c_l(\mathbf{x}) = \exp\left(-\frac{\max(\delta(\mathbf{x}, \mathbf{p}_k))^2}{\delta(\mathbf{x}, \mathbf{p}_l)}\right), \quad \sum_{l=1}^m c_l(\mathbf{x}) = 1.
+\]
+This method optimizes margin maximization and training error minimization without user-defined parameters \cite{torres2015, torres2015b}.
 
 \subsection{RCHIP-CLAS}
-The Reduced CHIP-CLAS simplifies computation by using only the nearest SE hyperplane:
-
-\begin{equation}
-    f(\mathbf{x}) = \text{sign}\left(\mathbf{w}_l^T\mathbf{x} - b_l\right) \quad \text{where} \quad l = \arg\min_l \delta(\mathbf{x},\mathbf{p}_l)
-\end{equation}
-
-This reduction eliminates exponential calculations in the gating network, making it more suitable for hardware implementation \cite{arias2021}.
+RCHIP-CLAS is a reduced-complexity variant of CHIP-CLAS. Instead of combining all hyperplanes, it selects the hyperplane closest to the test sample \(\mathbf{x}\) using:
+\[
+\arg\min_l \delta(\mathbf{x}, \mathbf{p}_l), \quad l = 1, \ldots, m,
+\]
+where \(\mathbf{p}_l\) is the midpoint of the \(l\)-th SE. The classification rule simplifies to:
+\[
+f(\mathbf{x}) = \begin{cases} 
++1 & \text{if } H_l(\mathbf{x}) > 0, \\
+-1 & \text{otherwise}.
+\end{cases}
+\]
+This approach reduces computational overhead while maintaining accuracy \cite{arias2021}.
 
 \subsection{NN-CLAS}
-The Nearest Neighbor CLAS variant uses a 1-NN rule on SE vertices:
-
-\begin{equation}
-    f(\mathbf{x}) = y_k \quad \text{where} \quad k = \arg\min_k \delta(\mathbf{x},\mathbf{x}_k), \ \mathbf{x}_k \in \mathcal{SE}
-\end{equation}
-
-This approach reduces memory requirements by storing only SE vertices while maintaining comparable accuracy to k-NN \cite{souza2019}. Hardware implementations achieve 8$\times$ speedup over software versions through parallel distance computation \cite{arias2024}.
-
+NN-CLAS further simplifies classification by applying a nearest-neighbor rule on the SE vertices. For a test sample \(\mathbf{x}\), its class is assigned as the label of the closest SE vertex:
+\[
+\hat{y} = y_{\arg\min_i \delta(\mathbf{x}, \mathbf{x}_i)}, \quad \mathbf{x}_i \in \mathcal{AS}.
+\]
+This method eliminates hyperplane computations and is equivalent to \(k\)-NN (\(k=1\)) restricted to margin points, making it highly efficient for hardware implementation \cite{souza2019, arias2021}.
 
 \section{Possible Improvements}
 Two key algorithmic improvements are proposed. First, replacing adjacency matrices with adjacency lists reduces memory complexity from $O(n^2)$ to $O(n + \left|E|\right)$, where $|E|$ is the number of edges in the Gabriel Graph. This is particularly advantageous for sparse datasets. Second, post-filtering steps can be optimized by computing edges exclusively between points of opposing classes, eliminating redundant intra-class calculations. This approach leverages class label metadata early in the pipeline, reducing computational overhead during graph construction.
