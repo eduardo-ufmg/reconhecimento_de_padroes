@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -97,6 +98,21 @@ def custom_bayes_gaussian(
   Q1_train = multivariate_normal.pdf(X_train, mean=mean1, cov=bandwidth_matrix)
   Q0_test = multivariate_normal.pdf(X_test, mean=mean0, cov=bandwidth_matrix)
   Q1_test = multivariate_normal.pdf(X_test, mean=mean1, cov=bandwidth_matrix)
+
+  # Normalize likelihoods
+  Qtrainnorm = np.sum(Q0_train + Q1_train)
+  Qtestnorm = np.sum(Q0_test + Q1_test)
+
+  if Qtrainnorm == 0:
+    Qtrainnorm += sys.float_info.epsilon
+
+  if Qtestnorm == 0:
+    Qtestnorm += sys.float_info.epsilon
+
+  Q0_train /= Qtrainnorm
+  Q1_train /= Qtrainnorm
+  Q0_test /= Qtestnorm
+  Q1_test /= Qtestnorm
 
   # Posterior predictions
   y_pred = np.argmax(np.vstack([Q0_test * prior0, Q1_test * prior1]).T, axis=1)
@@ -236,16 +252,16 @@ def analyze_bandwidth(
   mean_idx = np.argmin(np.abs(np.array(acc_list) - mean_acc))
   
   cases = [
-      ('best', best_idx),
-      ('worst', worst_idx),
-      ('mean', mean_idx)
+    ('best', best_idx),
+    ('worst', worst_idx),
+    ('mean', mean_idx)
   ]
   
   for case_name, idx in cases:
-      h, acc, Q0_tr, Q0_te, Q1_tr, Q1_te = frame_data[idx]
-      plot_data = (Q0_tr, Q0_te, Q1_tr, Q1_te, y_train, y_test)
-      filename = f"likelihood_{cov_type}_{case_name}"
-      plot_likelihoods(plot_data, acc, filename)
+    h, acc, Q0_tr, Q0_te, Q1_tr, Q1_te = frame_data[idx]
+    plot_data = (Q0_tr, Q0_te, Q1_tr, Q1_te, y_train, y_test)
+    filename = f"likelihood_{cov_type}_{case_name}"
+    plot_likelihoods(plot_data, acc, filename)
   
   plt.close()
 

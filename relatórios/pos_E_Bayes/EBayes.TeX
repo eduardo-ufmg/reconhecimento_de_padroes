@@ -1,0 +1,111 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{pgffor}
+
+\graphicspath{{../../python/bayes/breastcancer/output/}}
+
+\begin{document}
+
+\title{Relatório Bayes}
+\author{Eduardo}
+\date{\today}
+\maketitle
+
+\section*{Covariancia}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{default_likelihood.png}
+  \caption{Espaço de verossimilhança para o modelo padrão}
+  \label{fig:likelihood_def}
+\end{figure}
+
+\section*{Diagonal}
+
+Assume que todas as variáveis são independentes e usa o mesmo raio em todos os eixos.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{accuracy_diagonal.png}
+  \caption{Precisão vs raio}
+  \label{fig:accuracy_diag}
+\end{figure}
+
+\foreach \case in {best, mean, worst} {
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{likelihood_diagonal_\case.png}
+    \caption{Espaço de verossimilhança para o modelo diagonal (\case)}
+    \label{fig:likelihood_diag_\case}
+  \end{figure}
+}
+
+\section*{Completa}
+
+Monta a matriz de convariância usando todo o conjunto de dados, em oposição à padrão, que considera os dados de cada classe separadamente.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{accuracy_full.png}
+  \caption{Precisão vs raio}
+  \label{fig:accuracy_full}
+\end{figure}
+
+\foreach \case in {best, mean, worst} {
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{likelihood_full_\case.png}
+    \caption{Espaço de verossimilhança para o modelo completo (\case)}
+    \label{fig:likelihood_full_\case}
+  \end{figure}
+}
+
+\section*{Diagonal com variança por atributo}
+
+Considera independência entre os atributos, mas preserva a variança de cada um.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{accuracy_per_feature.png}
+  \caption{Precisão vs raio}
+  \label{fig:accuracy_per_feature}
+\end{figure}
+
+\foreach \case in {best, mean, worst} {
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{likelihood_per_feature_\case.png}
+    \caption{Espaço de verossimilhança para o modelo diagonal com variança por atributo (\case)}
+    \label{fig:likelihood_per_feature_\case}
+  \end{figure}
+}
+
+\section*{Completa Regularizada}
+
+Monta a matriz de convariância usando todo o conjunto de dados e adiciona um fator de regularização.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{accuracy_regularized.png}
+  \caption{Precisão vs raio}
+  \label{fig:accuracy_regularized}
+\end{figure}
+
+\foreach \case in {best, mean, worst} {
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{likelihood_regularized_\case.png}
+    \caption{Espaço de verossimilhança para o modelo completo regularizado (\case)}
+    \label{fig:likelihood_regularized_\case}
+  \end{figure}
+}
+
+\end{document}
