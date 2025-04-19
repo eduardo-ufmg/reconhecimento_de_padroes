@@ -10,8 +10,6 @@
 \usepackage{listings}
 \usepackage{pgffor}
 
-\graphicspath{{../../python/bayes/breastcancer/output/}}
-
 \begin{document}
 
 \title{Relatório Bayes}
@@ -19,93 +17,38 @@
 \date{\today}
 \maketitle
 
-\section*{Covariancia}
+\section{Analysis of Covariance Matrix Methods}
+\label{sec:covariance_analysis}
 
+This section evaluates three approaches for computing covariance matrices in a Gaussian Naive Bayes classifier: full covariance, naive (diagonal covariance), and complete-set covariance. Their effects on classification accuracy and likelihood space are discussed.
+
+\subsection{Methodologies}
+\begin{itemize}
+  \item \textbf{Full Covariance}: Computes class-specific covariance matrices using all feature interactions. Captures pairwise correlations within each class.
+  \item \textbf{Naive Covariance}: Assumes feature independence by using diagonal covariance matrices (variances only). Ignores inter-feature correlations.
+  \item \textbf{Complete-Set Covariance}: Derives a single covariance matrix from the entire dataset (ignoring class labels) and applies it to both classes. Reflects global correlations rather than class-specific ones.
+\end{itemize}
+
+\subsection{Accuracy Results}
+The mean cross-validation accuracies (10-fold) for each method are:
+\begin{itemize}
+  \item Reference (scikit-learn GaussianNB): \(0.93 \pm 0.03\)
+  \item Full covariance: \(0.94 \pm 0.03\)
+  \item Naive covariance: \(0.90 \pm 0.03\)
+  \item Complete-set covariance: \(0.92 \pm 0.04\)
+\end{itemize}
+
+The full covariance model achieved the highest accuracy, likely due to its ability to model class-specific feature correlations. The naive approach underperformed, as expected from its independence assumption. The complete-set method showed intermediate performance, suggesting that global correlations partially approximate class-specific structures.
+
+\subsection{Likelihood Space Behavior}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.75\textwidth]{default_likelihood.png}
-  \caption{Espaço de verossimilhança para o modelo padrão}
-  \label{fig:likelihood_def}
+  \includegraphics[width=0.95\textwidth]{likelihoods.png}
+  \caption{Likelihood spaces for different covariance methods. Points are colored by true class (0 or 1). The full covariance model (top-right) most closely resembles the reference model (top-left), with distinct class separation. The naive model (bottom-left) shows similar separation but lower accuracy, possibly due to unregularized variance estimates. The complete-set model (bottom-right) exhibits overlapping distributions, indicating mismatched covariance assumptions.}
+  \label{fig:likelihoods}
 \end{figure}
 
-\section*{Diagonal}
-
-Assume que todas as variáveis são independentes e usa o mesmo raio em todos os eixos.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth]{accuracy_diagonal.png}
-  \caption{Precisão vs raio}
-  \label{fig:accuracy_diag}
-\end{figure}
-
-\foreach \case in {best, mean, worst} {
-  \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\textwidth]{likelihood_diagonal_\case.png}
-    \caption{Espaço de verossimilhança para o modelo diagonal (\case)}
-    \label{fig:likelihood_diag_\case}
-  \end{figure}
-}
-
-\section*{Completa}
-
-Monta a matriz de convariância usando todo o conjunto de dados, em oposição à padrão, que considera os dados de cada classe separadamente.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth]{accuracy_full.png}
-  \caption{Precisão vs raio}
-  \label{fig:accuracy_full}
-\end{figure}
-
-\foreach \case in {best, mean, worst} {
-  \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\textwidth]{likelihood_full_\case.png}
-    \caption{Espaço de verossimilhança para o modelo completo (\case)}
-    \label{fig:likelihood_full_\case}
-  \end{figure}
-}
-
-\section*{Diagonal com variança por atributo}
-
-Considera independência entre os atributos, mas preserva a variança de cada um.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth]{accuracy_per_feature.png}
-  \caption{Precisão vs raio}
-  \label{fig:accuracy_per_feature}
-\end{figure}
-
-\foreach \case in {best, mean, worst} {
-  \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\textwidth]{likelihood_per_feature_\case.png}
-    \caption{Espaço de verossimilhança para o modelo diagonal com variança por atributo (\case)}
-    \label{fig:likelihood_per_feature_\case}
-  \end{figure}
-}
-
-\section*{Completa Regularizada}
-
-Monta a matriz de convariância usando todo o conjunto de dados e adiciona um fator de regularização.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth]{accuracy_regularized.png}
-  \caption{Precisão vs raio}
-  \label{fig:accuracy_regularized}
-\end{figure}
-
-\foreach \case in {best, mean, worst} {
-  \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\textwidth]{likelihood_regularized_\case.png}
-    \caption{Espaço de verossimilhança para o modelo completo regularizado (\case)}
-    \label{fig:likelihood_regularized_\case}
-  \end{figure}
-}
+\subsection{Discussion}
+The full covariance method outperformed others by leveraging class-specific correlations, aligning with the reference model's behavior. However, its computational complexity increases with feature dimensionality. The naive approach suffered from oversimplification but remained robust to correlated features. The complete-set method's intermediate accuracy suggests that global covariance partially compensates for class-specific correlations, but its divergent likelihood space implies suboptimal class separation. This contradiction warrants further investigation into dataset-specific correlation structures.
 
 \end{document}
