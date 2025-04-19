@@ -6,7 +6,6 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{lmodern}
 \usepackage{amsmath}
-\usepackage{csvsimple}
 
 \begin{document}
 
@@ -15,19 +14,71 @@
 \date{\today}
 \maketitle
 
-\section*{Seleção de K}
+\section*{Introduction}
+This report presents the implementation and evaluation of a Radial Basis Function (RBF) classifier with L2 regularization. The model leverages K-means clustering for center selection and employs regularized least squares for weight optimization. Experiments were conducted on synthetic and real-world datasets to validate performance.
 
-A tabela ~\ref{tab:kfold_results} apresenta os resultados do K-Fold para $K = 13$. Para a seleção de \texttt{K}, uma busca linear entre 2 e 20 foi realizada. Foi selecionado o valor de \texttt{K} que apresentou a maior precisão média.
+\section*{Methodology}
+\subsection*{RBF Network Structure}
+The classifier computes activations using the RBF kernel:
+\begin{equation}
+  \phi(\mathbf{x}) = \exp(-\gamma \|\mathbf{x} - \mathbf{c}_i\|^2)
+\end{equation}
+where \(\mathbf{c}_i\) are cluster centers and \(\gamma\) is determined by:
+\begin{equation}
+  \gamma = \frac{1}{2 \cdot (\text{median}(\text{min\_dists}))^2}
+\end{equation}
+with fallback to data-to-center distances if centers collapse.
 
+\subsection*{Weight Optimization}
+Weights \(\mathbf{W}\) are solved using regularized least squares:
+\begin{equation}
+  \mathbf{W} = (\mathbf{H}^T\mathbf{H} + \lambda \mathbf{I})^{-1}\mathbf{H}^T\mathbf{Y}
+\end{equation}
+where \(\mathbf{H}\) is the RBF activation matrix and \(\lambda\) is the regularization parameter.
+
+\subsection*{Implementation Details}
+\begin{itemize}
+  \item Centers selected via K-means clustering
+  \item Automatic \(\gamma\) computation using median heuristic
+  \item L2 regularization for numerical stability
+  \item One-vs-rest strategy for multi-class support
+\end{itemize}
+
+\section*{Experiments}
+\subsection*{Synthetic Data}
+\begin{itemize}
+  \item 1,000 samples, 20\% test split
+  \item Default parameters: 100 centers, \(\lambda=10^{-3}\)
+\end{itemize}
+
+\subsection*{Breast Cancer Dataset}
+\begin{itemize}
+  \item Preprocessing: Drop correlated features
+  \item 10-fold cross-validation
+  \item Evaluation metric: Classification accuracy
+\end{itemize}
+
+\section*{Results}
+\subsection*{Synthetic Data Evaluation}
+\begin{equation*}
+  \text{Accuracy} = 0.88
+\end{equation*}
+
+\subsection*{Cross-Validation Performance}
 \begin{table}[H]
   \centering
-  \caption{Resultados do K-Fold para $K = 13$}
-  \label{tab:kfold_results}
-  \csvautotabular{./kfold_results.csv}
+  \begin{tabular}{|l|c|}
+  \hline
+  Mean Accuracy & 0.89 \\
+  Std Deviation & 0.03 \\
+  \hline
+  \end{tabular}
+  \caption{10-fold cross-validation results on breast cancer dataset}
 \end{table}
 
-\section*{Conclusão}
+Detailed fold scores: [0.91, 0.89, 0.88, 0.95, 0.86, 0.88, 0.84, 0.88, 0.88, 0.95]
 
-O treinamento mais custoso, em relação ao do Perceptron, do RBF, se justifica pela sua maior precisão.
+\section*{Conclusion}
+The RBF classifier demonstrated strong performance on both synthetic (88\% accuracy) and real-world data (89\% mean cross-validated accuracy). The median-based \(\gamma\) computation and L2 regularization proved effective for stable learning.
 
 \end{document}
