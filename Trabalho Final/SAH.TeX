@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage[margin=1cm]{geometry}
+
+\title{Segment Attractiveness and Homogeneity (SAH) Score}
+\author{Eduardo Henrique Basilio de Carvalho}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+The SAH score is a metric ranging from 0 to 1, designed to quantify how well points are homogeneously spread within a defined segment $[a, b]$. An SAH score of 1 represents an ideal distribution.
+
+\section{SAH Calculation}
+Given a 1D array of points $P = \{p_1, p_2, ..., p_n\}$, and segment boundaries $a, b$ (with $a < b$). The segment length is $L = b - a$.
+
+\begin{enumerate}
+    \item \textbf{Segment Attractiveness Weight Function $w(p_i)$}:
+    For each point $p_i$, its distance $d_S(p_i)$ from the segment $[a,b]$ is calculated:
+    $$ d_S(p_i) = \begin{cases} a - p_i & \text{if } p_i < a \\ 0 & \text{if } a \le p_i \le b \\ p_i - b & \text{if } p_i > b \end{cases} $$
+    The weight $w(p_i)$ is then given by:
+    $$ w(p_i) = \exp\left(\frac{-2 \cdot d_S(p_i)^2}{L^2}\right) $$
+
+    \item \textbf{Mean Attractiveness (MA)}:
+    If $n=0$, $MA=0.0$. Otherwise:
+    $$ MA = \frac{1}{n} \sum_{i=1}^{n} w(p_i) $$
+
+    \item \textbf{Weighted Homogeneity ($H_W$)}:
+    $H_W = 1.0$ if $n \le 1$. Otherwise, points are sorted $P_{sorted}$, and corresponding weights are $W_{sorted}$.
+    Let $W_{sum} = \sum w_i$. If $W_{sum} \approx 0$, $H_W = 1.0$.
+    Nearest neighbor distances $d_{nn,i}$ are calculated for sorted points.
+    \begin{itemize}
+        \item Weighted mean of nearest neighbor distances ($\mu_d$):
+        $$ \mu_d = \frac{\sum (d_{nn,i} \cdot w_{sorted,i})}{W_{sum}} $$
+        \item Weighted variance of nearest neighbor distances ($\sigma_d^2$):
+        $$ \sigma_d^2 = \frac{\sum ((d_{nn,i} - \mu_d)^2 \cdot w_{sorted,i})}{W_{sum}} $$
+        \item Weighted coefficient of variation ($CV_d$):
+        If $\mu_d \approx 0$, $CV_d = 0.0$. Otherwise:
+        $$ CV_d = \frac{\sqrt{\sigma_d^2}}{\mu_d} $$
+    \end{itemize}
+    The homogeneity score $H_W$ is:
+    $$ H_W = \frac{1.0}{1.0 + CV_d} $$
+
+    \item \textbf{Final SAH Score}:
+    $$ \text{SAH} = MA \times H_W $$
+\end{enumerate}
+
+\end{document}
