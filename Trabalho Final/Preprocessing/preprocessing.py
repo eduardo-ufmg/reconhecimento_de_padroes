@@ -8,6 +8,7 @@ from typing_extensions import Self
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA # Import PCA
 
 class CorrelationFilter(BaseEstimator, TransformerMixin):
     """Transformer to remove highly correlated features."""
@@ -48,7 +49,7 @@ class CorrelationFilter(BaseEstimator, TransformerMixin):
     
 def preprocess(X: NDArray[np.float64], y: NDArray[np.int32]) -> NDArray[np.float64]:
     """
-    Preprocess the data by applying a correlation filter and scaling.
+    Preprocess the data by applying variance threshold, a correlation filter, scaling, and PCA.
 
     Parameters:
     X : NDArray[np.float64]
@@ -62,8 +63,8 @@ def preprocess(X: NDArray[np.float64], y: NDArray[np.int32]) -> NDArray[np.float
     """
 
     return Pipeline([
-        ('variance_threshold', VarianceThreshold(threshold=0.1)),
-        ('correlation_filter', CorrelationFilter(threshold=0.9)),
-        ('scaler', StandardScaler())
+        ('variance_threshold', VarianceThreshold(threshold=0.2)),
+        ('correlation_filter', CorrelationFilter(threshold=0.8)),
+        ('scaler', StandardScaler()),
+        ('pca', PCA(n_components=0.9))
     ]).fit_transform(X, y)
-

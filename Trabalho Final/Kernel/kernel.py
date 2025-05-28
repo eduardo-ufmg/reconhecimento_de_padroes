@@ -34,7 +34,7 @@ def kernel(X: NDArray[np.float64], Y: NDArray[np.float64],
 
     pdf = mvpdf(X, Y, scaled_norm_factor, scaled_cov_inv)
 
-    pdf_normalized = pdf / np.sum(pdf)
+    pdf_normalized = pdf / np.max(pdf)
 
     return pdf_normalized
 
@@ -113,7 +113,7 @@ def kernel_fit(X: NDArray[np.float64]) -> tuple[float, NDArray[np.float64]]:
     cov_matrix: NDArray[np.float64] = cast(NDArray[np.float64], np.cov(X, rowvar=False))
 
     cov_det = np.linalg.det(cov_matrix)
-    if cov_det <= 0:
+    if not cov_det > 0:
         raise ValueError("Covariance matrix is singular, ill-conditioned, or not positive definite.")
 
     # Compute the normalization factor
