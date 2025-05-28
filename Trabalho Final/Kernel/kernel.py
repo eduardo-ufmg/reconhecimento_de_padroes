@@ -96,31 +96,42 @@ def mvpdf(X: NDArray[np.float64], Y: NDArray[np.float64],
 
     return pdf_matrix
     
-def kernel_fit(X: NDArray[np.float64]) -> tuple[float, NDArray[np.float64]]:
+def kernel_fit(X: NDArray[np.float64], type: str='cov') -> tuple[float, NDArray[np.float64]]:
     """
     Fits the kernel by computing the inverse covariance matrix and normalization factor.
 
     Parameters:
     X : NDArray[np.float64]
         Data points (shape: [n_samples, n_features]).
+    type : str
+        Type of kernel to fit. 'cov' for covariance, 'scale' for diagonal scaling.
 
     Returns:
     tuple[float, NDArray[np.float64]]
         Normalization factor and Inverse covariance matrix (shape: [n_features, n_features]).
     """
     
-    # Compute the covariance matrix
-    cov_matrix: NDArray[np.float64] = cast(NDArray[np.float64], np.cov(X, rowvar=False))
-
-    cov_det = np.linalg.det(cov_matrix)
-    if not cov_det > 0:
-        raise ValueError("Covariance matrix is singular, ill-conditioned, or not positive definite.")
-
-    # Compute the normalization factor
-    _, n_features = X.shape
-    norm_factor: float = 1 / ((2 * np.pi) ** (n_features / 2) * np.sqrt(cov_det))
+    if type not in ['cov', 'scale']:
+        raise ValueError("Invalid type. Supported types are 'cov' and 'scale'.")
     
-    # Compute the inverse of the covariance matrix
-    cov_inv: NDArray[np.float64] = cast(NDArray[np.float64], np.linalg.inv(cov_matrix))
+    _, n_features = X.shape
+    
+    if type == 'cov':
+        # Compute the covariance matrix
+        cov_matrix: NDArray[np.float64] = cast(NDArray[np.float64], np.cov(X, rowvar=False))
+
+        cov_det = np.linalg.det(cov_matrix)
+        if not cov_det > 0:
+            raise ValueError("Covariance matrix is singular, ill-conditioned, or not positive definite.")
+
+        # Compute the normalization factor
+        norm_factor: float = 1 / ((2 * np.pi) ** (n_features / 2) * np.sqrt(cov_det))
+        
+        # Compute the inverse of the covariance matrix
+        cov_inv: NDArray[np.float64] = cast(NDArray[np.float64], np.linalg.inv(cov_matrix))
+
+    elif type == 'scale':
+        cov_inv = np.eye(n_features)
+        norm_factor = 1 / ((2 * np.pi) ** (n_features / 2))
     
     return norm_factor, cov_inv

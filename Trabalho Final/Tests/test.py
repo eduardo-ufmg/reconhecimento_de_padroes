@@ -7,11 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn.datasets import make_classification
-from numpy.typing import NDArray
 
+from Preprocessing.preprocessing import preprocess
 from Kernel.kernel import kernel, kernel_fit
 from AxisSpread.vector_spread import vector_spread
-from Preprocessing.preprocessing import preprocess
+from ObjectiveFunction.objective_funcion import objective_function
 
 if __name__ == "__main__":
 
@@ -22,11 +22,12 @@ if __name__ == "__main__":
 
     X = preprocess(X, y)
 
-    cov_inv, norm_factor = kernel_fit(X)
+    cov_inv, norm_factor = kernel_fit(X, type='scale')
 
-    hs = np.linspace(1e-3, 2.0, 100)
+    hs = np.linspace(1e-3, 5.0, 100)
 
     spreads = []
+    scores = []
 
     for h in hs:
         K = kernel(X, X, cov_inv, norm_factor, h)
@@ -39,13 +40,23 @@ if __name__ == "__main__":
         spread_Q0C0 = vector_spread(Q0C0)
         spread_Q1C1 = vector_spread(Q1C1)
 
+        if spread_Q0C0 is None or spread_Q1C1 is None:
+            score = np.nan
+        else:
+            score = objective_function(spread_Q0C0, spread_Q1C1)
+
         spreads.append((spread_Q0C0, spread_Q1C1))
+        scores.append(score)
 
     spreads = np.array(spreads)
-    plt.plot(hs, spreads[:, 0], label='Spread Q0C0')
-    plt.plot(hs, spreads[:, 1], label='Spread Q1C1')
-    plt.xlabel('Bandwidth (h)')
-    plt.ylabel('Spread')
+    scores = np.array(scores)
+
+    plt.figure()
+    plt.plot(hs, spreads[:, 0], label='0', linestyle='--')
+    plt.plot(hs, spreads[:, 1], label='1', linestyle='--')
+    plt.plot(hs, scores, label='Score')
+    plt.xlabel('h')
+    plt.ylabel('Value')
+    plt.title('Spread and Score vs h')
     plt.legend()
-    plt.title('Spread vs Bandwidth')
     plt.show()
