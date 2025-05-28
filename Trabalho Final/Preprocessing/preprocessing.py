@@ -66,5 +66,5 @@ def preprocess(X: NDArray[np.float64], y: NDArray[np.int32]) -> NDArray[np.float
         ('variance_threshold', VarianceThreshold(threshold=0.2)),
         ('correlation_filter', CorrelationFilter(threshold=0.8)),
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=0.9))
+        ('pca', PCA())
     ]).fit_transform(X, y)
