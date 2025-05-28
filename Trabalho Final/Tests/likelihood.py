@@ -24,18 +24,25 @@ if __name__ == "__main__":
 
     cov_inv, norm_factor = kernel_fit(X)
 
-    K = kernel(X, X, cov_inv, norm_factor, 1.0)
+    hs = np.linspace(1e-3, 2.0, 100)
 
-    plt.imshow(K)
-    plt.show()
+    spreads = []
 
-    Q0 = np.sum(K[:, y == 0], axis=1)
-    Q1 = np.sum(K[:, y == 1], axis=1)
+    for h in hs:
+        K = kernel(X, X, cov_inv, norm_factor, h)
+        Q0 = np.sum(K[:, y == 0], axis=1)
+        Q1 = np.sum(K[:, y == 1], axis=1)
 
-    spread_Q0 = vector_spread(Q0)
-    spread_Q1 = vector_spread(Q1)
+        spread_Q0 = vector_spread(Q0)
+        spread_Q1 = vector_spread(Q1)
 
-    plt.scatter(Q0, Q1, c=y)
-    plt.xlabel(f'Spread: {spread_Q0:.2g}')
-    plt.ylabel(f'Spread: {spread_Q1:.2g}')
+        spreads.append((spread_Q0, spread_Q1))
+
+    spreads = np.array(spreads)
+    plt.plot(hs, spreads[:, 0], label='Spread Q0')
+    plt.plot(hs, spreads[:, 1], label='Spread Q1')
+    plt.xlabel('Bandwidth (h)')
+    plt.ylabel('Spread')
+    plt.legend()
+    plt.title('Spread vs Bandwidth')
     plt.show()
