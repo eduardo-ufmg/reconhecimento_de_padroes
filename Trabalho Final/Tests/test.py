@@ -33,14 +33,17 @@ if __name__ == "__main__":
         Q0 = np.sum(K[:, y == 0], axis=1)
         Q1 = np.sum(K[:, y == 1], axis=1)
 
-        spread_Q0 = vector_spread(Q0)
-        spread_Q1 = vector_spread(Q1)
+        Q0C0 = Q0[y == 0]
+        Q1C1 = Q1[y == 1]
 
-        spreads.append((spread_Q0, spread_Q1))
+        spread_Q0C0 = vector_spread(Q0C0)
+        spread_Q1C1 = vector_spread(Q1C1)
+
+        spreads.append((spread_Q0C0, spread_Q1C1))
 
     spreads = np.array(spreads)
-    plt.plot(hs, spreads[:, 0], label='Spread Q0')
-    plt.plot(hs, spreads[:, 1], label='Spread Q1')
+    plt.plot(hs, spreads[:, 0], label='Spread Q0C0')
+    plt.plot(hs, spreads[:, 1], label='Spread Q1C1')
     plt.xlabel('Bandwidth (h)')
     plt.ylabel('Spread')
     plt.legend()
