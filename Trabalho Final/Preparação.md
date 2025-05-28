@@ -14,9 +14,3 @@
 | 02/Junho   | Análise do artigo
 | 09/Junho   | Implementação da solução alternativa
 | 15/Junho   | Comparação dos resultados e elaboração do relatório
-
-# Estratégia avaliada
-Buscar `h` para o qual a função `scipy.spatial.ConvexHull` forneça o polígono mais "próximo" do triangulo dado por [`(0, 0)`, `(0, 1)`, `(1, 1)`] para a classe 1 e [`(0, 0)`, `(1, 0)`, `(1, 1)`] para a classe 0.
-
-# Desafio inicial
-Formular, matemáticamente, o que é um polígono "próximo" de cada triângulo.
