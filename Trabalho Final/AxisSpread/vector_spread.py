@@ -57,16 +57,28 @@ def vector_spread(data_vector: ArrayLike) -> float | None:
     # np.std([d], ddof=0) is 0.0, correctly indicating perfect evenness for two points.
     std_of_differences = np.std(differences, ddof=0)
 
+    # Calculate the mean of the differences
+    mean_of_differences = np.mean(differences)
+
     # If std_of_differences is NaN or Inf (e.g., if input had Inf values leading to this),
     # return None for a clean API.
     if np.isnan(std_of_differences) or np.isinf(std_of_differences):
         return None
 
-    # Transform the standard deviation of differences into an "evenness score".
-    # Score = 1.0 / (1.0 + std_of_differences)
-    # - If std_of_differences is 0 (perfectly even), score is 1.0.
-    # - As std_of_differences increases (more uneven), score approaches 0.0.
-    score = 1.0 / (1.0 + std_of_differences)
+
+    # Calculate the std_score
+    # Since we want a score that is higher for more evenly spaced vectors,
+    # we favor lower standard deviations.
+    std_score = 1.0 / (1.0 + std_of_differences)
+
+    # Calculate the mean score
+    # We normalize the mean of differences by the maximum absolute difference
+    # to ensure the score is between 0.0 and 1.0.
+    max_diff = np.max(np.abs(differences))
+    mean_score = mean_of_differences / max_diff if max_diff != 0 else 0.0
+    
+    # Combine the scores
+    score = std_score * mean_score
     
     return float(score) # Ensure standard Python float
     
