@@ -47,24 +47,21 @@ class CorrelationFilter(BaseEstimator, TransformerMixin):
 
         return np.delete(X, valid_to_drop, axis=1)
     
-def preprocess(X: NDArray[np.float64], y: NDArray[np.int32]) -> NDArray[np.float64]:
-    """
-    Preprocess the data by applying variance threshold, a correlation filter, scaling, and PCA.
+class Preprocessor(BaseEstimator, TransformerMixin):
+    """Pipeline for preprocessing data with variance threshold, correlation filter, scaling, and PCA."""
+    
+    def __init__(self) -> None:
+        self.pipeline = Pipeline([
+            ('variance_threshold', VarianceThreshold(threshold=0.2)),
+            ('correlation_filter', CorrelationFilter(threshold=0.8)),
+            ('scaler', StandardScaler()),
+            ('pca', PCA())
+        ])
 
-    Parameters:
-    X : NDArray[np.float64]
-        Input features (shape: [n_samples, n_features]).
-    y : NDArray[np.int32]
-        Target labels (shape: [n_samples,]).
+    def fit(self, X: NDArray[np.float64], y: Any = None) -> Self:
+        self.pipeline.fit(X, y)
+        return self
 
-    Returns:
-    NDArray[np.float64]
-        Preprocessed features
-    """
+    def transform(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
+        return self.pipeline.transform(X)
 
-    return Pipeline([
-        ('variance_threshold', VarianceThreshold(threshold=0.2)),
-        ('correlation_filter', CorrelationFilter(threshold=0.8)),
-        ('scaler', StandardScaler()),
-        ('pca', PCA())
-    ]).fit_transform(X, y)
