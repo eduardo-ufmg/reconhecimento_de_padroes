@@ -5,7 +5,6 @@ import sys
 import numpy as np
 import pandas as pd
 from typing import cast
-from numpy.typing import ArrayLike
 from scipy.stats import ttest_rel
 from sklearn.datasets import make_classification
 from sklearn.model_selection import StratifiedKFold, cross_val_score
@@ -41,7 +40,7 @@ class StatisticalTestResult:
         else:
             self.conclusion = "Equivalent"
 
-def run_test(hs_search_range: ArrayLike, run_index: int) -> tuple[ClassifierScore, ClassifierScore, StatisticalTestResult]:
+def run_test(hs_bounds: tuple[float, float], run_index: int) -> tuple[ClassifierScore, ClassifierScore, StatisticalTestResult]:
     """
     Executes a single run of the classifier comparison.
     
@@ -75,7 +74,7 @@ def run_test(hs_search_range: ArrayLike, run_index: int) -> tuple[ClassifierScor
     pipeline_opt = Pipeline([
         ('preprocessor', Preprocessor()),
         ('custom_svm', SVM(
-            hs_range=hs_search_range,
+            h_bounds=hs_bounds,
         ))
     ])
     svm_opt_scores = cross_val_score(pipeline_opt, X_original, y_original, cv=skf, scoring='accuracy')
@@ -90,7 +89,7 @@ def run_test(hs_search_range: ArrayLike, run_index: int) -> tuple[ClassifierScor
 
 if __name__ == "__main__":
     n_runs = 10
-    hs_param_search_range = np.linspace(5e-1, 5e0, 100)
+    hs_param_search_range = (5e-1, 5e0)
 
     try:
         num_processes = multiprocessing.cpu_count()
