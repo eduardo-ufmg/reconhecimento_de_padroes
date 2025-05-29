@@ -3,6 +3,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,7 +18,29 @@ from Kernel.kernel import kernel, kernel_fit
 from AxisSpread.vector_spread import vector_spread, objective_function
 from scipy.stats import ttest_rel
 
-if __name__ == "__main__":
+class ClassifierScore:
+    mean: float
+    std: float
+
+    def __init__(self, mean: float, std: float):
+        self.mean = mean
+        self.std = std
+
+class StatisticalTestResult:
+    t_statistic: float
+    p_value: float
+    conclusion: str
+
+    def __init__(self, t_statistic: float, p_value: float):
+        self.t_statistic = t_statistic
+        self.p_value = p_value
+
+        if p_value < 0.05:
+            self.conclusion = "Not equivalent"
+        else:
+            self.conclusion = "Equivalent"
+
+def run_test() -> tuple[ClassifierScore, ClassifierScore, StatisticalTestResult, float]:
 
     X, y = make_classification(
         n_samples=1000,
@@ -55,21 +78,7 @@ if __name__ == "__main__":
     spreads = np.array(spreads)
     scores = np.array(scores)
 
-    plot = False
-    if plot:
-        plt.figure()
-        plt.plot(hs, spreads[:, 0], label='0', linestyle='--')
-        plt.plot(hs, spreads[:, 1], label='1', linestyle='--')
-        plt.plot(hs, scores, label='Score')
-        plt.xlabel('h')
-        plt.ylabel('Value')
-        plt.title('Spread and Score vs h')
-        plt.legend()
-        plt.show()
-
-
     h_opt = hs[np.nanargmax(scores)]
-    print(f'Optimal h: {h_opt:.2g}')
 
     K_opt = kernel(X, X, cov_inv, norm_factor, h_opt)
 
@@ -78,17 +87,36 @@ if __name__ == "__main__":
 
     skf = StratifiedKFold(n_splits=10, shuffle=True)
 
-    svm_ref_scores = cross_val_score(svm_ref, X, y, cv=skf)
-    svm_opt_scores = cross_val_score(svm_opt, K_opt, y, cv=skf)
+    svm_ref_scores = cross_val_score(svm_ref, X, y, cv=skf, scoring='accuracy')
+    svm_opt_scores = cross_val_score(svm_opt, K_opt, y, cv=skf, scoring='accuracy')
 
-    print(f"Reference SVM score: {np.mean(svm_ref_scores):.2g} ± {np.std(svm_ref_scores):.2g}")
-    print(f"Optimized SVM score: {np.mean(svm_opt_scores):.2g} ± {np.std(svm_opt_scores):.2g}")
-
-    # Paired t-test
     t_stat, p_value = cast(tuple[float, float], ttest_rel(svm_ref_scores, svm_opt_scores))
-    print(f"Paired t-test: t-statistic = {t_stat:.2g}, p-value = {p_value:.2g}")
 
-    if p_value > 0.05:
-        print("No statistically significant difference between the models (p > 0.05).")
-    else:
-        print("Statistically significant difference between the models (p <= 0.05).")
+    return (
+        ClassifierScore(mean=np.mean(svm_opt_scores).astype(float), std=np.std(svm_opt_scores).astype(float)),
+        ClassifierScore(mean=np.mean(svm_ref_scores).astype(float), std=np.std(svm_ref_scores).astype(float)),
+        StatisticalTestResult(t_statistic=t_stat, p_value=p_value),
+        h_opt
+    )
+
+if __name__ == "__main__":
+    n_runs = 10
+    results = [run_test() for _ in range(n_runs)]
+
+    df = pd.DataFrame([{
+        'opt score': r[0].mean,
+        'opt std': r[0].std,
+        'ref score': r[1].mean,
+        'ref std': r[1].std,
+        'T statistic': r[2].t_statistic,
+        'p value': r[2].p_value,
+        'conclusion': r[2].conclusion,
+        'opt h': r[3]
+    } for r in results])
+
+    summary = df.describe().T[['mean', 'std']]
+
+    print("Results for each run:")
+    print(df.to_string(index=False))
+    print("\nSummary statistics:")
+    print(summary)
