@@ -1,6 +1,5 @@
 import numpy as np
-from numpy.typing import ArrayLike
-import warnings
+from numpy.typing import ArrayLike, NDArray
 
 def vector_spread(data_vector: ArrayLike) -> float | None:
     """
@@ -82,35 +81,29 @@ def vector_spread(data_vector: ArrayLike) -> float | None:
     
     return float(score) # Ensure standard Python float
 
-def objective_function(score0: float, score1: float) -> float:
+def objective_function(Q0: NDArray[np.float64], Q1: NDArray[np.float64], y: NDArray[np.int32]) -> float:
     """
-    Computes the objective function value based on the scores of two classes.
-    
-    The objective function is defined as the mean of the two scores
-    minus the absolute difference between the two scores.
-    Parameters:
-        score0 (float): Score for class 0.
-        score1 (float): Score for class 1.
+    Calculates an objective value based on the spread of vectors in two groups, conditioned on class labels.
+    This function computes the spread (using `vector_spread`) of vectors in `Q0` for class 0 and in `Q1` for class 1,
+    then combines these spreads into a single objective value. If the spread cannot be computed for either group,
+    the function returns NaN.
+    Args:
+        Q0 (NDArray[np.float64]): Array of vectors corresponding to the first set of features.
+        Q1 (NDArray[np.float64]): Array of vectors corresponding to the second set of features.
+        y (NDArray[np.int32]): Array of integer class labels (0 or 1) for each sample.
     Returns:
-        float: The computed objective function value.
+        float: The computed objective value, or NaN if the spread cannot be computed for either group.
     """
-    if np.isnan(score0) or np.isnan(score1):
+
+    Q0C0, Q1C1 = Q0[y == 0], Q1[y == 1]
+
+    spread_Q0C0 = vector_spread(Q0C0)
+    spread_Q1C1 = vector_spread(Q1C1)
+
+    if spread_Q0C0 is None or spread_Q1C1 is None:
         return np.nan
     
-    mean = (score0 + score1) / 2.0
-    abs_diff = abs(score0 - score1)
+    mean = (spread_Q0C0 + spread_Q1C1) / 2.0
+    diff = np.abs(spread_Q0C0 - spread_Q1C1)
 
-    return mean - abs_diff
-    
-if __name__ == "__main__":
-    
-    # Ordened scores from higher to lower
-    v0 = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    v1 = [0.0, 0.0, 0.2, 0.2, 0.4, 0.4, 0.6, 0.6, 0.8, 0.8]
-    v2 = [0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0]
-    v3 = [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-
-    print("Spread of v0:", vector_spread(v0))
-    print("Spread of v1:", vector_spread(v1))
-    print("Spread of v2:", vector_spread(v2))
-    print("Spread of v3:", vector_spread(v3))
+    return mean - diff

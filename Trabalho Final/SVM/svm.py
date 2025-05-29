@@ -16,14 +16,14 @@ from sklearn.metrics import accuracy_score
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Kernel.kernel import kernel, kernel_fit
-from AxisSpread.vector_spread import vector_spread, objective_function
+from AxisSpread.vector_spread import objective_function
 
 DEFAULT_HS_RANGE = np.linspace(5e-1, 5e0, 100)
 
 class SVM(BaseEstimator, ClassifierMixin):
     """
     Custom SVM using a precomputed kernel where the kernel parameter 'h'
-    is optimized based on vector spread.
+    is optimized based on a custom metric.
     Assumes input data (X) is already preprocessed.
     """
     def __init__(self, hs_range: ArrayLike | None = None, kernel_fit_type: str = 'scale', svm_kwargs: dict | None = None):
@@ -52,27 +52,18 @@ class SVM(BaseEstimator, ClassifierMixin):
         # 2. Optimize h (h_opt)
         best_h = None
         max_obj_score = -np.inf
-        y_for_spread = y_checked
 
         for h_candidate in self.hs_range:
             K_h = kernel(X_checked, X_checked, self.norm_factor_, self.cov_inv_, h_candidate)
             
-            if K_h.shape[0] != len(y_for_spread):
-                 raise ValueError(f"Mismatch in K_h rows ({K_h.shape[0]}) and y_for_spread length ({len(y_for_spread)}) for h={h_candidate}")
+            if K_h.shape[0] != len(y_checked):
+                 raise ValueError(f"Mismatch in K_h rows ({K_h.shape[0]}) and y_checked length ({len(y_checked)}) for h={h_candidate}")
 
             # Assuming binary classification, adjust if multiclass spread logic is different
-            Q0 = np.sum(K_h[:, y_for_spread == self.classes_[0]], axis=1)
-            Q1 = np.sum(K_h[:, y_for_spread == self.classes_[1]], axis=1)
+            Q0 = np.sum(K_h[:, y_checked == self.classes_[0]], axis=1)
+            Q1 = np.sum(K_h[:, y_checked == self.classes_[1]], axis=1)
 
-            Q0C0 = Q0[y_for_spread == self.classes_[0]]
-            Q1C1 = Q1[y_for_spread == self.classes_[1]]
-
-            spread_Q0C0 = vector_spread(Q0C0)
-            spread_Q1C1 = vector_spread(Q1C1)
-            
-            current_obj_score = np.nan
-            if spread_Q0C0 is not None and spread_Q1C1 is not None:
-                current_obj_score = objective_function(spread_Q0C0, spread_Q1C1)
+            current_obj_score = objective_function(Q0, Q1, y_checked)
 
             if not np.isnan(current_obj_score) and current_obj_score > max_obj_score:
                 max_obj_score = current_obj_score
