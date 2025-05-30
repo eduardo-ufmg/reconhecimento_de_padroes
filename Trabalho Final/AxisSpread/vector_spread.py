@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-def vector_spread(data_vector: ArrayLike) -> float | None:
+def vector_spread(Qx: ArrayLike) -> float | None:
     """
     Computes a score indicating how evenly spaced the values in a vector are.
     A higher score (closer to 1.0) means more evenly spaced (benefited).
@@ -14,7 +14,7 @@ def vector_spread(data_vector: ArrayLike) -> float | None:
     4. The score is 1.0 / (1.0 + std_diff).
 
     Args:
-        data_vector (array-like): A list, tuple, or NumPy array of numbers.
+        Qx (array-like): A list, tuple, or NumPy array of numbers.
 
     Returns:
         float: A score between 0.0 (exclusive, in practice) and 1.0 (inclusive).
@@ -24,7 +24,7 @@ def vector_spread(data_vector: ArrayLike) -> float | None:
                or if the internal standard deviation calculation results in NaN or Inf.
     """
     try:
-        numeric_array = np.asarray(data_vector, dtype=float)
+        numeric_array = np.asarray(Qx, dtype=float)
     except ValueError:
         # Handles cases where conversion to float array fails (e.g., list of strings)
         return None

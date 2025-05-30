@@ -16,6 +16,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Kernel.kernel import kernel, kernel_fit 
 from AxisSpread.vector_spread import objective_function as vecspd_objfunc
+from twoDSpreadDistance.twod_spread_distance import objective_function as twod_objfunc
 
 # Default bounds for h optimization
 DEFAULT_H_BOUNDS: tuple[float, float] = (5e-1, 5e0)
@@ -97,7 +98,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         Q0 = np.sum(K_h[:, y_checked == self.classes_[0]], axis=1)
         Q1 = np.sum(K_h[:, y_checked == self.classes_[1]], axis=1)
 
-        current_obj_score = vecspd_objfunc(Q0, Q1, y_checked)
+        current_obj_score = twod_objfunc(Q0, Q1, y_checked)
 
         if np.isnan(current_obj_score):
             return np.inf  # Optimizer should avoid NaN values.
