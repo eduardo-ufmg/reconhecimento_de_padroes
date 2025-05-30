@@ -1,4 +1,3 @@
-import functools
 import multiprocessing
 import os
 import sys
@@ -15,7 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 try:
     from Preprocessing.preprocessing import Preprocessor
-    from SVM.svm import SVM
+    from CustomKernelSVC.CustomKernelSVC import CustomKernelSVC
 except ImportError as e:
     print(f"Error importing custom modules: {e}")
     print("Please ensure Preprocessor and SVM classes are correctly defined and accessible.")
@@ -73,7 +72,7 @@ def run_test(hs_bounds: tuple[float, float], run_index: int) -> tuple[Classifier
     # 2. Custom Kernel SVM
     pipeline_opt = Pipeline([
         ('preprocessor', Preprocessor()),
-        ('custom_svm', SVM(
+        ('custom_svm', CustomKernelSVC(
             h_bounds=hs_bounds,
         ))
     ])

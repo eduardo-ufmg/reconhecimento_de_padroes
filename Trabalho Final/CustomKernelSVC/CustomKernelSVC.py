@@ -15,12 +15,12 @@ from scipy.optimize import minimize_scalar
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Kernel.kernel import kernel, kernel_fit 
-from AxisSpread.vector_spread import objective_function
+from AxisSpread.vector_spread import objective_function as vecspd_objfunc
 
 # Default bounds for h optimization
 DEFAULT_H_BOUNDS: tuple[float, float] = (5e-1, 5e0)
 
-class SVM(BaseEstimator, ClassifierMixin):
+class CustomKernelSVC(BaseEstimator, ClassifierMixin):
     """
     Custom SVM using a precomputed kernel where the kernel parameter 'h'
     is optimized using scipy.optimize.minimize_scalar based on a custom metric.
@@ -97,7 +97,7 @@ class SVM(BaseEstimator, ClassifierMixin):
         Q0 = np.sum(K_h[:, y_checked == self.classes_[0]], axis=1)
         Q1 = np.sum(K_h[:, y_checked == self.classes_[1]], axis=1)
 
-        current_obj_score = objective_function(Q0, Q1, y_checked)
+        current_obj_score = vecspd_objfunc(Q0, Q1, y_checked)
 
         if np.isnan(current_obj_score):
             return np.inf  # Optimizer should avoid NaN values.
@@ -105,7 +105,7 @@ class SVM(BaseEstimator, ClassifierMixin):
         # We want to maximize objective_function, so minimize its negative
         return -current_obj_score
 
-    def fit(self, X: NDArray[np.float64], y: NDArray[np.int_]) -> "SVM":
+    def fit(self, X: NDArray[np.float64], y: NDArray[np.int_]) -> "CustomKernelSVC":
         """
         Fit the SVM model according to the given training data.
 
@@ -252,7 +252,7 @@ class SVM(BaseEstimator, ClassifierMixin):
             params['h_opt_'] = self.h_opt_ 
         return params
 
-    def set_params(self, **params: Any) -> "SVM":
+    def set_params(self, **params: Any) -> "CustomKernelSVC":
         """
         Set the parameters of this estimator.
         """
