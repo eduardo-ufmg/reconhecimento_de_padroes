@@ -1,0 +1,6 @@
+Summary statistics by objective_metric:
+                 custom_score_mean           custom_score_std           ref_score_mean           ref_score_std           t_statistic              p_value          
+                              mean       std             mean       std           mean       std          mean       std        mean        std      mean       std
+objective_metric                                                                                                                                                   
+axis                      0.882197  0.105436         0.025603  0.024316       0.892042  0.105884      0.025183  0.020202    4.781479  16.938465  0.444087  0.365710
+spatial                   0.844242  0.141501         0.026034  0.027569       0.891807  0.105345      0.025669  0.019935   12.339522  32.097202  0.415196  0.322866

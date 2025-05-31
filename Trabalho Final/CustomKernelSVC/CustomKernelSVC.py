@@ -28,7 +28,8 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
     """
     def __init__(self, 
                  h_bounds: tuple[float, float] | None = None, 
-                 kernel_fit_type: str = 'scale', 
+                 kernel_fit_type: str = 'scale',
+                 objective_metric: str = 'spatial',
                  svm_kwargs: dict[str, Any] | None = None):
         """
         Initialize the SVM.
@@ -40,11 +41,20 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
             If None, defaults to DEFAULT_H_BOUNDS.
         kernel_fit_type : str, default='scale'
             The type of kernel fitting to perform. Passed to `kernel_fit`.
+        objective_metric : str, default='spatial'
         svm_kwargs : dict, optional
             Additional keyword arguments to pass to the underlying `sklearn.svm.SVC`.
         """
+
+        if objective_metric not in ['spatial', 'axis']:
+            raise ValueError(
+                f"Invalid objective_metric '{objective_metric}'. "
+                "Expected 'spatial' or 'axis'."
+            )
+
         self.h_bounds = tuple(h_bounds) if h_bounds is not None else DEFAULT_H_BOUNDS
         self.kernel_fit_type = kernel_fit_type
+        self.objective_metric = objective_metric
         self.svm_kwargs = svm_kwargs if svm_kwargs is not None else {}
 
         self.h_opt_: float | None = None
@@ -52,12 +62,12 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         self.norm_factor_: float | None = None
         self.X_train_: NDArray[np.float32] | None = None
         self.svm_: SVC | None = None
-        self.classes_: NDArray[np.int_] | None = None # unique_labels returns array of int/str
+        self.classes_: NDArray[np.int32] | None = None # unique_labels returns array of int/str
 
     def _objective_for_h_optimization(self, 
                                       h_candidate: float, 
                                       X_checked: NDArray[np.float32], 
-                                      y_checked: NDArray[np.int_]) -> float:
+                                      y_checked: NDArray[np.int32]) -> float:
         """
         Objective function to be minimized for h optimization.
         Calculates -score from `objective_function`.
@@ -68,7 +78,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
             The candidate value for the kernel parameter 'h'.
         X_checked : NDArray[np.float32]
             The checked training input samples.
-        y_checked : NDArray[np.int_]
+        y_checked : NDArray[np.int32]
             The checked training target values.
 
         Returns:
@@ -98,7 +108,17 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         Q0 = np.sum(K_h[:, y_checked == self.classes_[0]], axis=1)
         Q1 = np.sum(K_h[:, y_checked == self.classes_[1]], axis=1)
 
-        current_obj_score = twod_objfunc(Q0, Q1, y_checked)
+        if self.objective_metric == 'axis':
+            # Use axis spread distance objective function
+            current_obj_score = vecspd_objfunc(Q0, Q1, y_checked)
+        elif self.objective_metric == 'spatial':
+            # Use two-dimensional spread distance objective function
+            current_obj_score = twod_objfunc(Q0, Q1, y_checked)
+        else:
+            raise ValueError(
+                f"Invalid objective_metric '{self.objective_metric}'. "
+                "Expected 'spatial' or 'axis'."
+            )
 
         if np.isnan(current_obj_score):
             return np.inf  # Optimizer should avoid NaN values.
@@ -106,7 +126,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         # We want to maximize objective_function, so minimize its negative
         return -current_obj_score
 
-    def fit(self, X: NDArray[np.float32], y: NDArray[np.int_]) -> "CustomKernelSVC":
+    def fit(self, X: NDArray[np.float32], y: NDArray[np.int32]) -> "CustomKernelSVC":
         """
         Fit the SVM model according to the given training data.
 
@@ -115,7 +135,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         X : NDArray[np.float32]
             Training vectors, where n_samples is the number of samples and
             n_features is the number of features.
-        y : NDArray[np.int_]
+        y : NDArray[np.int32]
             Target values (class labels) as integers.
 
         Returns:
@@ -123,7 +143,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         Self
             Fitted estimator.
         """
-        X_checked, y_checked = check_X_y(X, y, dtype=[np.float32, np.int_])
+        X_checked, y_checked = check_X_y(X, y, dtype=[np.float32, np.int32])
         self.classes_ = unique_labels(y_checked)
         self.X_train_ = X_checked
 
@@ -195,7 +215,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         
         return self
 
-    def predict(self, X: NDArray[np.float32]) -> NDArray[np.int_]:
+    def predict(self, X: NDArray[np.float32]) -> NDArray[np.int32]:
         """
         Perform classification on samples in X.
 
@@ -207,7 +227,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
 
         Returns:
         --------
-        NDArray[np.int_]
+        NDArray[np.int32]
             Class labels for samples in X.
         """
         check_is_fitted(self, ['svm_', 'X_train_', 'norm_factor_', 'cov_inv_', 'h_opt_'])
@@ -223,7 +243,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         
         return cast(SVC, self.svm_).predict(K_test)
 
-    def score(self, X: NDArray[np.float32], y: NDArray[np.int_]) -> float:
+    def score(self, X: NDArray[np.float32], y: NDArray[np.int32]) -> float:
         """
         Return the mean accuracy on the given test data and labels.
 
@@ -231,7 +251,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         -----------
         X : NDArray[np.float32]
             Test samples.
-        y : NDArray[np.int_]
+        y : NDArray[np.int32]
             True labels for X.
 
         Returns:
