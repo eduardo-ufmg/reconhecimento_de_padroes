@@ -34,7 +34,7 @@ except ImportError as e:
 # --- Dataset Names ---
 # Ensure these .npz files exist in the SETS_DIR
 DATASET_NAMES = [
-    "adult",
+    # "adult",
     "banknote-authentication",
     "blood-transfusion-service-center",
     "breast_cancer",
@@ -46,10 +46,10 @@ DATASET_NAMES = [
     "iris_binary_setosa_vs_rest",
     "iris_binary_setosa_vs_versicolor",
     "kc1",
-    "mushroom",
+    # "mushroom",
     "qsar-biodeg",
     "sonar",
-    "spambase",
+    # "spambase",
     "titanic",
     "vote",
     "wpbc"

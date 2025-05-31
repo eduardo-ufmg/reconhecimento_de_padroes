@@ -336,6 +336,14 @@ def main():
                     current_is_target_categorical = False
                 # else: remains True for LabelEncoder if other values exist
 
+            # Specific handling for 'sylvine' target if it is not binary
+            if ds_info['name'] == 'sylvine':
+                unique_sylvine_targets = y_series.unique()
+                if len(unique_sylvine_targets) > 2:
+                    logging.warning(f"Target for 'sylvine' has {len(unique_sylvine_targets)} classes: {unique_sylvine_targets}. Will attempt to binarize to first two classes.")
+                    current_binarize_config = {'type': 'select_two', 'class1': unique_sylvine_targets[0], 'class2': unique_sylvine_targets[1], 'map_to_0': unique_sylvine_targets[0]}
+                    current_is_target_categorical = True # Will use LabelEncoder for binarization
+
             # For OpenML 'blood-transfusion-service-center', target is 'Class' ('donated'/'not donated')
             # but fetch_openml might return it as string '1'/'2'. LabelEncoder will handle this.
             # For 'diabetes', target 'class' is 'tested_positive'/'tested_negative'. LabelEncoder handles.

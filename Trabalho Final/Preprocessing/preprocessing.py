@@ -52,8 +52,8 @@ class Preprocessor(BaseEstimator, TransformerMixin):
     
     def __init__(self) -> None:
         self.pipeline = Pipeline([
-            ('variance_threshold', VarianceThreshold(threshold=0.1)),
-            ('correlation_filter', CorrelationFilter(threshold=0.9)),
+            ('variance_threshold', VarianceThreshold(threshold=0.05)),
+            ('correlation_filter', CorrelationFilter(threshold=0.95)),
             ('scaler', StandardScaler()),
             ('pca', PCA())
         ])

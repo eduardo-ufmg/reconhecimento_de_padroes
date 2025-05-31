@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 
-from numpy.typing import NDArray # ArrayLike can be removed if not used elsewhere
+from numpy.typing import NDArray
 from typing import cast, Any
 
 from sklearn.base import BaseEstimator, ClassifierMixin
@@ -87,13 +87,13 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
             print(f"Warning: Mismatch in K_h rows ({K_h.shape[0]}) and y_checked length ({len(y_checked)}) for h={h_candidate}. Returning inf.")
             return np.inf
 
-        # Ensure there are at least two classes for the Q0, Q1 logic from original code
+        # Ensure there are at least two classes for the Q0, Q1 logic
         if len(self.classes_) < 2:
             # This scenario should be caught earlier in fit(), but as a safeguard:
             print(f"Warning: Less than 2 classes found during h optimization callback ({self.classes_}). Objective score is ill-defined. Returning inf.")
             return np.inf
 
-        # Assuming binary classification based on original Q0, Q1 logic
+        # Assuming binary classification
         # If multiclass, this part needs to be adapted based on `objective_function`'s expectation
         Q0 = np.sum(K_h[:, y_checked == self.classes_[0]], axis=1)
         Q1 = np.sum(K_h[:, y_checked == self.classes_[1]], axis=1)
