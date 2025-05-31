@@ -60,13 +60,13 @@ def mean_class_dist(Q0: ArrayLike, Q1: ArrayLike, y: ArrayLike) -> float | None:
 
     return mean_sample_dist(Q0_class_0, Q1_class_1)
 
-def objective_function(Q0: NDArray[np.float64], Q1: NDArray[np.float64], y: NDArray[np.int32]) -> float:
+def objective_function(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: NDArray[np.int32]) -> float:
     """
     The objective function is the sum of the mean distances between points in opposite classes and the mean distance
     between points in the same class. It is designed to encourage separation between classes while maintaining spread within classes.
     Args:
-        Q0 (NDArray[np.float64]): 1D array of x-coordinates for class 0.
-        Q1 (NDArray[np.float64]): 1D array of y-coordinates for class 1.
+        Q0 (NDArray[np.float32]): 1D array of x-coordinates for class 0.
+        Q1 (NDArray[np.float32]): 1D array of y-coordinates for class 1.
         y (NDArray[np.int32]): 1D array of class labels (0 or 1).
     Returns:
         float: The computed objective value, or NaN if the spread cannot be computed for either group.

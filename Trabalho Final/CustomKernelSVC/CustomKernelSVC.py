@@ -48,15 +48,15 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         self.svm_kwargs = svm_kwargs if svm_kwargs is not None else {}
 
         self.h_opt_: float | None = None
-        self.cov_inv_: NDArray[np.float64] | None = None
+        self.cov_inv_: NDArray[np.float32] | None = None
         self.norm_factor_: float | None = None
-        self.X_train_: NDArray[np.float64] | None = None
+        self.X_train_: NDArray[np.float32] | None = None
         self.svm_: SVC | None = None
         self.classes_: NDArray[np.int_] | None = None # unique_labels returns array of int/str
 
     def _objective_for_h_optimization(self, 
                                       h_candidate: float, 
-                                      X_checked: NDArray[np.float64], 
+                                      X_checked: NDArray[np.float32], 
                                       y_checked: NDArray[np.int_]) -> float:
         """
         Objective function to be minimized for h optimization.
@@ -66,7 +66,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         -----------
         h_candidate : float
             The candidate value for the kernel parameter 'h'.
-        X_checked : NDArray[np.float64]
+        X_checked : NDArray[np.float32]
             The checked training input samples.
         y_checked : NDArray[np.int_]
             The checked training target values.
@@ -106,13 +106,13 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         # We want to maximize objective_function, so minimize its negative
         return -current_obj_score
 
-    def fit(self, X: NDArray[np.float64], y: NDArray[np.int_]) -> "CustomKernelSVC":
+    def fit(self, X: NDArray[np.float32], y: NDArray[np.int_]) -> "CustomKernelSVC":
         """
         Fit the SVM model according to the given training data.
 
         Parameters:
         -----------
-        X : NDArray[np.float64]
+        X : NDArray[np.float32]
             Training vectors, where n_samples is the number of samples and
             n_features is the number of features.
         y : NDArray[np.int_]
@@ -123,7 +123,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         Self
             Fitted estimator.
         """
-        X_checked, y_checked = check_X_y(X, y, dtype=[np.float64, np.int_])
+        X_checked, y_checked = check_X_y(X, y, dtype=[np.float32, np.int_])
         self.classes_ = unique_labels(y_checked)
         self.X_train_ = X_checked
 
@@ -195,13 +195,13 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         
         return self
 
-    def predict(self, X: NDArray[np.float64]) -> NDArray[np.int_]:
+    def predict(self, X: NDArray[np.float32]) -> NDArray[np.int_]:
         """
         Perform classification on samples in X.
 
         Parameters:
         -----------
-        X : NDArray[np.float64]
+        X : NDArray[np.float32]
             For kernel='precomputed', the expected shape of X is (n_samples_test, n_samples_train).
             However, our kernel function computes this matrix. So X should be feature vectors.
 
@@ -212,24 +212,24 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         """
         check_is_fitted(self, ['svm_', 'X_train_', 'norm_factor_', 'cov_inv_', 'h_opt_'])
         # Ensure X is a 2D array of floats
-        X_checked = check_array(X, dtype=np.float64) 
+        X_checked = check_array(X, dtype=np.float32) 
         
         # These attributes are guaranteed to be non-None by check_is_fitted and fit() logic
         K_test = kernel(X_checked, 
-                        cast(NDArray[np.float64], self.X_train_), 
+                        cast(NDArray[np.float32], self.X_train_), 
                         cast(float, self.norm_factor_),
-                        cast(NDArray[np.float64], self.cov_inv_), 
+                        cast(NDArray[np.float32], self.cov_inv_), 
                         cast(float, self.h_opt_))
         
         return cast(SVC, self.svm_).predict(K_test)
 
-    def score(self, X: NDArray[np.float64], y: NDArray[np.int_]) -> float:
+    def score(self, X: NDArray[np.float32], y: NDArray[np.int_]) -> float:
         """
         Return the mean accuracy on the given test data and labels.
 
         Parameters:
         -----------
-        X : NDArray[np.float64]
+        X : NDArray[np.float32]
             Test samples.
         y : NDArray[np.int_]
             True labels for X.

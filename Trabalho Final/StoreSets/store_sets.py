@@ -1,7 +1,12 @@
 import os
 import numpy as np
-from sklearn.datasets import load_breast_cancer, load_iris, load_digits
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+import pandas as pd
+from sklearn.datasets import (
+    load_breast_cancer, load_iris, load_digits,
+    fetch_openml
+)
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
 import logging
 
 # Configure logging
@@ -24,93 +29,351 @@ def save_dataset(X, y, name, base_dir):
     try:
         np.savez_compressed(filepath, X=X, y=y)
         logging.info(f"Dataset '{name}' saved successfully to '{filepath}'")
-        logging.info(f"X shape: {X.shape}, y shape: {y.shape}, y unique values: {np.unique(y)}")
+        logging.info(f"X shape: {X.shape}, y shape: {y.shape}, y unique values: {np.unique(y, return_counts=True)}")
     except Exception as e:
         logging.error(f"Error saving dataset '{name}': {e}")
 
-def preprocess_features(X):
+def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binarize_target_config=None):
     """
-    Ensures all features are numeric and scales them.
-    For this script, sklearn datasets mostly provide numeric features.
-    If categorical features were present, more complex preprocessing like
-    one-hot encoding would be needed here.
+    Preprocesses features (handles missing values, scaling, one-hot encoding)
+    and ensures target labels are binary (0, 1).
+
+    Args:
+        X_df_orig (pd.DataFrame): Original feature DataFrame.
+        y_series_orig (pd.Series): Original target Series.
+        is_target_categorical (bool): Indicates if the target needs LabelEncoding.
+                                      Set to False if y is already 0/1 numeric.
+        binarize_target_config (dict, optional): Configuration for binarizing a multi-class target.
+            E.g., {'type': 'one_vs_rest', 'positive_class': 'some_label'}
+                  {'type': 'select_two', 'class1': 'labelA', 'class2': 'labelB', 'map_to_0': 'labelA'}
+
+    Returns:
+        tuple: (X_processed_np, y_processed_np)
+               Processed feature matrix as a NumPy array and
+               processed label vector as a NumPy array.
     """
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X.astype(np.float64))
-    return X_scaled
+    X_df = X_df_orig.copy()
+    y_series = y_series_orig.copy()
+
+    # --- Apply binarize_target_config early if it involves filtering X and y ---
+    if binarize_target_config:
+        if binarize_target_config['type'] == 'one_vs_rest':
+            pos_class = binarize_target_config['positive_class']
+            y_series = y_series.apply(lambda x: 1 if x == pos_class else 0)
+        elif binarize_target_config['type'] == 'select_two':
+            c1 = binarize_target_config['class1']
+            c2 = binarize_target_config['class2']
+            map_to_0 = binarize_target_config.get('map_to_0', c1)
+
+            # Filter for only the two classes
+            mask = y_series.isin([c1, c2])
+            if not mask.any(): # No samples match the selected classes
+                raise ValueError(f"In 'select_two' binarization, neither class '{c1}' nor '{c2}' found in target.")
+
+            y_series_before_filter_len = len(y_series)
+            X_df = X_df[mask]
+            y_series = y_series[mask]
+
+            if X_df.shape[0] == 0: # All samples dropped
+                raise ValueError(f"No samples remaining after filtering for classes {c1}, {c2} in 'select_two' binarization. Original y had {y_series_before_filter_len} samples.")
+
+            y_series = y_series.apply(lambda x: 0 if x == map_to_0 else 1)
+        is_target_categorical = False # Target is now 0/1
+
+    # --- Preprocess Features (X) from potentially filtered X_df ---
+    numerical_cols = X_df.select_dtypes(include=np.number).columns.tolist()
+    categorical_cols = X_df.select_dtypes(include=['object', 'category']).columns.tolist()
+    X_processed_parts = []
+
+    if numerical_cols:
+        num_imputer = SimpleImputer(strategy='median')
+        X_numerical = X_df[numerical_cols]
+        X_numerical_imputed = num_imputer.fit_transform(X_numerical)
+        X_processed_parts.append(X_numerical_imputed)
+        logging.debug(f"Processed numerical features: {numerical_cols}")
+
+    if categorical_cols:
+        cat_imputer = SimpleImputer(strategy='most_frequent')
+        X_categorical = X_df[categorical_cols]
+        X_categorical_imputed = cat_imputer.fit_transform(X_categorical)
+        X_categorical_imputed_df = pd.DataFrame(X_categorical_imputed, columns=categorical_cols, index=X_df.index)
+        X_categorical_encoded = pd.get_dummies(X_categorical_imputed_df, columns=categorical_cols, dummy_na=False)
+        X_processed_parts.append(X_categorical_encoded.values)
+        logging.debug(f"Processed categorical features (one-hot encoded): {categorical_cols}")
+
+    if not X_processed_parts:
+        if X_df_orig.shape[1] > 0: # Original dataframe had columns
+             logging.error("No features were identified for processing (neither numerical nor categorical) from the input X_df.")
+        else: # Original dataframe was empty
+             logging.error("Input X_df was empty. No features to process.")
+        raise ValueError("No features available for processing.")
+
+    try:
+        X_processed_np = np.concatenate(X_processed_parts, axis=1).astype(np.float32)
+    except ValueError as e:
+        logging.error(f"Error during feature concatenation: {e}. This might mean all feature parts were empty or incompatible.")
+        raise ValueError(f"Could not concatenate processed feature parts: {e}")
+
+    if X_processed_np.shape[0] == 0 and X_df_orig.shape[0] > 0:
+        # This can happen if X_df became empty due to y-filtering, and y also became empty.
+        raise ValueError("All samples were removed during preprocessing (e.g. target binarization), resulting in empty X and y.")
+
+    # --- Check for features that failed numerical encoding (non-finite values) ---
+    if X_processed_np.shape[1] > 0: # Only if there are columns to check
+        finite_cols_mask = np.all(np.isfinite(X_processed_np), axis=0)
+        if not np.all(finite_cols_mask):
+            num_total_features = X_processed_np.shape[1]
+            X_processed_np_original_cols = X_processed_np.shape[1]
+            X_processed_np = X_processed_np[:, finite_cols_mask]
+            num_dropped_features = num_total_features - X_processed_np.shape[1]
+
+            logging.warning(
+                f"Dropped {num_dropped_features} feature(s) out of {num_total_features} "
+                f"due to non-finite values (NaN or infinity) after processing."
+            )
+            if X_processed_np.shape[1] == 0:
+                logging.error("All features were dropped due to non-finite values. Cannot proceed with this dataset.")
+                raise ValueError("All features resulted in non-finite values and were dropped.")
+    elif X_df_orig.shape[1] > 0: # Original X had features, but now X_processed_np has no columns
+        logging.error("No features remaining after processing (e.g., all columns were of unsupported types or dropped).")
+        raise ValueError("Resulting feature matrix X has no columns after processing.")
+
+
+    # --- Preprocess Target (y) ---
+    y_np = y_series.values # y_series might have been filtered or transformed
+
+    if is_target_categorical:
+        if y_np.shape[0] == 0: # y_series became empty (e.g. due to binarize_target_config that removed all samples)
+            raise ValueError("Target variable y is empty before LabelEncoding. Cannot proceed.")
+        label_encoder = LabelEncoder()
+        y_processed_interim = label_encoder.fit_transform(y_np)
+        unique_labels_encoded = np.unique(y_processed_interim)
+
+        if len(unique_labels_encoded) > 2:
+            logging.warning(f"Target has {len(unique_labels_encoded)} classes after LabelEncoding: {unique_labels_encoded} (from originals: {np.unique(y_np)}). Attempting to use first two encoded classes.")
+            
+            map_to_0_val = unique_labels_encoded[0]
+            map_to_1_val = unique_labels_encoded[1]
+            
+            y_temp = y_processed_interim.copy()
+            y_processed_np_final = np.full_like(y_temp, -1, dtype=int)
+            y_processed_np_final[y_temp == map_to_0_val] = 0
+            y_processed_np_final[y_temp == map_to_1_val] = 1
+            
+            valid_indices = (y_processed_np_final != -1)
+            if not np.any(valid_indices):
+                 raise ValueError(f"All samples dropped when binarizing multi-class target from {len(unique_labels_encoded)} classes. No samples matched the first two selected encoded classes.")
+
+            y_processed_np = y_processed_np_final[valid_indices]
+            X_processed_np = X_processed_np[valid_indices] # Filter X accordingly
+            
+            if X_processed_np.shape[0] == 0 or y_processed_np.shape[0] == 0:
+                raise ValueError(f"All samples dropped after attempting to binarize target from {len(unique_labels_encoded)} classes. Original unique encoded: {unique_labels_encoded}")
+            logging.info(f"Target binarized from {len(unique_labels_encoded)} classes by selecting first two. New y shape: {y_processed_np.shape}, X shape: {X_processed_np.shape}")
+        
+        elif len(unique_labels_encoded) == 2: # Already two classes, ensure they become 0 and 1
+            # This will be handled by the final check to map to 0,1 if not already.
+            y_processed_np = y_processed_interim
+        elif len(unique_labels_encoded) == 1:
+            raise ValueError(f"Target has only one class after LabelEncoding: {unique_labels_encoded} (from original: {np.unique(y_np)}). Not a binary problem.")
+        else: # 0 classes
+            raise ValueError(f"Target has no classes after LabelEncoding (original y might have been empty or all NaNs not caught). Original unique: {np.unique(y_np)}")
+    else: # is_target_categorical is False (y is supposedly numeric, possibly 0/1)
+        if isinstance(y_np, (pd.Series, pd.DataFrame)): # Ensure it's a numpy array
+            y_np = y_np.values
+        try:
+            y_processed_np = y_np.astype(int)
+        except ValueError as e:
+            raise ValueError(f"Target variable could not be cast to int (is_target_categorical=False). Values: {np.unique(y_np)}. Error: {e}")
+
+
+    # --- Final check and enforcement for binary target (y must be 0 and 1) ---
+    if y_processed_np.shape[0] == 0:
+        # This can happen if all samples were filtered out during target processing
+        # and X_processed_np might also be empty (checked earlier for X).
+        raise ValueError("Target variable y is empty after all processing. Cannot create a dataset.")
+
+    unique_y_values = np.unique(y_processed_np)
+
+    if len(unique_y_values) == 2:
+        # If classes are already [0, 1], great. Otherwise, map them.
+        if not (0 in unique_y_values and 1 in unique_y_values):
+            logging.warning(f"Target labels are {unique_y_values}. Remapping to 0 and 1 (mapping {unique_y_values[0]} to 0, {unique_y_values[1]} to 1).")
+            # Map the numerically smaller unique value to 0, and the larger to 1
+            val_a, val_b = unique_y_values[0], unique_y_values[1]
+            y_processed_np = np.where(y_processed_np == val_a, 0, 1)
+            # Verify remapping
+            remapped_unique_y = np.unique(y_processed_np)
+            if not (len(remapped_unique_y) == 2 and 0 in remapped_unique_y and 1 in remapped_unique_y):
+                 logging.error(f"Target remapping failed. Labels are now: {remapped_unique_y}. Expected [0, 1].")
+                 raise ValueError(f"Target remapping from two classes ({unique_y_values}) to [0,1] failed.")
+    elif len(unique_y_values) == 1:
+        logging.warning(f"Target variable has only one unique class after all processing: {unique_y_values}. Dataset will be skipped as it's not binary.")
+        raise ValueError(f"Target has only one class ({unique_y_values[0]}), not suitable for binary classification.")
+    else: # 0 classes or more than 2 classes
+        logging.warning(f"Target variable does not have exactly two unique classes after processing. Found {len(unique_y_values)} classes: {unique_y_values}. Dataset will be skipped.")
+        raise ValueError(f"Target is not binary. Found {len(unique_y_values)} unique classes: {unique_y_values}.")
+
+    # Final check on X and y shapes (must have same number of samples)
+    if X_processed_np.shape[0] != y_processed_np.shape[0]:
+        raise ValueError(f"Mismatch in number of samples between X ({X_processed_np.shape[0]}) and y ({y_processed_np.shape[0]}) after processing.")
+
+    return X_processed_np, y_processed_np
+
 
 def main():
     """
     Loads, processes, and saves multiple datasets.
     """
-    # Determine the base directory (e.g., ../ from the script's directory)
-    # __file__ is the path to the current script
-    # os.path.abspath(__file__) gets the absolute path of the script
-    # os.path.dirname(...) gets the directory of the script
-    # os.path.join(..., '..') goes one level up
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
     except NameError:
-        # Fallback for environments where __file__ is not defined (e.g., some notebooks)
         script_dir = os.getcwd()
         logging.warning(f"'__file__' not defined. Using current working directory: {script_dir}")
 
     base_storage_dir = os.path.join(script_dir, '..')
     logging.info(f"Base storage directory for 'sets': {os.path.abspath(base_storage_dir)}")
 
-    # 1. Breast Cancer Dataset (already binary)
-    logging.info("Processing Breast Cancer dataset...")
+    datasets_to_process = []
+
+    # --- 1. Scikit-learn Datasets ---
+    logging.info("--- Processing Scikit-learn Datasets ---")
     cancer = load_breast_cancer()
-    X_cancer, y_cancer = cancer.data, cancer.target
-    # Ensure labels are 0 and 1 (already the case for breast_cancer)
-    # Ensure features are numeric (already the case)
-    X_cancer_processed = preprocess_features(X_cancer)
-    save_dataset(X_cancer_processed, y_cancer.astype(int), 'breast_cancer', base_storage_dir)
-    print("-" * 30)
+    X_cancer_df = pd.DataFrame(cancer.data, columns=cancer.feature_names)
+    y_cancer_series = pd.Series(cancer.target)
+    datasets_to_process.append({'df': X_cancer_df, 'series': y_cancer_series, 'name': 'breast_cancer', 'is_target_categorical': False})
 
-    # 2. Iris Dataset (convert to binary: class 0 vs. rest)
-    logging.info("Processing Iris dataset (class 0 vs. rest)...")
     iris = load_iris()
-    X_iris, y_iris = iris.data, iris.target
-    # Convert to binary: class 0 vs. (class 1 and class 2)
-    # Label class 0 as 0, and classes 1 and 2 as 1
-    y_iris_binary = np.where(y_iris == 0, 0, 1)
-    X_iris_processed = preprocess_features(X_iris)
-    save_dataset(X_iris_processed, y_iris_binary.astype(int), 'iris_binary_0_vs_rest', base_storage_dir)
-    print("-" * 30)
+    X_iris_df = pd.DataFrame(iris.data, columns=iris.feature_names)
+    y_iris_series = pd.Series(iris.target_names[iris.target]) # Use names for clarity in binarization
+    # Iris: class 'setosa' vs. rest
+    datasets_to_process.append({
+        'df': X_iris_df.copy(), 
+        'series': y_iris_series.copy(), 
+        'name': 'iris_binary_setosa_vs_rest', 
+        'binarize_target_config': {'type': 'one_vs_rest', 'positive_class': 'setosa'}
+        # is_target_categorical will be effectively False due to binarize_target_config
+    })
+    # Iris: class 'setosa' vs. 'versicolor'
+    datasets_to_process.append({
+        'df': X_iris_df.copy(), 
+        'series': y_iris_series.copy(), 
+        'name': 'iris_binary_setosa_vs_versicolor', 
+        'binarize_target_config': {'type': 'select_two', 'class1': 'setosa', 'class2': 'versicolor', 'map_to_0': 'setosa'}
+    })
 
-    # 3. Iris Dataset (convert to binary: class 0 vs. class 1)
-    logging.info("Processing Iris dataset (class 0 vs. class 1)...")
-    iris_0_vs_1_filter = np.where(y_iris <= 1) # Filter for classes 0 and 1
-    X_iris_01 = X_iris[iris_0_vs_1_filter]
-    y_iris_01 = y_iris[iris_0_vs_1_filter]
-    # Labels are already 0 and 1 for this subset
-    X_iris_01_processed = preprocess_features(X_iris_01)
-    save_dataset(X_iris_01_processed, y_iris_01.astype(int), 'iris_binary_0_vs_1', base_storage_dir)
-    print("-" * 30)
 
-    # 4. Digits Dataset (convert to binary: digit 0 vs. digit 1)
-    logging.info("Processing Digits dataset (digit 0 vs. digit 1)...")
     digits = load_digits()
-    X_digits, y_digits = digits.data, digits.target
-    # Filter for digits 0 and 1
-    filter_01 = np.logical_or(y_digits == 0, y_digits == 1)
-    X_digits_01 = X_digits[filter_01]
-    y_digits_01 = y_digits[filter_01]
-    # Labels are already 0 and 1 for this subset
-    X_digits_01_processed = preprocess_features(X_digits_01)
-    save_dataset(X_digits_01_processed, y_digits_01.astype(int), 'digits_binary_0_vs_1', base_storage_dir)
-    print("-" * 30)
+    X_digits_df = pd.DataFrame(digits.data) 
+    y_digits_series = pd.Series(digits.target) # Targets are 0-9
+    # Digits: 0 vs 1
+    datasets_to_process.append({
+        'df': X_digits_df.copy(),
+        'series': y_digits_series.copy(),
+        'name': 'digits_binary_0_vs_1',
+        'binarize_target_config': {'type': 'select_two', 'class1': 0, 'class2': 1, 'map_to_0': 0}
+    })
+    # Digits: 5 vs rest
+    datasets_to_process.append({
+        'df': X_digits_df.copy(),
+        'series': y_digits_series.copy(),
+        'name': 'digits_binary_5_vs_rest',
+        'binarize_target_config': {'type': 'one_vs_rest', 'positive_class': 5}
+    })
 
-    # 5. Digits Dataset (convert to binary: digit 5 vs. rest)
-    logging.info("Processing Digits dataset (digit 5 vs. rest)...")
-    # Convert to binary: digit 5 as class 1, all other digits as class 0
-    y_digits_5_vs_rest = np.where(y_digits == 5, 1, 0)
-    X_digits_processed = preprocess_features(X_digits)
-    save_dataset(X_digits_processed, y_digits_5_vs_rest.astype(int), 'digits_binary_5_vs_rest', base_storage_dir)
-    print("-" * 30)
 
-    logging.info("All datasets processed and saved.")
+    # --- 2. OpenML Datasets ---
+    logging.info("--- Processing OpenML Datasets ---")
+    openml_datasets_info = [
+        {'name': 'diabetes', 'id': 37, 'target_col': 'class', 'is_target_categorical': True}, # tested_positive, tested_negative
+        {'name': 'ionosphere', 'id': 59, 'target_col': 'class', 'is_target_categorical': True}, # 'g', 'b'
+        {'name': 'sonar', 'id': 40, 'target_col': 'Class', 'is_target_categorical': True}, # 'Rock', 'Mine'
+        {'name': 'spambase', 'id': 44, 'target_col': 'class', 'is_target_categorical': False}, # Already 0/1
+        {'name': 'german_credit_g', 'id': 31, 'target_col': 'class', 'is_target_categorical': True}, # 'good', 'bad'
+        {'name': 'vote', 'id': 56, 'target_col': 'Class', 'is_target_categorical': True}, # 'democrat', 'republican'
+        {'name': 'mushroom', 'id': 24, 'target_col': 'class', 'is_target_categorical': True}, # 'e', 'p'
+        {'name': 'banknote-authentication', 'id': 1462, 'target_col': 'Class', 'is_target_categorical': False}, # Already 0/1
+        {'name': 'adult', 'id': 1590, 'target_col': 'class', 'is_target_categorical': True}, # '>50K', '<=50K'
+        {'name': 'titanic', 'id': 40945, 'target_col': 'survived', 'is_target_categorical': True}, # target '0', '1' as strings
+        {'name': 'wpbc', 'id': 13, 'target_col': 'binaryClass', 'is_target_categorical': True}, # 'N', 'R'
+        {'name': 'kc1', 'id': 1067, 'target_col': 'defects', 'is_target_categorical': True}, # boolean true/false needs handling
+        {'name': 'blood-transfusion-service-center', 'id': 1464, 'target_col': 'Class', 'is_target_categorical': True}, # 'donated', 'not donated' (mapped from original int by openml)
+        {'name': 'qsar-biodeg', 'id': 1494, 'target_col': 'Class', 'is_target_categorical': True}, # 'ready biodegradable', 'not ready biodegradable'
+        {'name': 'sylvine', 'id': 1501, 'target_col': 'class', 'is_target_categorical': False} # Already 0/1 like
+    ]
+
+    for ds_info in openml_datasets_info:
+        logging.info(f"Fetching and processing OpenML dataset: {ds_info['name']} (ID: {ds_info['id']})")
+        try:
+            dataset = fetch_openml(data_id=ds_info['id'], as_frame=True, parser='auto')
+            X_df = dataset.data
+            y_series = dataset.target
+            
+            if y_series is None and ds_info['target_col'] in X_df.columns:
+                y_series = X_df.pop(ds_info['target_col'])
+            elif y_series is None:
+                logging.error(f"Target column for {ds_info['name']} could not be identified.")
+                continue
+            
+            # Ensure y_series is a pandas Series
+            if not isinstance(y_series, pd.Series):
+                y_series = pd.Series(y_series)
+
+
+            current_is_target_categorical = ds_info['is_target_categorical']
+            current_binarize_config = ds_info.get('binarize_target_config') # For potential future use
+
+            # Specific handling for 'kc1' boolean target
+            if ds_info['name'] == 'kc1' and y_series.dtype == 'bool':
+                 y_series = y_series.astype(str) # Convert boolean to string ('True', 'False') for LabelEncoder
+                 current_is_target_categorical = True # Ensure LabelEncoder is used
+
+            # Specific handling for 'titanic' target if it's string '0', '1'
+            if ds_info['name'] == 'titanic': # target '0', '1' as strings
+                unique_titanic_targets = y_series.unique()
+                if set(unique_titanic_targets) == {'0', '1'}:
+                    y_series = y_series.astype(int)
+                    current_is_target_categorical = False
+                # else: remains True for LabelEncoder if other values exist
+
+            # For OpenML 'blood-transfusion-service-center', target is 'Class' ('donated'/'not donated')
+            # but fetch_openml might return it as string '1'/'2'. LabelEncoder will handle this.
+            # For 'diabetes', target 'class' is 'tested_positive'/'tested_negative'. LabelEncoder handles.
+
+            datasets_to_process.append({
+                'df': X_df,
+                'series': y_series,
+                'name': ds_info['name'],
+                'is_target_categorical': current_is_target_categorical,
+                'binarize_target_config': current_binarize_config
+            })
+        except Exception as e:
+            logging.error(f"Failed to fetch or initially process OpenML dataset {ds_info['name']} (ID: {ds_info['id']}): {e}")
+        print("-" * 30)
+
+
+    # Process all collected datasets
+    for data_dict in datasets_to_process:
+        logging.info(f"Processing dataset: {data_dict['name']}")
+        try:
+            # Convert all column names to string
+            data_dict['df'].columns = data_dict['df'].columns.astype(str)
+
+            X_processed, y_processed = preprocess_data(
+                data_dict['df'],
+                data_dict['series'],
+                is_target_categorical=data_dict.get('is_target_categorical', True), # Default to True if not specified
+                binarize_target_config=data_dict.get('binarize_target_config')
+            )
+            save_dataset(X_processed, y_processed, data_dict['name'], base_storage_dir)
+        except ValueError as ve: 
+            logging.error(f"Skipping dataset '{data_dict['name']}' due to processing error: {ve}")
+        except Exception as e:
+            logging.error(f"An unexpected error occurred while processing dataset '{data_dict['name']}': {e}")
+        finally:
+            print("-" * 30)
+
+    logging.info("All datasets processed.")
 
 if __name__ == '__main__':
     main()

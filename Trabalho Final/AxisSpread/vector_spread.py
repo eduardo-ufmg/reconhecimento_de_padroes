@@ -81,15 +81,15 @@ def vector_spread(Qx: ArrayLike) -> float | None:
     
     return float(score) # Ensure standard Python float
 
-def objective_function(Q0: NDArray[np.float64], Q1: NDArray[np.float64], y: NDArray[np.int32]) -> float:
+def objective_function(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: NDArray[np.int32]) -> float:
     """
     Calculates an objective value based on the spread of vectors in two groups, conditioned on class labels.
     This function computes the spread (using `vector_spread`) of vectors in `Q0` for class 0 and in `Q1` for class 1,
     then combines these spreads into a single objective value. If the spread cannot be computed for either group,
     the function returns NaN.
     Args:
-        Q0 (NDArray[np.float64]): Array of vectors corresponding to the first set of features.
-        Q1 (NDArray[np.float64]): Array of vectors corresponding to the second set of features.
+        Q0 (NDArray[np.float32]): Array of vectors corresponding to the first set of features.
+        Q1 (NDArray[np.float32]): Array of vectors corresponding to the second set of features.
         y (NDArray[np.int32]): Array of integer class labels (0 or 1) for each sample.
     Returns:
         float: The computed objective value, or NaN if the spread cannot be computed for either group.

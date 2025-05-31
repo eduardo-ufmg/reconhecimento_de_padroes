@@ -12,12 +12,12 @@ from sklearn.decomposition import PCA # Import PCA
 
 class CorrelationFilter(BaseEstimator, TransformerMixin):
     """Transformer to remove highly correlated features."""
-    def __init__(self, threshold: float = 0.98) -> None:
+    def __init__(self, threshold: float = 0.9) -> None:
         self.threshold = threshold
-        self.to_drop_: NDArray[np.int64] | None = None # Features to drop
+        self.to_drop_: NDArray[np.int32] | None = None # Features to drop
 
-    def fit(self, X: NDArray[np.float64], y: Any = None) -> Self:
-        X = check_array(X, dtype=[np.float64, np.float32])
+    def fit(self, X: NDArray[np.float32], y: Any = None) -> Self:
+        X = check_array(X, dtype=np.float32)
         if X.shape[1] < 2:
             self.to_drop_ = np.array([], dtype=int)
             return self # Not enough features to compare correlations
@@ -30,12 +30,12 @@ class CorrelationFilter(BaseEstimator, TransformerMixin):
         highly_correlated_pairs = (np.abs(corr_matrix) > self.threshold) & upper_triangle_mask
         
         # Get indices of columns to drop (prefer dropping the second feature in a pair)
-        self.to_drop_ = np.unique(np.where(highly_correlated_pairs)[1]).astype(np.int64)
+        self.to_drop_ = np.unique(np.where(highly_correlated_pairs)[1]).astype(np.int32)
         return self
 
-    def transform(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
+    def transform(self, X: NDArray[np.float32]) -> NDArray[np.float32]:
         check_is_fitted(self, 'to_drop_')
-        X = check_array(X, dtype=[np.float64, np.float32])
+        X = check_array(X, dtype=np.float32)
 
         if self.to_drop_ is None or self.to_drop_.size == 0:
             return X.copy()
@@ -58,10 +58,10 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             ('pca', PCA())
         ])
 
-    def fit(self, X: NDArray[np.float64], y: Any = None) -> Self:
+    def fit(self, X: NDArray[np.float32], y: Any = None) -> Self:
         self.pipeline.fit(X, y)
         return self
 
-    def transform(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
+    def transform(self, X: NDArray[np.float32]) -> NDArray[np.float32]:
         return self.pipeline.transform(X)
 

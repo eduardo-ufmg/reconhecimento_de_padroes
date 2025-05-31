@@ -3,30 +3,30 @@ import numpy as np
 from typing import cast
 from numpy.typing import NDArray
 
-def kernel(X: NDArray[np.float64], Y: NDArray[np.float64],
-           norm_factor: float, cov_inv: NDArray[np.float64],
-           h: float) -> NDArray[np.float64]:
+def kernel(X: NDArray[np.float32], Y: NDArray[np.float32],
+           norm_factor: float, cov_inv: NDArray[np.float32],
+           h: float) -> NDArray[np.float32]:
     """
     Computes the kernel matrix between two sets of data points.
 
     Parameters:
-    X : NDArray[np.float64]
+    X : NDArray[np.float32]
         First set of data points (shape: [n_samples_X, n_features]).
-    Y : NDArray[np.float64]
+    Y : NDArray[np.float32]
         Second set of data points (shape: [n_samples_Y, n_features]).
     norm_factor : float
         Normalization factor for the kernel.
-    cov_inv : NDArray[np.float64]
+    cov_inv : NDArray[np.float32]
         Inverse covariance matrix (shape: [n_features, n_features]).
     h : float
         Bandwidth parameter
 
     Returns:
-    NDArray[np.float64]
+    NDArray[np.float32]
         Kernel matrix (shape: [n_samples_X, n_samples_Y]).
     """
 
-    scaled_cov_inv: NDArray[np.float64] = cov_inv / (h ** 2)
+    scaled_cov_inv: NDArray[np.float32] = cov_inv / (h ** 2)
 
     n_features: int = X.shape[1]
 
@@ -38,24 +38,24 @@ def kernel(X: NDArray[np.float64], Y: NDArray[np.float64],
 
     return pdf_normalized
 
-def mvpdf(X: NDArray[np.float64], Y: NDArray[np.float64],
-          norm_factor: float, cov_inv: NDArray[np.float64]) -> NDArray[np.float64]:
+def mvpdf(X: NDArray[np.float32], Y: NDArray[np.float32],
+          norm_factor: float, cov_inv: NDArray[np.float32]) -> NDArray[np.float32]:
     """
     Computes the multivariate probability density function (PDF) for two sets of data points.
     The PDF is defined as:
     K(X, Y) = norm_factor * exp(-0.5 * (X - Y)^T * cov_inv * (X - Y))
 
     Parameters:
-    X : NDArray[np.float64]
+    X : NDArray[np.float32]
         First set of data points (shape: [n_samples_X, n_features]).
-    Y : NDArray[np.float64]
+    Y : NDArray[np.float32]
         Second set of data points (shape: [n_samples_Y, n_features]).
     norm_factor : float
         Normalization factor for the pdf.
-    cov_inv : NDArray[np.float64]
+    cov_inv : NDArray[np.float32]
         Inverse covariance matrix (shape: [n_features, n_features]).
     Returns:
-    NDArray[np.float64]
+    NDArray[np.float32]
         pdf matrix (shape: [n_samples_X, n_samples_Y]).
     """
 
@@ -68,17 +68,17 @@ def mvpdf(X: NDArray[np.float64], Y: NDArray[np.float64],
     # (X @ cov_inv) has shape (n_samples_X, n_features).
     # Element-wise multiplication with X, then sum over features (axis=1).
     # This computes diag(X @ cov_inv @ X.T).
-    term_X_C_X: NDArray[np.float64] = np.sum((X @ cov_inv) * X, axis=1)
+    term_X_C_X: NDArray[np.float32] = np.sum((X @ cov_inv) * X, axis=1)
 
     # 2. Calculate y_j^T @ C @ y_j for all y_j in Y
     # This results in a 1D array of shape (n_samples_Y,).
     # Similarly, this computes diag(Y @ cov_inv @ Y.T).
-    term_Y_C_Y: NDArray[np.float64] = np.sum((Y @ cov_inv) * Y, axis=1)
+    term_Y_C_Y: NDArray[np.float32] = np.sum((Y @ cov_inv) * Y, axis=1)
 
     # 3. Calculate x_i^T @ C @ y_j for all pairs (x_i, y_j)
     # This results in a 2D array of shape (n_samples_X, n_samples_Y).
     # This is equivalent to X @ cov_inv @ Y.T.
-    term_X_C_Y: NDArray[np.float64] = X @ cov_inv @ Y.T
+    term_X_C_Y: NDArray[np.float32] = X @ cov_inv @ Y.T
 
     # 4. Combine terms to get the full quadratic form for all pairs.
     # We need to make term_X_C_X a column vector and term_Y_C_Y a row vector
@@ -87,27 +87,27 @@ def mvpdf(X: NDArray[np.float64], Y: NDArray[np.float64],
     # term_Y_C_Y[np.newaxis, :] has shape (1, n_samples_Y)
     # The subtraction and addition are then broadcasted element-wise.
     # quadratic_form_values_ij = term_X_C_X[i] - 2 * term_X_C_Y[i,j] + term_Y_C_Y[j]
-    quadratic_form_values: NDArray[np.float64] = (
+    quadratic_form_values: NDArray[np.float32] = (
         term_X_C_X[:, np.newaxis] - 2 * term_X_C_Y + term_Y_C_Y[np.newaxis, :]
     )
 
     # 5. Apply the exponential and normalization factor
-    pdf_matrix: NDArray[np.float64] = norm_factor * np.exp(-0.5 * quadratic_form_values)
+    pdf_matrix: NDArray[np.float32] = norm_factor * np.exp(-0.5 * quadratic_form_values)
 
     return pdf_matrix
     
-def kernel_fit(X: NDArray[np.float64], type: str='cov') -> tuple[float, NDArray[np.float64]]:
+def kernel_fit(X: NDArray[np.float32], type: str='cov') -> tuple[float, NDArray[np.float32]]:
     """
     Fits the kernel by computing the inverse covariance matrix and normalization factor.
 
     Parameters:
-    X : NDArray[np.float64]
+    X : NDArray[np.float32]
         Data points (shape: [n_samples, n_features]).
     type : str
         Type of kernel to fit. 'cov' for covariance, 'scale' for diagonal scaling.
 
     Returns:
-    tuple[float, NDArray[np.float64]]
+    tuple[float, NDArray[np.float32]]
         Normalization factor and Inverse covariance matrix (shape: [n_features, n_features]).
     """
     
@@ -118,7 +118,7 @@ def kernel_fit(X: NDArray[np.float64], type: str='cov') -> tuple[float, NDArray[
     
     if type == 'cov':
         # Compute the covariance matrix
-        cov_matrix: NDArray[np.float64] = cast(NDArray[np.float64], np.cov(X, rowvar=False))
+        cov_matrix: NDArray[np.float32] = cast(NDArray[np.float32], np.cov(X, rowvar=False))
 
         cov_det = np.linalg.det(cov_matrix)
         if not cov_det > 0:
@@ -128,7 +128,7 @@ def kernel_fit(X: NDArray[np.float64], type: str='cov') -> tuple[float, NDArray[
         norm_factor: float = 1 / ((2 * np.pi) ** (n_features / 2) * np.sqrt(cov_det))
         
         # Compute the inverse of the covariance matrix
-        cov_inv: NDArray[np.float64] = cast(NDArray[np.float64], np.linalg.inv(cov_matrix))
+        cov_inv: NDArray[np.float32] = cast(NDArray[np.float32], np.linalg.inv(cov_matrix))
 
     elif type == 'scale':
         cov_inv = np.eye(n_features)
