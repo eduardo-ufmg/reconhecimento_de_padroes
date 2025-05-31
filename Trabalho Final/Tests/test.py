@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-from typing import cast, Tuple, Dict, Any, List
+from typing import cast, Any
 from scipy.stats import ttest_rel
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
@@ -73,7 +73,7 @@ file_error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s -
 logging.getLogger().addHandler(file_error_handler)
 
 
-def load_npz_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
+def load_npz_dataset(name: str) -> tuple[np.ndarray, np.ndarray]:
     """Loads X and y from a .npz file."""
     path = os.path.join(SETS_DIR, f"{name}.npz")
     if not os.path.exists(path):
@@ -85,7 +85,7 @@ def load_npz_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
         X = X.reshape(-1, 1)
     return X, y
 
-def run_test_on_dataset_worker(args: Tuple[str, Tuple[float, float]]) -> Dict[str, Any]:
+def run_test_on_dataset_worker(args: tuple[str, tuple[np.float32, np.float32]]) -> dict[str, Any]:
     """
     Worker function to be called by multiprocessing pool.
     Unpacks arguments and calls the main processing function.
@@ -121,17 +121,17 @@ def run_test_on_dataset_worker(args: Tuple[str, Tuple[float, float]]) -> Dict[st
 
         # Perform paired t-test
         # Cast is used because ttest_rel can return union types depending on scipy version,
-        # but for standard use it's (float, float)
-        t_stat, p_value = cast(Tuple[float, float], ttest_rel(svm_ref_scores, svm_opt_scores))
+        # but for standard use it's (np.float32, np.float32)
+        t_stat, p_value = cast(tuple[np.float32, np.float32], ttest_rel(svm_ref_scores, svm_opt_scores))
 
         return {
             'dataset': dataset_name,
-            'opt_score_mean': float(np.mean(svm_opt_scores)),
-            'opt_score_std': float(np.std(svm_opt_scores)),
-            'ref_score_mean': float(np.mean(svm_ref_scores)),
-            'ref_score_std': float(np.std(svm_ref_scores)),
-            't_statistic': float(t_stat),
-            'p_value': float(p_value),
+            'opt_score_mean': np.float32(np.mean(svm_opt_scores)),
+            'opt_score_std': np.float32(np.std(svm_opt_scores)),
+            'ref_score_mean': np.float32(np.mean(svm_ref_scores)),
+            'ref_score_std': np.float32(np.std(svm_ref_scores)),
+            't_statistic': np.float32(t_stat),
+            'p_value': np.float32(p_value),
             'conclusion': "Not equivalent" if p_value < 0.05 else "Equivalent",
             'status': 'success'
         }
@@ -148,7 +148,7 @@ def run_test_on_dataset_worker(args: Tuple[str, Tuple[float, float]]) -> Dict[st
 
 
 if __name__ == "__main__":
-    hs_param_search_range_global = (5e-1, 5e0) # Use a more descriptive name
+    hs_param_search_range_global = (np.float32(1e-1), np.float32(1e1)) # Use np.float32 for type compatibility
 
     try:
         # Use a slightly less aggressive number of processes to leave resources for OS, etc.
@@ -163,8 +163,8 @@ if __name__ == "__main__":
     # Prepare arguments for starmap-like behavior with imap_unordered
     tasks_args = [(name, hs_param_search_range_global) for name in DATASET_NAMES]
 
-    successful_results: List[Dict[str, Any]] = []
-    failed_datasets_info: List[Dict[str, Any]] = []
+    successful_results: list[dict[str, Any]] = []
+    failed_datasets_info: list[dict[str, Any]] = []
 
     # Using imap_unordered to get results as they complete and allow tqdm progress updates
     with multiprocessing.Pool(processes=num_processes) as pool:

@@ -8,7 +8,7 @@ COV_DET_THRESHOLD_F32 = np.float32(1e-7)
 
 def kernel(X: NDArray[np.float32], Y: NDArray[np.float32],
            norm_factor: np.float32, cov_inv: NDArray[np.float32],
-           h: float) -> NDArray[np.float32]:
+           h: np.float32) -> NDArray[np.float32]:
     """
     Computes the kernel matrix (highly optimized for speed and memory with float32).
     mvpdf logic is inlined.
@@ -24,7 +24,7 @@ def kernel(X: NDArray[np.float32], Y: NDArray[np.float32],
 
     n_features: int = X.shape[1]
 
-    if h == 0: # h is float, so direct comparison is okay
+    if h == 0: # h is np.float32, so direct comparison is okay
         raise ValueError("Bandwidth parameter h cannot be zero.")
     
     h_squared = np.float32(h ** 2) # Ensure h_squared is float32

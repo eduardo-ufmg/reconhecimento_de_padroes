@@ -66,7 +66,7 @@ def load_npz_dataset(name: str) -> tuple[np.ndarray, np.ndarray]:
         X = X.reshape(-1, 1)
     return X, y
 
-def run_compare_worker(args: tuple[str, tuple[float, float], str]) -> dict[str, Any]:
+def run_compare_worker(args: tuple[str, tuple[np.float32, np.float32], str]) -> dict[str, Any]:
     dataset_name, hs_bounds, objective_metric = args
     try:
         X, y = load_npz_dataset(dataset_name)
@@ -94,17 +94,17 @@ def run_compare_worker(args: tuple[str, tuple[float, float], str]) -> dict[str, 
         ref_scores = cross_val_score(pipeline_ref, X, y, cv=skf, scoring='accuracy', error_score='raise')
         custom_scores = cross_val_score(pipeline_custom, X, y, cv=skf, scoring='accuracy', error_score='raise')
 
-        t_stat, p_value = cast(tuple[float, float], ttest_rel(ref_scores, custom_scores))
+        t_stat, p_value = cast(tuple[np.float32, np.float32], ttest_rel(ref_scores, custom_scores))
 
         return {
             'dataset': dataset_name,
             'objective_metric': objective_metric,
-            'custom_score_mean': float(np.mean(custom_scores)),
-            'custom_score_std': float(np.std(custom_scores)),
-            'ref_score_mean': float(np.mean(ref_scores)),
-            'ref_score_std': float(np.std(ref_scores)),
-            't_statistic': float(t_stat),
-            'p_value': float(p_value),
+            'custom_score_mean': np.float32(np.mean(custom_scores)),
+            'custom_score_std': np.float32(np.std(custom_scores)),
+            'ref_score_mean': np.float32(np.mean(ref_scores)),
+            'ref_score_std': np.float32(np.std(ref_scores)),
+            't_statistic': np.float32(t_stat),
+            'p_value': np.float32(p_value),
             'conclusion': "Not equivalent" if p_value < 0.05 else "Equivalent",
             'status': 'success'
         }

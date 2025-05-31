@@ -12,7 +12,7 @@ from sklearn.decomposition import PCA # Import PCA
 
 class CorrelationFilter(BaseEstimator, TransformerMixin):
     """Transformer to remove highly correlated features."""
-    def __init__(self, threshold: float = 0.9) -> None:
+    def __init__(self, threshold: np.float32 = np.float32(0.9)) -> None:
         self.threshold = threshold
         self.to_drop_: NDArray[np.int32] | None = None # Features to drop
 
@@ -53,7 +53,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
     def __init__(self) -> None:
         self.pipeline = Pipeline([
             ('variance_threshold', VarianceThreshold(threshold=0.05)),
-            ('correlation_filter', CorrelationFilter(threshold=0.95)),
+            ('correlation_filter', CorrelationFilter(threshold=np.float32(0.95))),
             ('scaler', StandardScaler()),
             ('pca', PCA())
         ])

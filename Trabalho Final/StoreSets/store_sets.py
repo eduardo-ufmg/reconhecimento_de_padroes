@@ -1,6 +1,9 @@
 import os
 import numpy as np
 import pandas as pd
+
+from typing import cast
+
 from sklearn.datasets import (
     load_breast_cancer, load_iris, load_digits,
     fetch_openml
@@ -11,6 +14,18 @@ import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class SklearnLoadedDataset:
+    data: np.ndarray
+    target: np.ndarray
+    feature_names: list
+    target_names: list
+    
+    def __init__(self, data: np.ndarray, target: np.ndarray, feature_names: list, target_names: list):
+        self.data = data
+        self.target = target
+        self.feature_names = feature_names
+        self.target_names = target_names
 
 def save_dataset(X, y, name, base_dir):
     """
@@ -155,10 +170,9 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
             map_to_0_val = unique_labels_encoded[0]
             map_to_1_val = unique_labels_encoded[1]
             
-            y_temp = y_processed_interim.copy()
-            y_processed_np_final = np.full_like(y_temp, -1, dtype=int)
-            y_processed_np_final[y_temp == map_to_0_val] = 0
-            y_processed_np_final[y_temp == map_to_1_val] = 1
+            y_processed_np_final = np.full_like(y_processed_interim, -1, dtype=int)
+            y_processed_np_final[y_processed_interim == map_to_0_val] = 0
+            y_processed_np_final[y_processed_interim == map_to_1_val] = 1
             
             valid_indices = (y_processed_np_final != -1)
             if not np.any(valid_indices):
@@ -184,11 +198,12 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
         try:
             y_processed_np = y_np.astype(int)
         except ValueError as e:
-            raise ValueError(f"Target variable could not be cast to int (is_target_categorical=False). Values: {np.unique(y_np)}. Error: {e}")
+            raise ValueError(f"Target variable could not be cast to int (is_target_categorical=False). Values: {np.unique(np.array(y_np))}. Error: {e}")
 
 
     # --- Final check and enforcement for binary target (y must be 0 and 1) ---
-    if y_processed_np.shape[0] == 0:
+    y_processed_np = np.asarray(y_processed_np)
+    if len(y_processed_np) == 0:
         # This can happen if all samples were filtered out during target processing
         # and X_processed_np might also be empty (checked earlier for X).
         raise ValueError("Target variable y is empty after all processing. Cannot create a dataset.")
@@ -215,8 +230,8 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
         raise ValueError(f"Target is not binary. Found {len(unique_y_values)} unique classes: {unique_y_values}.")
 
     # Final check on X and y shapes (must have same number of samples)
-    if X_processed_np.shape[0] != y_processed_np.shape[0]:
-        raise ValueError(f"Mismatch in number of samples between X ({X_processed_np.shape[0]}) and y ({y_processed_np.shape[0]}) after processing.")
+    if X_processed_np.shape[0] != len(y_processed_np):
+        raise ValueError(f"Mismatch in number of samples between X ({X_processed_np.shape[0]}) and y ({len(y_processed_np)}) after processing.")
 
     return X_processed_np, y_processed_np
 
@@ -238,12 +253,12 @@ def main():
 
     # --- 1. Scikit-learn Datasets ---
     logging.info("--- Processing Scikit-learn Datasets ---")
-    cancer = load_breast_cancer()
+    cancer = cast(SklearnLoadedDataset, load_breast_cancer())
     X_cancer_df = pd.DataFrame(cancer.data, columns=cancer.feature_names)
     y_cancer_series = pd.Series(cancer.target)
     datasets_to_process.append({'df': X_cancer_df, 'series': y_cancer_series, 'name': 'breast_cancer', 'is_target_categorical': False})
 
-    iris = load_iris()
+    iris = cast(SklearnLoadedDataset, load_iris())
     X_iris_df = pd.DataFrame(iris.data, columns=iris.feature_names)
     y_iris_series = pd.Series(iris.target_names[iris.target]) # Use names for clarity in binarization
     # Iris: class 'setosa' vs. rest
@@ -263,8 +278,8 @@ def main():
     })
 
 
-    digits = load_digits()
-    X_digits_df = pd.DataFrame(digits.data) 
+    digits = cast(SklearnLoadedDataset, load_digits())
+    X_digits_df = pd.DataFrame(digits.data)
     y_digits_series = pd.Series(digits.target) # Targets are 0-9
     # Digits: 0 vs 1
     datasets_to_process.append({
