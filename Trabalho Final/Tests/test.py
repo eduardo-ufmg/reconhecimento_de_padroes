@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from typing import cast
 from scipy.stats import ttest_rel
-from sklearn.datasets import make_classification
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
@@ -19,6 +18,22 @@ except ImportError as e:
     print(f"Error importing custom modules: {e}")
     print("Please ensure Preprocessor and SVM classes are correctly defined and accessible.")
     sys.exit(1)
+
+SETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../sets'))
+DATASET_NAMES = [
+    "breast_cancer",
+    "iris_binary_0_vs_rest",
+    "iris_binary_0_vs_1",
+    "digits_binary_0_vs_1",
+    "digits_binary_5_vs_rest"
+]
+
+def load_npz_dataset(name: str):
+    path = os.path.join(SETS_DIR, f"{name}.npz")
+    data = np.load(path)
+    X = data["X"]
+    y = data["y"].ravel()  # Flatten to 1D for sklearn compatibility
+    return X, y
 
 class ClassifierScore:
     mean: float
@@ -39,25 +54,11 @@ class StatisticalTestResult:
         else:
             self.conclusion = "Equivalent"
 
-def run_test(hs_bounds: tuple[float, float], run_index: int) -> tuple[ClassifierScore, ClassifierScore, StatisticalTestResult]:
+def run_test_on_dataset(dataset_name: str, hs_bounds: tuple[float, float]) -> dict:
     """
-    Executes a single run of the classifier comparison.
-    
-    Args:
-        hs_search_range (ArrayLike): The hyperparameter search range for the custom SVM.
-        run_index (int): The index for the current run, used for seeding.
-    
-    Returns:
-        tuple[ClassifierScore, ClassifierScore, StatisticalTestResult]: Scores and test results.
+    Executes the classifier comparison on a given dataset.
     """
-
-    np.random.seed(run_index)
-
-    X_original, y_original = make_classification(
-        n_samples=1000,
-        n_classes=2
-    )
-
+    X, y = load_npz_dataset(dataset_name)
     skf = StratifiedKFold(n_splits=10, shuffle=True)
 
     # 1. Reference SVM
@@ -66,9 +67,6 @@ def run_test(hs_bounds: tuple[float, float], run_index: int) -> tuple[Classifier
         ('svm', SVC())
     ])
 
-    # As noted by the joblib's UserWarning, n_jobs=-1 would likely be overridden to n_jobs=1 here
-    svm_ref_scores = cross_val_score(pipeline_ref, X_original, y_original, cv=skf, scoring='accuracy')
-
     # 2. Custom Kernel SVM
     pipeline_opt = Pipeline([
         ('preprocessor', Preprocessor()),
@@ -76,54 +74,44 @@ def run_test(hs_bounds: tuple[float, float], run_index: int) -> tuple[Classifier
             h_bounds=hs_bounds,
         ))
     ])
-    svm_opt_scores = cross_val_score(pipeline_opt, X_original, y_original, cv=skf, scoring='accuracy')
-    
+
+
+    svm_ref_scores = cross_val_score(pipeline_ref, X, y, cv=skf, scoring='accuracy', error_score='raise')
+    svm_opt_scores = cross_val_score(pipeline_opt, X, y, cv=skf, scoring='accuracy', error_score='raise')
+
     t_stat, p_value = cast(tuple[float, float], ttest_rel(svm_ref_scores, svm_opt_scores))
 
-    return (
-        ClassifierScore(mean=np.mean(svm_opt_scores).astype(float), std=np.std(svm_opt_scores).astype(float)),
-        ClassifierScore(mean=np.mean(svm_ref_scores).astype(float), std=np.std(svm_ref_scores).astype(float)),
-        StatisticalTestResult(t_statistic=t_stat, p_value=p_value)
-    )
+    return {
+        'dataset': dataset_name,
+        'opt score': float(np.mean(svm_opt_scores)),
+        'opt std': float(np.std(svm_opt_scores)),
+        'ref score': float(np.mean(svm_ref_scores)),
+        'ref std': float(np.std(svm_ref_scores)),
+        'T statistic': float(t_stat),
+        'p value': float(p_value),
+        'conclusion': "Not equivalent" if p_value < 0.05 else "Equivalent"
+    }
 
 if __name__ == "__main__":
-    n_runs = 10
     hs_param_search_range = (5e-1, 5e0)
 
     try:
         num_processes = multiprocessing.cpu_count()
     except NotImplementedError:
         num_processes = 4 # Fallback
-    print(f"Starting {n_runs} test runs in parallel using up to {num_processes} processes...")
+    print(f"Starting dataset tests in parallel using up to {num_processes} processes...")
 
-    # Prepare a list of argument tuples for starmap
-    # Each tuple will be (hs_param_search_range, run_idx)
-    # These arguments correspond to the signature: run_test(hs_search_range, run_index)
-    args_for_starmap = [(hs_param_search_range, i) for i in range(n_runs)]
+    args_for_starmap = [(name, hs_param_search_range) for name in DATASET_NAMES]
 
     with multiprocessing.Pool(processes=num_processes) as pool:
-        # `pool.starmap` calls run_test(*args_tuple) for each tuple in args_for_starmap.
-        # So, it will call run_test(hs_param_search_range, 0), run_test(hs_param_search_range, 1), ...
-        parallel_results = pool.starmap(run_test, args_for_starmap)
-    
-    print("All test runs completed.")
+        results_data = pool.starmap(run_test_on_dataset, args_for_starmap)
 
-    results_data = []
-    for opt_score_info, ref_score_info, test_result in parallel_results:
-        results_data.append({
-            'opt score': opt_score_info.mean,
-            'opt std': opt_score_info.std,
-            'ref score': ref_score_info.mean,
-            'ref std': ref_score_info.std,
-            'T statistic': test_result.t_statistic,
-            'p value': test_result.p_value,
-            'conclusion': test_result.conclusion
-        })
+    print("All dataset test runs completed.")
 
     df = pd.DataFrame(results_data)
     summary = df.describe().loc[['mean', 'std'], ['opt score', 'opt std', 'ref score', 'ref std', 'T statistic', 'p value']]
 
-    print("\nResults for each run:")
+    print("\nResults for each dataset:")
     print(df.to_string(index=False))
-    print("\nSummary statistics (mean and std of metrics over runs):")
+    print("\nSummary statistics (mean and std of metrics over datasets):")
     print(summary)
