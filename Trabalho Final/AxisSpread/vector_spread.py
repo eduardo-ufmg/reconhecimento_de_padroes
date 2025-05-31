@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import NDArray
 
-def vector_spread(Qx: ArrayLike) -> np.float32 | None:
+def vector_spread(Qx: NDArray[np.float32]) -> np.float32 | None:
     """
     Computes a score indicating how evenly spaced the values in a vector are.
     A higher score (closer to 1.0) means more evenly spaced (benefited).
@@ -14,7 +14,7 @@ def vector_spread(Qx: ArrayLike) -> np.float32 | None:
     4. The score is 1.0 / (1.0 + std_diff).
 
     Args:
-        Qx (array-like): A list, tuple, or NumPy array of numbers.
+        Qx (ndarray): A list, tuple, or NumPy array of numbers.
 
     Returns:
         np.float32: A score between 0.0 (exclusive, in practice) and 1.0 (inclusive).

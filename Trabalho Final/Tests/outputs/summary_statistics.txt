@@ -1,8 +1,8 @@
 Summary statistics (mean and std of metrics over successful datasets):
-                    mean        std
-opt_score_mean  0.844183   0.141814
-opt_score_std   0.018978   0.016167
-ref_score_mean  0.890764   0.107844
-ref_score_std   0.027414   0.026061
-t_statistic     9.704706  23.593849
-p_value         0.383239   0.341298
+                     mean        std
+opt_score_mean   0.846825   0.141265
+opt_score_std    0.025164   0.028071
+ref_score_mean   0.892728   0.103964
+ref_score_std    0.023904   0.021496
+t_statistic     10.489146  25.688444
+p_value          0.481751   0.358292
