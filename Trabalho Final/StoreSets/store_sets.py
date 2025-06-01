@@ -12,7 +12,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import SimpleImputer
 import logging
 
-# Configure logging
+logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class SklearnLoadedDataset:
@@ -43,10 +43,10 @@ def save_dataset(X, y, name, base_dir):
     filepath = os.path.join(sets_dir, f"{name}.npz")
     try:
         np.savez_compressed(filepath, X=X, y=y)
-        logging.info(f"Dataset '{name}' saved successfully to '{filepath}'")
-        logging.info(f"X shape: {X.shape}, y shape: {y.shape}, y unique values: {np.unique(y, return_counts=True)}")
+        logger.info(f"Dataset '{name}' saved successfully to '{filepath}'")
+        logger.info(f"X shape: {X.shape}, y shape: {y.shape}, y unique values: {np.unique(y, return_counts=True)}")
     except Exception as e:
-        logging.error(f"Error saving dataset '{name}': {e}")
+        logger.error(f"Error saving dataset '{name}': {e}")
 
 def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binarize_target_config=None):
     """
@@ -105,7 +105,7 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
         X_numerical = X_df[numerical_cols]
         X_numerical_imputed = num_imputer.fit_transform(X_numerical)
         X_processed_parts.append(X_numerical_imputed)
-        logging.debug(f"Processed numerical features: {numerical_cols}")
+        logger.debug(f"Processed numerical features: {numerical_cols}")
 
     if categorical_cols:
         cat_imputer = SimpleImputer(strategy='most_frequent')
@@ -114,19 +114,19 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
         X_categorical_imputed_df = pd.DataFrame(X_categorical_imputed, columns=categorical_cols, index=X_df.index)
         X_categorical_encoded = pd.get_dummies(X_categorical_imputed_df, columns=categorical_cols, dummy_na=False)
         X_processed_parts.append(X_categorical_encoded.values)
-        logging.debug(f"Processed categorical features (one-hot encoded): {categorical_cols}")
+        logger.debug(f"Processed categorical features (one-hot encoded): {categorical_cols}")
 
     if not X_processed_parts:
         if X_df_orig.shape[1] > 0: # Original dataframe had columns
-             logging.error("No features were identified for processing (neither numerical nor categorical) from the input X_df.")
+             logger.error("No features were identified for processing (neither numerical nor categorical) from the input X_df.")
         else: # Original dataframe was empty
-             logging.error("Input X_df was empty. No features to process.")
+             logger.error("Input X_df was empty. No features to process.")
         raise ValueError("No features available for processing.")
 
     try:
         X_processed_np = np.concatenate(X_processed_parts, axis=1).astype(np.float32)
     except ValueError as e:
-        logging.error(f"Error during feature concatenation: {e}. This might mean all feature parts were empty or incompatible.")
+        logger.error(f"Error during feature concatenation: {e}. This might mean all feature parts were empty or incompatible.")
         raise ValueError(f"Could not concatenate processed feature parts: {e}")
 
     if X_processed_np.shape[0] == 0 and X_df_orig.shape[0] > 0:
@@ -142,15 +142,15 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
             X_processed_np = X_processed_np[:, finite_cols_mask]
             num_dropped_features = num_total_features - X_processed_np.shape[1]
 
-            logging.warning(
+            logger.warning(
                 f"Dropped {num_dropped_features} feature(s) out of {num_total_features} "
                 f"due to non-finite values (NaN or infinity) after processing."
             )
             if X_processed_np.shape[1] == 0:
-                logging.error("All features were dropped due to non-finite values. Cannot proceed with this dataset.")
+                logger.error("All features were dropped due to non-finite values. Cannot proceed with this dataset.")
                 raise ValueError("All features resulted in non-finite values and were dropped.")
     elif X_df_orig.shape[1] > 0: # Original X had features, but now X_processed_np has no columns
-        logging.error("No features remaining after processing (e.g., all columns were of unsupported types or dropped).")
+        logger.error("No features remaining after processing (e.g., all columns were of unsupported types or dropped).")
         raise ValueError("Resulting feature matrix X has no columns after processing.")
 
 
@@ -165,7 +165,7 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
         unique_labels_encoded = np.unique(y_processed_interim)
 
         if len(unique_labels_encoded) > 2:
-            logging.warning(f"Target has {len(unique_labels_encoded)} classes after LabelEncoding: {unique_labels_encoded} (from originals: {np.unique(y_np)}). Attempting to use first two encoded classes.")
+            logger.warning(f"Target has {len(unique_labels_encoded)} classes after LabelEncoding: {unique_labels_encoded} (from originals: {np.unique(y_np)}). Attempting to use first two encoded classes.")
             
             map_to_0_val = unique_labels_encoded[0]
             map_to_1_val = unique_labels_encoded[1]
@@ -183,8 +183,6 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
             
             if X_processed_np.shape[0] == 0 or y_processed_np.shape[0] == 0:
                 raise ValueError(f"All samples dropped after attempting to binarize target from {len(unique_labels_encoded)} classes. Original unique encoded: {unique_labels_encoded}")
-            logging.info(f"Target binarized from {len(unique_labels_encoded)} classes by selecting first two. New y shape: {y_processed_np.shape}, X shape: {X_processed_np.shape}")
-        
         elif len(unique_labels_encoded) == 2: # Already two classes, ensure they become 0 and 1
             # This will be handled by the final check to map to 0,1 if not already.
             y_processed_np = y_processed_interim
@@ -213,20 +211,20 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
     if len(unique_y_values) == 2:
         # If classes are already [0, 1], great. Otherwise, map them.
         if not (0 in unique_y_values and 1 in unique_y_values):
-            logging.warning(f"Target labels are {unique_y_values}. Remapping to 0 and 1 (mapping {unique_y_values[0]} to 0, {unique_y_values[1]} to 1).")
+            logger.warning(f"Target labels are {unique_y_values}. Remapping to 0 and 1 (mapping {unique_y_values[0]} to 0, {unique_y_values[1]} to 1).")
             # Map the numerically smaller unique value to 0, and the larger to 1
             val_a, val_b = unique_y_values[0], unique_y_values[1]
             y_processed_np = np.where(y_processed_np == val_a, 0, 1)
             # Verify remapping
             remapped_unique_y = np.unique(y_processed_np)
             if not (len(remapped_unique_y) == 2 and 0 in remapped_unique_y and 1 in remapped_unique_y):
-                 logging.error(f"Target remapping failed. Labels are now: {remapped_unique_y}. Expected [0, 1].")
+                 logger.error(f"Target remapping failed. Labels are now: {remapped_unique_y}. Expected [0, 1].")
                  raise ValueError(f"Target remapping from two classes ({unique_y_values}) to [0,1] failed.")
     elif len(unique_y_values) == 1:
-        logging.warning(f"Target variable has only one unique class after all processing: {unique_y_values}. Dataset will be skipped as it's not binary.")
+        logger.warning(f"Target variable has only one unique class after all processing: {unique_y_values}. Dataset will be skipped as it's not binary.")
         raise ValueError(f"Target has only one class ({unique_y_values[0]}), not suitable for binary classification.")
     else: # 0 classes or more than 2 classes
-        logging.warning(f"Target variable does not have exactly two unique classes after processing. Found {len(unique_y_values)} classes: {unique_y_values}. Dataset will be skipped.")
+        logger.warning(f"Target variable does not have exactly two unique classes after processing. Found {len(unique_y_values)} classes: {unique_y_values}. Dataset will be skipped.")
         raise ValueError(f"Target is not binary. Found {len(unique_y_values)} unique classes: {unique_y_values}.")
 
     # Final check on X and y shapes (must have same number of samples)
@@ -244,15 +242,15 @@ def main():
         script_dir = os.path.dirname(os.path.abspath(__file__))
     except NameError:
         script_dir = os.getcwd()
-        logging.warning(f"'__file__' not defined. Using current working directory: {script_dir}")
+        logger.warning(f"'__file__' not defined. Using current working directory: {script_dir}")
 
     base_storage_dir = os.path.join(script_dir, '..')
-    logging.info(f"Base storage directory for 'sets': {os.path.abspath(base_storage_dir)}")
+    logger.info(f"Base storage directory for 'sets': {os.path.abspath(base_storage_dir)}")
 
     datasets_to_process = []
 
     # --- 1. Scikit-learn Datasets ---
-    logging.info("--- Processing Scikit-learn Datasets ---")
+    logger.info("--- Processing Scikit-learn Datasets ---")
     cancer = cast(SklearnLoadedDataset, load_breast_cancer())
     X_cancer_df = pd.DataFrame(cancer.data, columns=cancer.feature_names)
     y_cancer_series = pd.Series(cancer.target)
@@ -298,7 +296,7 @@ def main():
 
 
     # --- 2. OpenML Datasets ---
-    logging.info("--- Processing OpenML Datasets ---")
+    logger.info("--- Processing OpenML Datasets ---")
     openml_datasets_info = [
         {'name': 'diabetes', 'id': 37, 'target_col': 'class', 'is_target_categorical': True}, # tested_positive, tested_negative
         {'name': 'ionosphere', 'id': 59, 'target_col': 'class', 'is_target_categorical': True}, # 'g', 'b'
@@ -318,7 +316,7 @@ def main():
     ]
 
     for ds_info in openml_datasets_info:
-        logging.info(f"Fetching and processing OpenML dataset: {ds_info['name']} (ID: {ds_info['id']})")
+        logger.info(f"Fetching and processing OpenML dataset: {ds_info['name']} (ID: {ds_info['id']})")
         try:
             dataset = fetch_openml(data_id=ds_info['id'], as_frame=True, parser='auto')
             X_df = dataset.data
@@ -327,7 +325,7 @@ def main():
             if y_series is None and ds_info['target_col'] in X_df.columns:
                 y_series = X_df.pop(ds_info['target_col'])
             elif y_series is None:
-                logging.error(f"Target column for {ds_info['name']} could not be identified.")
+                logger.error(f"Target column for {ds_info['name']} could not be identified.")
                 continue
             
             # Ensure y_series is a pandas Series
@@ -355,7 +353,7 @@ def main():
             if ds_info['name'] == 'sylvine':
                 unique_sylvine_targets = y_series.unique()
                 if len(unique_sylvine_targets) > 2:
-                    logging.warning(f"Target for 'sylvine' has {len(unique_sylvine_targets)} classes: {unique_sylvine_targets}. Will attempt to binarize to first two classes.")
+                    logger.warning(f"Target for 'sylvine' has {len(unique_sylvine_targets)} classes: {unique_sylvine_targets}. Will attempt to binarize to first two classes.")
                     current_binarize_config = {'type': 'select_two', 'class1': unique_sylvine_targets[0], 'class2': unique_sylvine_targets[1], 'map_to_0': unique_sylvine_targets[0]}
                     current_is_target_categorical = True # Will use LabelEncoder for binarization
 
@@ -371,13 +369,12 @@ def main():
                 'binarize_target_config': current_binarize_config
             })
         except Exception as e:
-            logging.error(f"Failed to fetch or initially process OpenML dataset {ds_info['name']} (ID: {ds_info['id']}): {e}")
-        print("-" * 30)
-
+            logger.error(f"Failed to fetch or initially process OpenML dataset {ds_info['name']} (ID: {ds_info['id']}): {e}")
+        logger.info("-" * 30)
 
     # Process all collected datasets
     for data_dict in datasets_to_process:
-        logging.info(f"Processing dataset: {data_dict['name']}")
+        logger.info(f"Processing dataset: {data_dict['name']}")
         try:
             # Convert all column names to string
             data_dict['df'].columns = data_dict['df'].columns.astype(str)
@@ -390,13 +387,13 @@ def main():
             )
             save_dataset(X_processed, y_processed, data_dict['name'], base_storage_dir)
         except ValueError as ve: 
-            logging.error(f"Skipping dataset '{data_dict['name']}' due to processing error: {ve}")
+            logger.error(f"Skipping dataset '{data_dict['name']}' due to processing error: {ve}")
         except Exception as e:
-            logging.error(f"An unexpected error occurred while processing dataset '{data_dict['name']}': {e}")
+            logger.error(f"An unexpected error occurred while processing dataset '{data_dict['name']}': {e}")
         finally:
-            print("-" * 30)
+            logger.info("-" * 30)
 
-    logging.info("All datasets processed.")
+    logger.info("All datasets processed.")
 
 if __name__ == '__main__':
     main()

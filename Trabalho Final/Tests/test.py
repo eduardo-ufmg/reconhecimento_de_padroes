@@ -22,14 +22,8 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, 'outputs') # Save outputs in a subdirector
 
 sys.path.append(BASE_DIR)
 
-try:
-    from Preprocessing.preprocessing import Preprocessor
-    from CustomKernelSVC.CustomKernelSVC import CustomKernelSVC
-except ImportError as e:
-    print(f"Critical Error: Could not import custom modules (Preprocessor or CustomKernelSVC): {e}")
-    print("Please ensure these modules are in the correct path (e.g., parent directory) and are error-free.")
-    print(f"BASE_DIR (for sys.path): {BASE_DIR}")
-    sys.exit(1)
+from Preprocessing.preprocessing import Preprocessor
+from CustomKernelSVC.CustomKernelSVC import CustomKernelSVC
 
 # --- Dataset Names ---
 # Ensure these .npz files exist in the SETS_DIR
@@ -59,6 +53,7 @@ DATASET_NAMES = [
 
 
 # --- Logging Configuration ---
+logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     handlers=[logging.StreamHandler(sys.stdout)]) # Also log to console
@@ -70,7 +65,7 @@ FAILED_LOG_FILE = os.path.join(OUTPUT_DIR, "failed_datasets.log")
 file_error_handler = logging.FileHandler(FAILED_LOG_FILE, mode='w') # Overwrite for each run
 file_error_handler.setLevel(logging.ERROR)
 file_error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-logging.getLogger().addHandler(file_error_handler)
+logger.addHandler(file_error_handler)
 
 
 def load_npz_dataset(name: str) -> tuple[np.ndarray, np.ndarray]:
@@ -138,14 +133,13 @@ def run_test_on_dataset_worker(
             'status': 'success'
         }
     except FileNotFoundError as fnf_err:
-        logging.error(f"Dataset Error for '{dataset_name}': {fnf_err}")
+        logger.error(f"Dataset Error for '{dataset_name}': {fnf_err}")
         return {'dataset': dataset_name, 'status': 'error', 'message': str(fnf_err)}
     except ValueError as val_err: # Catch specific errors like single class
-        logging.error(f"Data Error for '{dataset_name}': {val_err}")
+        logger.error(f"Data Error for '{dataset_name}': {val_err}")
         return {'dataset': dataset_name, 'status': 'error', 'message': str(val_err)}
     except Exception as e:
-        # Log the full traceback for unexpected errors
-        logging.error(f"Runtime Error processing dataset '{dataset_name}': {e}", exc_info=True)
+        logger.error(f"Runtime Error processing dataset '{dataset_name}': {e}", exc_info=True)
         return {'dataset': dataset_name, 'status': 'error', 'message': f"Runtime error: {e}"}
 
 
@@ -157,9 +151,9 @@ if __name__ == "__main__":
         num_processes = max(1, multiprocessing.cpu_count() - 1 if multiprocessing.cpu_count() > 1 else 1)
     except NotImplementedError:
         num_processes = 2 # Fallback for systems where cpu_count is not implemented
-    logging.info(f"Starting dataset tests in parallel using up to {num_processes} processes...")
-    logging.info(f"Datasets will be loaded from: {SETS_DIR}")
-    logging.info(f"Results and logs will be saved in: {OUTPUT_DIR}")
+    logger.info(f"Starting dataset tests in parallel using up to {num_processes} processes...")
+    logger.info(f"Datasets will be loaded from: {SETS_DIR}")
+    logger.info(f"Results and logs will be saved in: {OUTPUT_DIR}")
 
 
     # Prepare arguments for starmap-like behavior with imap_unordered
@@ -178,7 +172,7 @@ if __name__ == "__main__":
                     failed_datasets_info.append(result)
                 pbar.update(1)
 
-    logging.info("All dataset test runs completed or attempted.")
+    logger.info("All dataset test runs completed or attempted.")
 
     # --- Save Results ---
     if successful_results:
@@ -189,12 +183,12 @@ if __name__ == "__main__":
         output_csv_path = os.path.join(OUTPUT_DIR, "all_results.csv")
         try:
             df_to_save.to_csv(output_csv_path, index=False)
-            logging.info(f"Detailed results saved to: {output_csv_path}")
+            logger.info(f"Detailed results saved to: {output_csv_path}")
         except Exception as e:
-            logging.error(f"Failed to save detailed results CSV: {e}")
+            logger.error(f"Failed to save detailed results CSV: {e}")
 
-        print("\nResults for successfully processed datasets:")
-        print(df_to_save.to_string(index=False))
+        logger.info("\nResults for successfully processed datasets:")
+        logger.info(df_to_save.to_string(index=False))
 
         # Calculate and save summary statistics
         # Adjusted column names to match the new DataFrame
@@ -208,22 +202,22 @@ if __name__ == "__main__":
                 with open(output_summary_path, 'w') as f:
                     f.write("Summary statistics (mean and std of metrics over successful datasets):\n")
                     f.write(summary.to_string())
-                logging.info(f"Summary statistics saved to: {output_summary_path}")
-                print("\nSummary statistics (mean and std of metrics over successful datasets):")
-                print(summary)
+                logger.info(f"Summary statistics saved to: {output_summary_path}")
+                logger.info("\nSummary statistics (mean and std of metrics over successful datasets):")
+                logger.info(summary)
             except Exception as e:
-                logging.error(f"Failed to save summary statistics: {e}")
+                logger.error(f"Failed to save summary statistics: {e}")
         else:
-            logging.warning("No valid columns found for summary statistics. Skipping summary.")
+            logger.warning("No valid columns found for summary statistics. Skipping summary.")
 
     else:
-        logging.warning("No datasets were processed successfully. No results to save or summarize.")
+        logger.warning("No datasets were processed successfully. No results to save or summarize.")
 
     if failed_datasets_info:
-        logging.warning(f"\n--- Failed Datasets ({len(failed_datasets_info)}) ---")
+        logger.warning(f"\n--- Failed Datasets ({len(failed_datasets_info)}) ---")
         for failure in failed_datasets_info:
-            logging.warning(f"Dataset: {failure['dataset']}, Reason: {failure['message']}")
-        logging.warning(f"Details for failed datasets logged to: {FAILED_LOG_FILE}")
-        print(f"\nInformation on {len(failed_datasets_info)} failed dataset(s) logged to: {FAILED_LOG_FILE}")
+            logger.warning(f"Dataset: {failure['dataset']}, Reason: {failure['message']}")
+        logger.warning(f"Details for failed datasets logged to: {FAILED_LOG_FILE}")
+        logger.info(f"\nInformation on {len(failed_datasets_info)} failed dataset(s) logged to: {FAILED_LOG_FILE}")
 
-    logging.info("Script finished.")
+    logger.info("Script finished.")

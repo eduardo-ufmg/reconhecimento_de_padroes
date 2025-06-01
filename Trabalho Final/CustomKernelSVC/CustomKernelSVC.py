@@ -13,6 +13,9 @@ from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import accuracy_score
 from scipy.optimize import minimize_scalar
 
+import logging
+logger = logging.getLogger(__name__)
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Kernel.kernel import kernel, kernel_fit 
@@ -109,13 +112,12 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         K_h = kernel(X_checked, X_checked, self.norm_factor_, self.cov_inv_, h_candidate)
         
         if K_h.shape[0] != len(y_checked):
-            print(f"Warning: Mismatch in K_h rows ({K_h.shape[0]}) and y_checked length ({len(y_checked)}) for h={h_candidate}. Returning inf.")
+            logger.warning(f"Mismatch in K_h rows ({K_h.shape[0]}) and y_checked length ({len(y_checked)}) for h={h_candidate}. Returning inf.")
             return np.inf
 
         # Ensure there are at least two classes for the Q0, Q1 logic
         if len(self.classes_) < 2:
-            # This scenario should be caught earlier in fit(), but as a safeguard:
-            print(f"Warning: Less than 2 classes found during h optimization callback ({self.classes_}). Objective score is ill-defined. Returning inf.")
+            logger.warning(f"Less than 2 classes found during h optimization callback ({self.classes_}). Objective score is ill-defined. Returning inf.")
             return np.inf
 
         # Assuming binary classification
@@ -191,8 +193,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         if result.success:
             self.h_opt_ = np.float32(result.x)
         else:
-            # If optimization failed, try evaluating at the boundaries as a fallback
-            print(f"Warning: 'h' optimization failed. Optimizer message: {result.message}")
+            logger.warning(f"'h' optimization failed. Optimizer message: {result.message}")
             val_at_lower_bound = self._objective_for_h_optimization(self.h_bounds[0], *optimization_args)
             val_at_upper_bound = self._objective_for_h_optimization(self.h_bounds[1], *optimization_args)
 
@@ -209,8 +210,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
 
             if best_bound_h is not None:
                 self.h_opt_ = best_bound_h
-                # Original objective score is -min_objective_at_bound
-                print(f"Defaulting to boundary value h={self.h_opt_} with objective value {-min_objective_at_bound:.4f}.")
+                logger.info(f"Defaulting to boundary value h={self.h_opt_} with objective value {-min_objective_at_bound:.4f}.")
             else:
                 raise ValueError(
                     "Optimization of 'h' failed, and evaluating at boundaries also resulted "

@@ -19,12 +19,8 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, 'outputs')
 
 sys.path.append(BASE_DIR)
 
-try:
-    from Preprocessing.preprocessing import Preprocessor
-    from CustomKernelSVC.CustomKernelSVC import CustomKernelSVC
-except ImportError as e:
-    print(f"Critical Error: Could not import custom modules (Preprocessor or CustomKernelSVC): {e}")
-    sys.exit(1)
+from Preprocessing.preprocessing import Preprocessor
+from CustomKernelSVC.CustomKernelSVC import CustomKernelSVC
 
 DATASET_NAMES = [
     "banknote-authentication",
@@ -50,10 +46,12 @@ FAILED_LOG_FILE = os.path.join(OUTPUT_DIR, "failed_datasets.log")
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     handlers=[logging.StreamHandler(sys.stdout)])
+logger = logging.getLogger(__name__)
+
 file_error_handler = logging.FileHandler(FAILED_LOG_FILE, mode='w')
 file_error_handler.setLevel(logging.ERROR)
 file_error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-logging.getLogger().addHandler(file_error_handler)
+logger.addHandler(file_error_handler)
 
 def load_npz_dataset(name: str) -> tuple[np.ndarray, np.ndarray]:
     path = os.path.join(SETS_DIR, f"{name}.npz")
@@ -111,7 +109,7 @@ def run_compare_worker(
             'status': 'success'
         }
     except Exception as e:
-        logging.error(f"Error processing {dataset_name} ({objective_metric}): {e}", exc_info=True)
+        logger.error(f"Error processing {dataset_name} ({objective_metric}): {e}", exc_info=True)
         return {'dataset': dataset_name, 'objective_metric': objective_metric, 'status': 'error', 'message': str(e)}
 
 if __name__ == "__main__":
@@ -120,7 +118,7 @@ if __name__ == "__main__":
         num_processes = max(1, multiprocessing.cpu_count() - 1 if multiprocessing.cpu_count() > 1 else 1)
     except NotImplementedError:
         num_processes = 2
-    logging.info(f"Comparing SVC and CustomKernelSVC (both objectives) using up to {num_processes} processes...")
+    logger.info(f"Comparing SVC and CustomKernelSVC (both objectives) using up to {num_processes} processes...")
 
     tasks_args = []
     for name in DATASET_NAMES:
@@ -139,7 +137,7 @@ if __name__ == "__main__":
                     failed_datasets_info.append(result)
                 pbar.update(1)
 
-    logging.info("All comparisons completed.")
+    logger.info("All comparisons completed.")
 
     if successful_results:
         df_results = pd.DataFrame(successful_results)
@@ -148,12 +146,12 @@ if __name__ == "__main__":
         output_csv_path = os.path.join(OUTPUT_DIR, "compare_results.csv")
         try:
             df_to_save.to_csv(output_csv_path, index=False)
-            logging.info(f"Comparison results saved to: {output_csv_path}")
+            logger.info(f"Comparison results saved to: {output_csv_path}")
         except Exception as e:
-            logging.error(f"Failed to save comparison results CSV: {e}")
+            logger.error(f"Failed to save comparison results CSV: {e}")
 
-        print("\nComparison results:")
-        print(df_to_save.to_string(index=False))
+        logger.info("\nComparison results:")
+        logger.info(df_to_save.to_string(index=False))
 
         summary_cols = ['custom_score_mean', 'custom_score_std', 'ref_score_mean', 'ref_score_std', 't_statistic', 'p_value']
         valid_summary_cols = [col for col in summary_cols if col in df_to_save.columns]
@@ -164,22 +162,22 @@ if __name__ == "__main__":
                 with open(output_summary_path, 'w') as f:
                     f.write("Summary statistics by objective_metric:\n")
                     f.write(summary.to_string())
-                logging.info(f"Summary statistics saved to: {output_summary_path}")
-                print("\nSummary statistics by objective_metric:")
-                print(summary)
+                logger.info(f"Summary statistics saved to: {output_summary_path}")
+                logger.info("\nSummary statistics by objective_metric:")
+                logger.info(summary)
             except Exception as e:
-                logging.error(f"Failed to save summary statistics: {e}")
+                logger.error(f"Failed to save summary statistics: {e}")
         else:
-            logging.warning("No valid columns found for summary statistics. Skipping summary.")
+            logger.warning("No valid columns found for summary statistics. Skipping summary.")
 
     else:
-        logging.warning("No datasets were processed successfully. No results to save or summarize.")
+        logger.warning("No datasets were processed successfully. No results to save or summarize.")
 
     if failed_datasets_info:
-        logging.warning(f"\n--- Failed Datasets ({len(failed_datasets_info)}) ---")
+        logger.warning(f"\n--- Failed Datasets ({len(failed_datasets_info)}) ---")
         for failure in failed_datasets_info:
-            logging.warning(f"Dataset: {failure['dataset']} ({failure.get('objective_metric', '')}), Reason: {failure['message']}")
-        logging.warning(f"Details for failed datasets logged to: {FAILED_LOG_FILE}")
-        print(f"\nInformation on {len(failed_datasets_info)} failed dataset(s) logged to: {FAILED_LOG_FILE}")
+            logger.warning(f"Dataset: {failure['dataset']} ({failure.get('objective_metric', '')}), Reason: {failure['message']}")
+        logger.warning(f"Details for failed datasets logged to: {FAILED_LOG_FILE}")
+        logger.info(f"\nInformation on {len(failed_datasets_info)} failed dataset(s) logged to: {FAILED_LOG_FILE}")
 
-    logging.info("Script finished.")
+    logger.info("Script finished.")
