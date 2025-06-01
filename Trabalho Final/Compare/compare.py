@@ -108,8 +108,14 @@ def run_compare_worker(
             'conclusion': "Not equivalent" if p_value < 0.05 else "Equivalent",
             'status': 'success'
         }
+    except FileNotFoundError as fnf_err:
+        logger.error(f"Dataset file not found for {dataset_name} ({objective_metric}): {fnf_err}")
+        return {'dataset': dataset_name, 'objective_metric': objective_metric, 'status': 'error', 'message': str(fnf_err)}
+    except ValueError as val_err:
+        logger.error(f"Value error for {dataset_name} ({objective_metric}): {val_err}")
+        return {'dataset': dataset_name, 'objective_metric': objective_metric, 'status': 'error', 'message': str(val_err)}
     except Exception as e:
-        logger.error(f"Error processing {dataset_name} ({objective_metric}): {e}", exc_info=True)
+        logger.error(f"Unexpected error processing {dataset_name} ({objective_metric}): {e}", exc_info=True)
         return {'dataset': dataset_name, 'objective_metric': objective_metric, 'status': 'error', 'message': str(e)}
 
 if __name__ == "__main__":

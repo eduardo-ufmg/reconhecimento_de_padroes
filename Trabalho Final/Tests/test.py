@@ -139,7 +139,7 @@ def run_test_on_dataset_worker(
         logger.error(f"Data Error for '{dataset_name}': {val_err}")
         return {'dataset': dataset_name, 'status': 'error', 'message': str(val_err)}
     except Exception as e:
-        logger.error(f"Runtime Error processing dataset '{dataset_name}': {e}", exc_info=True)
+        logger.error(f"Unexpected runtime error processing dataset '{dataset_name}': {e}", exc_info=True)
         return {'dataset': dataset_name, 'status': 'error', 'message': f"Runtime error: {e}"}
 
 

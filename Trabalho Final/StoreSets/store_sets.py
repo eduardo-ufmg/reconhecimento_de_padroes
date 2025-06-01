@@ -388,8 +388,10 @@ def main():
             save_dataset(X_processed, y_processed, data_dict['name'], base_storage_dir)
         except ValueError as ve: 
             logger.error(f"Skipping dataset '{data_dict['name']}' due to processing error: {ve}")
+        except FileNotFoundError as fnf:
+            logger.error(f"File not found while processing dataset '{data_dict['name']}': {fnf}")
         except Exception as e:
-            logger.error(f"An unexpected error occurred while processing dataset '{data_dict['name']}': {e}")
+            logger.error(f"An unexpected error occurred while processing dataset '{data_dict['name']}': {e}", exc_info=True)
         finally:
             logger.info("-" * 30)
 
