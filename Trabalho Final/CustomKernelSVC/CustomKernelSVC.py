@@ -38,11 +38,13 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
     Custom SVM using a precomputed kernel where the kernel parameter 'h'
     is optimized using scipy.optimize.minimize_scalar based on a custom metric.
     """
-    def __init__(self, 
-                 h_bounds: tuple[np.float32, np.float32] | None = None, 
-                 kernel_fit_type: str = 'scale',
-                 objective_metric: str = 'spatial',
-                 svm_kwargs: dict[str, Any] | None = None):
+    def __init__(
+        self,
+        h_bounds: tuple[np.float32, np.float32] | None = None,
+        kernel_fit_type: str = 'scale',
+        objective_metric: str = 'spatial',
+        svm_kwargs: dict[str, Any] | None = None
+    ) -> None:
         """
         Initialize the SVM.
 
@@ -54,7 +56,8 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         kernel_fit_type : str, default='scale'
             The type of kernel fitting to perform. Passed to `kernel_fit`.
         objective_metric : str, default='spatial'
-        svm_kwargs : dict, optional
+            The metric to use for optimizing 'h'. Must be 'spatial' or 'axis'.
+        svm_kwargs : dict[str, object], optional
             Additional keyword arguments to pass to the underlying `sklearn.svm.SVC`.
         """
 
@@ -138,7 +141,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         # We want to maximize objective_function, so minimize its negative
         return -np.float32(current_obj_score)
 
-    def fit(self, X: NDArray[np.float32], y: NDArray[np.int32]) -> "CustomKernelSVC":
+    def fit(self, X: NDArray[np.float32], y: NDArray[np.int32]) -> Self:
         """
         Fit the SVM model according to the given training data.
 
@@ -276,7 +279,7 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         y_pred = self.predict(X)
         return np.float32(accuracy_score(y, y_pred)) # Ensure return is np.float32
 
-    def get_params(self, deep: bool = True) -> dict[str, Any]:
+    def get_params(self, deep: bool = True) -> dict[str, float | str | tuple[np.float32, np.float32]]:
         """
         Get parameters for this estimator. Includes constructor parameters and h_opt_ if fitted.
         """
@@ -287,14 +290,12 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
             params['h_opt_'] = self.h_opt_ 
         return params
 
-    def set_params(self, **params: Any) -> "CustomKernelSVC":
+    def set_params(self, **params: float | str | tuple[np.float32, np.float32]) -> Self:
         """
         Set the parameters of this estimator.
         """
-        # Handle h_opt_ specifically if it's part of params,
-        # though typically fitted parameters are not set this way.
         if 'h_opt_' in params:
-            self.h_opt_ = params.pop('h_opt_') # Remove it so super().set_params doesn't complain
+            raise ValueError("Cannot set 'h_opt_' directly. It is determined during fit().")
         
         super().set_params(**params)
         return self

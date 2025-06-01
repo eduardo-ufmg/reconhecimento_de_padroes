@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-from typing import cast, Any
+from typing import cast
 from scipy.stats import ttest_rel
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
@@ -66,7 +66,9 @@ def load_npz_dataset(name: str) -> tuple[np.ndarray, np.ndarray]:
         X = X.reshape(-1, 1)
     return X, y
 
-def run_compare_worker(args: tuple[str, tuple[np.float32, np.float32], str]) -> dict[str, Any]:
+def run_compare_worker(
+    args: tuple[str, tuple[np.float32, np.float32], str]
+) -> dict[str, str | np.float32]:
     dataset_name, hs_bounds, objective_metric = args
     try:
         X, y = load_npz_dataset(dataset_name)
@@ -125,8 +127,8 @@ if __name__ == "__main__":
         for obj_metric in ["spatial", "axis"]:
             tasks_args.append((name, hs_param_search_range_global, obj_metric))
 
-    successful_results: list[dict[str, Any]] = []
-    failed_datasets_info: list[dict[str, Any]] = []
+    successful_results: list[dict[str, str | np.float32]] = []
+    failed_datasets_info: list[dict[str, str | np.float32]] = []
 
     with multiprocessing.Pool(processes=num_processes) as pool:
         with tqdm(total=len(tasks_args), desc="Comparing datasets") as pbar:

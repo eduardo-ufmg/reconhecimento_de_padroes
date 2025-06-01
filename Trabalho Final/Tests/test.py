@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-from typing import cast, Any
+from typing import cast
 from scipy.stats import ttest_rel
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
@@ -85,7 +85,9 @@ def load_npz_dataset(name: str) -> tuple[np.ndarray, np.ndarray]:
         X = X.reshape(-1, 1)
     return X, y
 
-def run_test_on_dataset_worker(args: tuple[str, tuple[np.float32, np.float32]]) -> dict[str, Any]:
+def run_test_on_dataset_worker(
+    args: tuple[str, tuple[np.float32, np.float32]]
+) -> dict[str, str | np.float32]:
     """
     Worker function to be called by multiprocessing pool.
     Unpacks arguments and calls the main processing function.
@@ -163,8 +165,8 @@ if __name__ == "__main__":
     # Prepare arguments for starmap-like behavior with imap_unordered
     tasks_args = [(name, hs_param_search_range_global) for name in DATASET_NAMES]
 
-    successful_results: list[dict[str, Any]] = []
-    failed_datasets_info: list[dict[str, Any]] = []
+    successful_results: list[dict[str, str | np.float32]] = []
+    failed_datasets_info: list[dict[str, str | np.float32]] = []
 
     # Using imap_unordered to get results as they complete and allow tqdm progress updates
     with multiprocessing.Pool(processes=num_processes) as pool:

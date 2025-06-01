@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -16,7 +15,7 @@ class CorrelationFilter(BaseEstimator, TransformerMixin):
         self.threshold = threshold
         self.to_drop_: NDArray[np.int32] | None = None # Features to drop
 
-    def fit(self, X: NDArray[np.float32], y: Any = None) -> Self:
+    def fit(self, X: NDArray[np.float32], y: NDArray[np.int32] | None = None) -> Self:
         X = check_array(X, dtype=np.float32)
         if X.shape[1] < 2:
             self.to_drop_ = np.array([], dtype=int)
@@ -58,7 +57,7 @@ class Preprocessor(BaseEstimator, TransformerMixin):
             ('pca', PCA())
         ])
 
-    def fit(self, X: NDArray[np.float32], y: Any = None) -> Self:
+    def fit(self, X: NDArray[np.float32], y: NDArray[np.int32] | None = None) -> Self:
         self.pipeline.fit(X, y)
         return self
 
