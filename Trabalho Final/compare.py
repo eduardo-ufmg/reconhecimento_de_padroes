@@ -11,7 +11,6 @@ from scipy.stats import ttest_rel
 import time
 
 # --- Setup sys.path to find custom modules ---
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
@@ -74,12 +73,12 @@ def get_models():
     return models
 
 def main():
-    logger.info("Starting model comparison script.")
+    logger.info("Starting model comparison script (with time recording).")
     
     if not os.path.isdir(DATASET_DIR):
         logger.error(f"Dataset directory not found: {DATASET_DIR}")
         logger.error("Please ensure datasets are generated and available in 'sets/'.")
-        logger.error("You might need to run '/StoreSets/store_sets.py' first.")
+        logger.error("You might need to run 'StoreSets/store_sets.py' first.")
         return
 
     dataset_files = glob(os.path.join(DATASET_DIR, "*.npz"))
@@ -92,7 +91,6 @@ def main():
     all_results = load_results(RESULTS_FILE)
     models = get_models()
     
-    # shuffle=True is important for StratifiedKFold robustness if data isn't already randomly ordered
     kf = StratifiedKFold(n_splits=N_SPLITS_CV, shuffle=True, random_state=RANDOM_STATE)
 
     for dataset_path in dataset_files:
@@ -109,8 +107,8 @@ def main():
             
             if X.dtype != np.float32:
                 X = X.astype(np.float32)
-            if y.dtype != np.int32: # CustomKernelSVC and other parts might expect int32
-                y = y.astype(np.int32)
+            if y.dtype != np.int32:
+                 y = y.astype(np.int32)
 
             if X.shape[0] == 0:
                 logger.warning(f"Dataset {dataset_name} has 0 samples. Skipping.")
@@ -124,7 +122,7 @@ def main():
                 logger.warning(f"Dataset {dataset_name} has only {len(unique_classes_y)} unique class(es). Skipping.")
                 continue
             
-            class_counts = np.bincount(y[y >= 0]) # Ensure y is non-negative for bincount if necessary
+            class_counts = np.bincount(y[y >= 0]) 
             min_class_count = np.min(class_counts[class_counts > 0]) if len(class_counts[class_counts > 0]) > 0 else 0
             if min_class_count < N_SPLITS_CV:
                 logger.warning(f"Dataset {dataset_name} has a class with {min_class_count} samples, less than N_SPLITS_CV={N_SPLITS_CV}. StratifiedKFold may fail. Skipping.")
@@ -135,22 +133,28 @@ def main():
             continue
 
         model_scores_dict = {}
-        dataset_start_time = time.time()
+        model_times_dict = {} # To store execution times
+        current_dataset_overall_start_time = time.time()
 
         for model_name, model_pipeline in models.items():
             logger.info(f"Running {N_SPLITS_CV}-fold CV for model '{model_name}' on dataset '{dataset_name}'...")
-            model_start_time = time.time()
+            individual_model_start_time = time.time()
             try:
                 scores = cross_val_score(model_pipeline, X, y, cv=kf, 
                                          scoring='accuracy', n_jobs=-1, error_score='raise')
+                duration = time.time() - individual_model_start_time
                 model_scores_dict[model_name] = scores
-                logger.info(f"Finished CV for '{model_name}'. Time: {time.time() - model_start_time:.2f}s. Avg Acc: {np.mean(scores):.4f}")
+                model_times_dict[model_name] = duration
+                logger.info(f"Finished CV for '{model_name}'. Time: {duration:.2f}s. Avg Acc: {np.mean(scores):.4f}")
             except Exception as e:
-                logger.error(f"Error CV model '{model_name}' on '{dataset_name}': {e}")
+                duration = time.time() - individual_model_start_time 
+                logger.error(f"Error CV model '{model_name}' on '{dataset_name}': {e}. Time taken before error: {duration:.2f}s")
                 model_scores_dict[model_name] = None
+                model_times_dict[model_name] = duration
 
         dataset_results = {
             "accuracy": {},
+            "time": {},
             "ttest_pvalue": {},
             "equivalent": {}
         }
@@ -162,7 +166,14 @@ def main():
                 dataset_results["accuracy"][model_name] = f"{mean_acc:.4f} ± {std_acc:.4f}"
             else:
                 dataset_results["accuracy"][model_name] = "Error or no scores"
-        
+
+        for model_name, time_val in model_times_dict.items():
+            if time_val is not None: # time_val is the duration in seconds
+                dataset_results["time"][model_name] = f"{time_val:.2f}s"
+            # If an error occurred, time_val is still the duration until the error.
+            # If model was skipped entirely (shouldn't happen with this loop structure), it would be missing.
+            # But since we initialize model_times_dict[model_name] even on error, it should be present.
+
         comparisons = [
             ("opt_2d", "ref"),
             ("opt_axis", "ref"),
@@ -175,13 +186,11 @@ def main():
             scores_m2 = model_scores_dict.get(m2_name)
 
             if scores_m1 is not None and scores_m2 is not None and len(scores_m1) == N_SPLITS_CV and len(scores_m2) == N_SPLITS_CV:
-                # Perform t-test only if both models have complete scores for all folds
                 try:
                     ttest_result = ttest_rel(scores_m1, scores_m2)
-                    # Check for NaN p-value (e.g. if all scores are identical for both models in all folds)
                     if np.isnan(ttest_result.pvalue):
-                        pval = 1.0 # Or handle as a special case, e.g. perfectly equivalent
-                        logger.warning(f"NaN p-value for {comp_key} on {dataset_name}. Scores might be identical. Treating as p-value=1.0 for equivalence.")
+                        pval = 1.0 
+                        logger.warning(f"NaN p-value for {comp_key} on {dataset_name}. Scores might be identical. Treating as p-value=1.0.")
                     else:
                         pval = float(ttest_result.pvalue)
                     
@@ -197,13 +206,12 @@ def main():
             
         all_results[dataset_name] = dataset_results
         save_results(RESULTS_FILE, all_results)
-        logger.info(f"Finished processing dataset {dataset_name}. Time: {time.time() - dataset_start_time:.2f}s")
+        logger.info(f"Finished processing dataset {dataset_name}. Total dataset time: {time.time() - current_dataset_overall_start_time:.2f}s")
         logger.info("-" * 50)
 
     logger.info(f"All datasets processed. Final results are in {RESULTS_FILE}")
 
 if __name__ == '__main__':
     from multiprocessing import freeze_support
-    freeze_support()
-    
+    freeze_support() 
     main()
