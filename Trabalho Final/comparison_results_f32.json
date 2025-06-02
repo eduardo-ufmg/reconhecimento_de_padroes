@@ -1,0 +1,442 @@
+{
+    "sylvine": {
+        "accuracy": {
+            "opt_2d": "0.5015 \u00b1 0.0082",
+            "opt_axis": "0.5015 \u00b1 0.0082",
+            "ref": "1.0000 \u00b1 0.0000"
+        },
+        "time": {
+            "opt_2d": "6.42s",
+            "opt_axis": "5.45s",
+            "ref": "0.28s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 2.179372702929483e-17,
+            "opt_axis - ref": 2.179372702929483e-17,
+            "opt_2d - opt_axis": 1.0
+        },
+        "equivalent": {
+            "opt_2d - ref": false,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "breast_cancer": {
+        "accuracy": {
+            "opt_2d": "0.9297 \u00b1 0.0368",
+            "opt_axis": "0.9262 \u00b1 0.0349",
+            "ref": "0.9332 \u00b1 0.0375"
+        },
+        "time": {
+            "opt_2d": "0.55s",
+            "opt_axis": "0.60s",
+            "ref": "0.04s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.16785065605707486,
+            "opt_axis - ref": 0.4433318501696609,
+            "opt_2d - opt_axis": 0.7052012581661724
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "banknote-authentication": {
+        "accuracy": {
+            "opt_2d": "1.0000 \u00b1 0.0000",
+            "opt_axis": "0.9788 \u00b1 0.0128",
+            "ref": "1.0000 \u00b1 0.0000"
+        },
+        "time": {
+            "opt_2d": "3.26s",
+            "opt_axis": "4.15s",
+            "ref": "0.05s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 1.0,
+            "opt_axis - ref": 0.0007921083559055153,
+            "opt_2d - opt_axis": 0.0007921083559055153
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": false
+        }
+    },
+    "qsar-biodeg": {
+        "accuracy": {
+            "opt_2d": "0.8759 \u00b1 0.0250",
+            "opt_axis": "0.8408 \u00b1 0.0913",
+            "ref": "0.8825 \u00b1 0.0304"
+        },
+        "time": {
+            "opt_2d": "3.17s",
+            "opt_axis": "3.85s",
+            "ref": "0.11s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.11065052749778526,
+            "opt_axis - ref": 0.16468435020226635,
+            "opt_2d - opt_axis": 0.22407590602163102
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "german_credit_g": {
+        "accuracy": {
+            "opt_2d": "0.7000 \u00b1 0.0000",
+            "opt_axis": "0.7000 \u00b1 0.0000",
+            "ref": "0.7680 \u00b1 0.0293"
+        },
+        "time": {
+            "opt_2d": "4.93s",
+            "opt_axis": "4.72s",
+            "ref": "0.17s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 6.519414023620854e-05,
+            "opt_axis - ref": 6.519414023620854e-05,
+            "opt_2d - opt_axis": 1.0
+        },
+        "equivalent": {
+            "opt_2d - ref": false,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "sonar": {
+        "accuracy": {
+            "opt_2d": "0.6631 \u00b1 0.1068",
+            "opt_axis": "0.7019 \u00b1 0.0764",
+            "ref": "0.7064 \u00b1 0.0939"
+        },
+        "time": {
+            "opt_2d": "0.14s",
+            "opt_axis": "0.17s",
+            "ref": "0.03s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.0036722474031887584,
+            "opt_axis - ref": 0.8112019541383457,
+            "opt_2d - opt_axis": 0.17993700613058763
+        },
+        "equivalent": {
+            "opt_2d - ref": false,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "spambase": {
+        "accuracy": {
+            "opt_2d": "0.6060 \u00b1 0.0009",
+            "opt_axis": "0.6060 \u00b1 0.0009",
+            "ref": "0.9335 \u00b1 0.0094"
+        },
+        "time": {
+            "opt_2d": "114.50s",
+            "opt_axis": "103.98s",
+            "ref": "1.75s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 3.32631473245069e-15,
+            "opt_axis - ref": 3.32631473245069e-15,
+            "opt_2d - opt_axis": 1.0
+        },
+        "equivalent": {
+            "opt_2d - ref": false,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "diabetes": {
+        "accuracy": {
+            "opt_2d": "0.7670 \u00b1 0.0414",
+            "opt_axis": "0.7813 \u00b1 0.0381",
+            "ref": "0.7657 \u00b1 0.0396"
+        },
+        "time": {
+            "opt_2d": "1.00s",
+            "opt_axis": "1.10s",
+            "ref": "0.07s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.7233400470885916,
+            "opt_axis - ref": 0.21203286488246625,
+            "opt_2d - opt_axis": 0.22253345447254205
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "titanic": {
+        "accuracy": {
+            "opt_2d": "0.9458 \u00b1 0.0134",
+            "opt_axis": "0.9427 \u00b1 0.0138",
+            "ref": "0.9442 \u00b1 0.0133"
+        },
+        "time": {
+            "opt_2d": "3.62s",
+            "opt_axis": "4.14s",
+            "ref": "0.54s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.16785065605707486,
+            "opt_axis - ref": 0.34343639613790794,
+            "opt_2d - opt_axis": 0.03678749787978613
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": false
+        }
+    },
+    "ionosphere": {
+        "accuracy": {
+            "opt_2d": "0.9402 \u00b1 0.0413",
+            "opt_axis": "0.9487 \u00b1 0.0439",
+            "ref": "0.9458 \u00b1 0.0433"
+        },
+        "time": {
+            "opt_2d": "0.49s",
+            "opt_axis": "0.42s",
+            "ref": "0.04s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.16789794704468425,
+            "opt_axis - ref": 0.5770368716609588,
+            "opt_2d - opt_axis": 0.08112618884584057
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "blood-transfusion-service-center": {
+        "accuracy": {
+            "opt_2d": "0.7768 \u00b1 0.0167",
+            "opt_axis": "0.7647 \u00b1 0.0089",
+            "ref": "0.7848 \u00b1 0.0193"
+        },
+        "time": {
+            "opt_2d": "0.86s",
+            "opt_axis": "0.90s",
+            "ref": "0.06s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.0811261888458405,
+            "opt_axis - ref": 0.008995611953202878,
+            "opt_2d - opt_axis": 0.04108440015623859
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": false
+        }
+    },
+    "kc1": {
+        "accuracy": {
+            "opt_2d": "0.8549 \u00b1 0.0074",
+            "opt_axis": "0.8511 \u00b1 0.0064",
+            "ref": "0.8535 \u00b1 0.0078"
+        },
+        "time": {
+            "opt_2d": "8.56s",
+            "opt_axis": "10.19s",
+            "ref": "0.23s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.3932534939316925,
+            "opt_axis - ref": 0.273532815008571,
+            "opt_2d - opt_axis": 0.06970737536955449
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "wpbc": {
+        "accuracy": {
+            "opt_2d": "0.7624 \u00b1 0.0522",
+            "opt_axis": "0.7483 \u00b1 0.0401",
+            "ref": "0.7520 \u00b1 0.0603"
+        },
+        "time": {
+            "opt_2d": "0.25s",
+            "opt_axis": "0.29s",
+            "ref": "0.04s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.3435068599600156,
+            "opt_axis - ref": 0.8306831478645833,
+            "opt_2d - opt_axis": 0.30222095900631935
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "iris_binary_setosa_vs_rest": {
+        "accuracy": {
+            "opt_2d": "0.9933 \u00b1 0.0200",
+            "opt_axis": "1.0000 \u00b1 0.0000",
+            "ref": "0.9933 \u00b1 0.0200"
+        },
+        "time": {
+            "opt_2d": "0.08s",
+            "opt_axis": "0.10s",
+            "ref": "0.03s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 1.0,
+            "opt_axis - ref": 0.34343639613791355,
+            "opt_2d - opt_axis": 0.34343639613791355
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "adult": {
+        "accuracy": {
+            "opt_2d": "Error or no scores",
+            "opt_axis": "Error or no scores",
+            "ref": "0.8515 \u00b1 0.0034"
+        },
+        "time": {
+            "opt_2d": "15.34s",
+            "opt_axis": "17.63s",
+            "ref": "296.53s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": "Scores unavailable",
+            "opt_axis - ref": "Scores unavailable",
+            "opt_2d - opt_axis": "Scores unavailable"
+        },
+        "equivalent": {
+            "opt_2d - ref": "Scores unavailable",
+            "opt_axis - ref": "Scores unavailable",
+            "opt_2d - opt_axis": "Scores unavailable"
+        }
+    },
+    "digits_binary_0_vs_1": {
+        "accuracy": {
+            "opt_2d": "0.5056 \u00b1 0.0111",
+            "opt_axis": "0.5056 \u00b1 0.0111",
+            "ref": "0.9972 \u00b1 0.0083"
+        },
+        "time": {
+            "opt_2d": "0.73s",
+            "opt_axis": "0.66s",
+            "ref": "0.05s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 1.3483928993198458e-15,
+            "opt_axis - ref": 1.3483928993198458e-15,
+            "opt_2d - opt_axis": 1.0
+        },
+        "equivalent": {
+            "opt_2d - ref": false,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "vote": {
+        "accuracy": {
+            "opt_2d": "0.9564 \u00b1 0.0238",
+            "opt_axis": "0.9610 \u00b1 0.0250",
+            "ref": "0.9588 \u00b1 0.0222"
+        },
+        "time": {
+            "opt_2d": "0.36s",
+            "opt_axis": "0.40s",
+            "ref": "0.04s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 0.34343639613791355,
+            "opt_axis - ref": 0.5910512317836034,
+            "opt_2d - opt_axis": 0.3405253342589292
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "mushroom": {
+        "accuracy": {
+            "opt_2d": "0.5180 \u00b1 0.0005",
+            "opt_axis": "0.5180 \u00b1 0.0005",
+            "ref": "1.0000 \u00b1 0.0000"
+        },
+        "time": {
+            "opt_2d": "402.77s",
+            "opt_axis": "394.42s",
+            "ref": "3.75s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 1.809534390497163e-28,
+            "opt_axis - ref": 1.809534390497163e-28,
+            "opt_2d - opt_axis": 1.0
+        },
+        "equivalent": {
+            "opt_2d - ref": false,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "digits_binary_5_vs_rest": {
+        "accuracy": {
+            "opt_2d": "0.8987 \u00b1 0.0022",
+            "opt_axis": "0.8987 \u00b1 0.0022",
+            "ref": "0.9967 \u00b1 0.0027"
+        },
+        "time": {
+            "opt_2d": "15.40s",
+            "opt_axis": "14.88s",
+            "ref": "0.16s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 1.9927500832675836e-15,
+            "opt_axis - ref": 1.9927500832675836e-15,
+            "opt_2d - opt_axis": 1.0
+        },
+        "equivalent": {
+            "opt_2d - ref": false,
+            "opt_axis - ref": false,
+            "opt_2d - opt_axis": true
+        }
+    },
+    "iris_binary_setosa_vs_versicolor": {
+        "accuracy": {
+            "opt_2d": "1.0000 \u00b1 0.0000",
+            "opt_axis": "1.0000 \u00b1 0.0000",
+            "ref": "1.0000 \u00b1 0.0000"
+        },
+        "time": {
+            "opt_2d": "0.09s",
+            "opt_axis": "0.11s",
+            "ref": "0.03s"
+        },
+        "ttest_pvalue": {
+            "opt_2d - ref": 1.0,
+            "opt_axis - ref": 1.0,
+            "opt_2d - opt_axis": 1.0
+        },
+        "equivalent": {
+            "opt_2d - ref": true,
+            "opt_axis - ref": true,
+            "opt_2d - opt_axis": true
+        }
+    }
+}
