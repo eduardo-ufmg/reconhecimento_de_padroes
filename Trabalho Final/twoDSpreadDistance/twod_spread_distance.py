@@ -127,7 +127,7 @@ def objective_function(Q0: NDArray[np.float64], Q1: NDArray[np.float64], y: NDAr
     val_m_intra = (val_m_intra_c0 + val_m_intra_c1) / 2.0
 
     # Calculate the standard deviation of the mean distances within each class.
-    val_std_intra = np.std([val_m_intra_c0, val_m_intra_c1])
+    val_std_intra = np.std(np.array([val_m_intra_c0, val_m_intra_c1]))
 
     # Objective value is the mean inter-class distance plus the mean intra-class distance minus the standard deviation of intra-class distances
     objective_value = val_m_inter_cd + val_m_intra - val_std_intra
