@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import json # For hierarchical output
-from typing import Any
+from typing import Any, cast
 from scipy.stats import ttest_rel
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
@@ -44,9 +44,9 @@ DATASET_NAMES = [
     "titanic",
     "vote",
     "wpbc",
-    # "adult", # Potentially large/long-running
-    # "mushroom", # Often has perfect scores or issues with variance
-    # "spambase", # Potentially large/long-running
+    "adult", # Potentially large/long-running
+    "mushroom", # Often has perfect scores or issues with variance
+    "spambase", # Potentially large/long-running
 ]
 
 # --- Logging Configuration ---
@@ -177,9 +177,9 @@ def run_comparison_on_dataset_worker(
                 logger.debug(f"Scores for {clf1_name} and {clf2_name} are identical on dataset {dataset_name}. T-test will result in NaN.")
             else:
                 # Cast is used because ttest_rel can return union types
-                t_stat_p_val_tuple = ttest_rel(scores1, scores2, nan_policy='propagate') # Added nan_policy
-                t_stat = np.float32(t_stat_p_val_tuple.statistic)
-                p_val = np.float32(t_stat_p_val_tuple.pvalue)
+                stats, pval = ttest_rel(scores1, scores2, nan_policy='propagate') # Added nan_policy
+                t_stat = cast(np.float32, stats)  # Ensure t_stat is float32
+                p_val = cast(np.float32, pval)  # Ensure p_val is float32
 
 
             comparisons_data[pair_key] = {
