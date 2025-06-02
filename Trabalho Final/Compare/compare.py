@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import sys
 import numpy as np
@@ -44,9 +43,9 @@ DATASET_NAMES = [
     "titanic",
     "vote",
     "wpbc",
-    "adult", # Potentially large/long-running
-    "mushroom", # Often has perfect scores or issues with variance
-    "spambase", # Potentially large/long-running
+    # "adult", # Potentially large/long-running
+    # "mushroom", # Potentially large/long-running
+    # "spambase", # Potentially large/long-running
 ]
 
 # --- Logging Configuration ---
@@ -85,15 +84,16 @@ def load_npz_dataset(name: str) -> tuple[np.ndarray, np.ndarray] | None:
         logger.error(f"Error loading dataset '{name}' from {path}: {e}")
         raise
 
-def run_comparison_on_dataset_worker(
+def run_comparison_on_dataset(
     args: tuple[str, tuple[np.float32, np.float32]]
-) -> dict[str, Any]: # Improved type hint
+) -> dict[str, Any]:
     """
-    Worker function to run comparisons for a single dataset.
+    Function to run comparisons for a single dataset.
     Runs three classifiers (ref, opt_2d, opt_axis) once, then performs t-tests.
+    Uses n_jobs=-1 for parallel fold evaluation in cross_val_score.
     """
     dataset_name, hs_bounds = args
-    dataset_results: dict[str, Any] = {'dataset': dataset_name} # Improved type hint
+    dataset_results: dict[str, Any] = {'dataset': dataset_name}
 
     try:
         load_attempt = load_npz_dataset(dataset_name)
@@ -107,13 +107,11 @@ def run_comparison_on_dataset_worker(
         if len(unique_labels) < 2:
             raise ValueError(f"Dataset {dataset_name} has only one class ({unique_labels}). Cannot perform classification.")
 
-        # Added random_state for reproducible splits
         skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=0)
 
-        # Define pipelines
         pipeline_ref = Pipeline([
             ('preprocessor', Preprocessor()),
-            ('svm', SVC(random_state=0)) # Added random_state
+            ('svm', SVC(random_state=0))
         ])
 
         pipeline_opt_2d = Pipeline([
@@ -122,7 +120,7 @@ def run_comparison_on_dataset_worker(
                 h_bounds=hs_bounds,
                 objective_metric='spatial',
                 kernel_fit_type='scale',
-                svm_kwargs={'random_state': 0} # Added for reproducibility of internal SVC
+                svm_kwargs={'random_state': 0}
             ))
         ])
 
@@ -132,7 +130,7 @@ def run_comparison_on_dataset_worker(
                 h_bounds=hs_bounds,
                 objective_metric='axis',
                 kernel_fit_type='scale',
-                svm_kwargs={'random_state': 0} # Added for reproducibility of internal SVC
+                svm_kwargs={'random_state': 0}
             ))
         ])
 
@@ -142,12 +140,13 @@ def run_comparison_on_dataset_worker(
             "opt_axis": pipeline_opt_axis
         }
 
-        classifier_scores_raw: dict[str, np.ndarray] = {} # Improved type hint
-        classifier_metrics: dict[str, dict[str, np.float32]] = {} # Improved type hint
+        classifier_scores_raw: dict[str, np.ndarray] = {}
+        classifier_metrics: dict[str, dict[str, np.float32]] = {}
 
         for clf_name, pipeline in pipelines.items():
             try:
-                scores = cross_val_score(pipeline, X, y, cv=skf, scoring='accuracy', error_score='raise')
+                # Use n_jobs=-1 for parallel fold evaluation (use all available cores)
+                scores = cross_val_score(pipeline, X, y, cv=skf, scoring='accuracy', error_score='raise', n_jobs=-1)
                 classifier_scores_raw[clf_name] = scores
                 classifier_metrics[clf_name] = {
                     "mean_accuracy": np.float32(np.mean(scores)),
@@ -159,7 +158,7 @@ def run_comparison_on_dataset_worker(
 
         dataset_results['classifier_metrics'] = classifier_metrics
         
-        comparisons_data: dict[str, dict[str, Any]] = {} # Improved type hint
+        comparisons_data: dict[str, dict[str, Any]] = {}
         
         comparison_pairs = [
             ('ref', 'opt_2d', 'ref_vs_opt_2d'),
@@ -171,23 +170,19 @@ def run_comparison_on_dataset_worker(
             scores1 = classifier_scores_raw[clf1_name]
             scores2 = classifier_scores_raw[clf2_name]
             
-            # Check if scores are identical, which leads to NaN in ttest_rel
             if np.array_equal(scores1, scores2):
                 t_stat, p_val = np.nan, np.nan
                 logger.debug(f"Scores for {clf1_name} and {clf2_name} are identical on dataset {dataset_name}. T-test will result in NaN.")
             else:
-                # Cast is used because ttest_rel can return union types
-                stats, pval = ttest_rel(scores1, scores2, nan_policy='propagate') # Added nan_policy
-                t_stat = cast(np.float32, stats)  # Ensure t_stat is float32
-                p_val = cast(np.float32, pval)  # Ensure p_val is float32
-
+                stats, pval = ttest_rel(scores1, scores2, nan_policy='propagate')
+                t_stat = cast(np.float32, stats)
+                p_val = cast(np.float32, pval)
 
             comparisons_data[pair_key] = {
                 't_statistic': t_stat,
                 'p_value': p_val,
-                'conclusion': "Not equivalent" if p_val < 0.05 else "Equivalent" # p_val can be NaN
+                'conclusion': "Not equivalent" if p_val < 0.05 else "Equivalent"
             }
-            # If p_val is NaN, 'Not equivalent' if NaN < 0.05 would be False, so it correctly becomes 'Equivalent'.
         
         dataset_results['statistical_comparisons'] = comparisons_data
         dataset_results['status'] = 'success'
@@ -213,41 +208,38 @@ def run_comparison_on_dataset_worker(
 
 if __name__ == "__main__":
     hs_param_search_range_global = (np.float32(1e-1), np.float32(1e1))
-
-    try:
-        # Consider system load when setting num_processes
-        cpu_count = multiprocessing.cpu_count()
-        num_processes = max(1, cpu_count - 2 if cpu_count > 2 else (cpu_count - 1 if cpu_count > 1 else 1))
-    except NotImplementedError:
-        num_processes = 2 
-    logger.info(f"Starting dataset comparisons in parallel using up to {num_processes} processes...")
+    
+    logger.info(f"Datasets will be processed sequentially.")
+    logger.info(f"Cross-validation for each dataset is parallelized using all available cores.")
     logger.info(f"Datasets will be loaded from: {SETS_DIR}")
     logger.info(f"Results and logs will be saved in: {OUTPUT_DIR}")
 
-    tasks_args = [(name, hs_param_search_range_global) for name in DATASET_NAMES]
-
-    all_results_dict: dict[str, Any] = {"datasets": {}} # Improved type hint
-    failed_datasets_summary: dict[str, str] = {} # Improved type hint
+    all_results_dict: dict[str, Any] = {"datasets": {}}
+    failed_datasets_summary: dict[str, str] = {}
     successful_dataset_count = 0
 
-    with multiprocessing.Pool(processes=num_processes) as pool:
-        with tqdm(total=len(tasks_args), desc="Processing datasets") as pbar:
-            for result in pool.imap_unordered(run_comparison_on_dataset_worker, tasks_args):
-                dataset_name = result['dataset']
-                if result.get('status') == 'success':
-                    successful_dataset_count += 1
-                    all_results_dict["datasets"][dataset_name] = {
-                        k: v for k, v in result.items() if k not in ['dataset', 'status']
-                    }
-                else:
-                    failed_datasets_summary[dataset_name] = result.get('message', 'Unknown error')
-                    all_results_dict["datasets"][dataset_name] = {
-                        'status': 'error',
-                        'message': result.get('message', 'Unknown error')
-                    }
-                pbar.set_postfix_str(f"Success: {successful_dataset_count}, Failed: {len(failed_datasets_summary)}")
-                pbar.update(1)
-    
+    # Process datasets sequentially
+    with tqdm(DATASET_NAMES, desc="Processing datasets", unit="dataset") as pbar:
+        for dataset_name in pbar:
+            task_args_tuple = (dataset_name, hs_param_search_range_global)
+            # Call worker function without n_jobs_cv parameter
+            result = run_comparison_on_dataset(task_args_tuple)
+            
+            retrieved_dataset_name = result['dataset']
+            if result.get('status') == 'success':
+                successful_dataset_count += 1
+                all_results_dict["datasets"][retrieved_dataset_name] = {
+                    k: v for k, v in result.items() if k not in ['dataset', 'status']
+                }
+            else:
+                failed_datasets_summary[retrieved_dataset_name] = result.get('message', 'Unknown error')
+                all_results_dict["datasets"][retrieved_dataset_name] = {
+                    'status': 'error',
+                    'message': result.get('message', 'Unknown error')
+                }
+            
+            pbar.set_postfix_str(f"Success: {successful_dataset_count}, Failed: {len(failed_datasets_summary)}", refresh=True)
+
     logger.info("All dataset comparison runs completed or attempted.")
 
     # --- Save Results ---
@@ -259,7 +251,6 @@ if __name__ == "__main__":
                     if isinstance(obj, np.integer):
                         return int(obj)
                     elif isinstance(obj, np.floating):
-                        # Handle NaN, Inf, -Inf specifically for JSON
                         if np.isnan(obj): return "NaN"
                         if np.isinf(obj): return "Infinity" if obj > 0 else "-Infinity"
                         return float(obj)
@@ -278,9 +269,8 @@ if __name__ == "__main__":
     logger.info(f"Failed to process: {len(failed_datasets_summary)}")
 
     if successful_dataset_count > 0:
-        # Calculate average 'ref' accuracy only on successfully processed datasets
         ref_means = []
-        for dataset_name, data_content in all_results_dict["datasets"].items():
+        for dataset_name_key, data_content in all_results_dict["datasets"].items():
             if data_content.get('status') != 'error' and 'classifier_metrics' in data_content:
                  if 'ref' in data_content['classifier_metrics'] and 'mean_accuracy' in data_content['classifier_metrics']['ref']:
                     ref_means.append(data_content['classifier_metrics']['ref']['mean_accuracy'])
@@ -288,11 +278,13 @@ if __name__ == "__main__":
         if ref_means:
              logger.info(f"Average 'ref' classifier mean accuracy across successful datasets: {np.mean(ref_means):.4f}")
     else:
-        if len(DATASET_NAMES) > 0 : # Only show this warning if datasets were actually attempted
+        if len(DATASET_NAMES) > 0 :
             logger.warning("No datasets were processed successfully to calculate summary statistics.")
     
     if failed_datasets_summary:
-        all_results_dict["failed_datasets_summary"] = failed_datasets_summary # Ensure it's in the dict if not already
+        if "failed_datasets_summary" not in all_results_dict:
+             all_results_dict["failed_datasets_summary"] = failed_datasets_summary
+
         logger.info(f"\n--- Details for Failed Datasets ({len(failed_datasets_summary)}) ---")
         for name, reason in failed_datasets_summary.items():
             logger.warning(f"  Dataset: {name}, Reason: {reason}")

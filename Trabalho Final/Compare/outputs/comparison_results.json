@@ -1,5 +1,302 @@
 {
     "datasets": {
+        "banknote-authentication": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 1.0,
+                    "std_accuracy": 0.0
+                },
+                "opt_2d": {
+                    "mean_accuracy": 1.0,
+                    "std_accuracy": 0.0
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.9788321256637573,
+                    "std_accuracy": 0.012830945663154125
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": NaN,
+                    "p_value": NaN,
+                    "conclusion": "Equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": 4.949257078700596,
+                    "p_value": 0.0007921083559055153,
+                    "conclusion": "Not equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": 4.949257078700596,
+                    "p_value": 0.0007921083559055153,
+                    "conclusion": "Not equivalent"
+                }
+            }
+        },
+        "blood-transfusion-service-center": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.7847567796707153,
+                    "std_accuracy": 0.019295472651720047
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.776756763458252,
+                    "std_accuracy": 0.01666603423655033
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.7647026777267456,
+                    "std_accuracy": 0.008852862752974033
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": 1.9639610121239317,
+                    "p_value": 0.0811261888458405,
+                    "conclusion": "Equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": 3.316129590546807,
+                    "p_value": 0.008995611953202878,
+                    "conclusion": "Not equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": 2.3821241118456657,
+                    "p_value": 0.04108440015623859,
+                    "conclusion": "Not equivalent"
+                }
+            }
+        },
+        "breast_cancer": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.9332080483436584,
+                    "std_accuracy": 0.037477053701877594
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.9296992421150208,
+                    "std_accuracy": 0.03680223226547241
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.9261904954910278,
+                    "std_accuracy": 0.034901268780231476
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": 1.5,
+                    "p_value": 0.16785065605707486,
+                    "conclusion": "Equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": 0.8017837257372719,
+                    "p_value": 0.4433318501696609,
+                    "conclusion": "Equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": 0.3905667329424715,
+                    "p_value": 0.7052012581661724,
+                    "conclusion": "Equivalent"
+                }
+            }
+        },
+        "diabetes": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.7656698822975159,
+                    "std_accuracy": 0.039582058787345886
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.7669856548309326,
+                    "std_accuracy": 0.04135989397764206
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.7799555659294128,
+                    "std_accuracy": 0.03880423679947853
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": -0.3652791428459991,
+                    "p_value": 0.7233400470885916,
+                    "conclusion": "Equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": -1.1311462709092384,
+                    "p_value": 0.28723328160259937,
+                    "conclusion": "Equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": -1.0986228732837042,
+                    "p_value": 0.3004519825091288,
+                    "conclusion": "Equivalent"
+                }
+            }
+        },
+        "digits_binary_0_vs_1": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.9972222447395325,
+                    "std_accuracy": 0.008333333767950535
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.5055555701255798,
+                    "std_accuracy": 0.011111111380159855
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.5055555701255798,
+                    "std_accuracy": 0.011111111380159855
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": 115.8736997153119,
+                    "p_value": 1.3483928993198458e-15,
+                    "conclusion": "Not equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": 115.8736997153119,
+                    "p_value": 1.3483928993198458e-15,
+                    "conclusion": "Not equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": NaN,
+                    "p_value": NaN,
+                    "conclusion": "Equivalent"
+                }
+            }
+        },
+        "digits_binary_5_vs_rest": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.9966604709625244,
+                    "std_accuracy": 0.002726747188717127
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.8987212777137756,
+                    "std_accuracy": 0.002152062486857176
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.8987212777137756,
+                    "std_accuracy": 0.002152062486857176
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": 110.94925453478582,
+                    "p_value": 1.9927500832675836e-15,
+                    "conclusion": "Not equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": 110.94925453478582,
+                    "p_value": 1.9927500832675836e-15,
+                    "conclusion": "Not equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": NaN,
+                    "p_value": NaN,
+                    "conclusion": "Equivalent"
+                }
+            }
+        },
+        "german_credit_g": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.7680000066757202,
+                    "std_accuracy": 0.029257478192448616
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.699999988079071,
+                    "std_accuracy": 0.0
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.699999988079071,
+                    "std_accuracy": 0.0
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": 6.972576455651565,
+                    "p_value": 6.519414023620854e-05,
+                    "conclusion": "Not equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": 6.972576455651565,
+                    "p_value": 6.519414023620854e-05,
+                    "conclusion": "Not equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": NaN,
+                    "p_value": NaN,
+                    "conclusion": "Equivalent"
+                }
+            }
+        },
+        "ionosphere": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.945793628692627,
+                    "std_accuracy": 0.04328424856066704
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.9401587247848511,
+                    "std_accuracy": 0.04131895676255226
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.9487301707267761,
+                    "std_accuracy": 0.04387417435646057
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": 1.4998140595745975,
+                    "p_value": 0.16789794704468425,
+                    "conclusion": "Equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": -0.5786196373819341,
+                    "p_value": 0.5770368716609588,
+                    "conclusion": "Equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": -1.9639610121239313,
+                    "p_value": 0.08112618884584057,
+                    "conclusion": "Equivalent"
+                }
+            }
+        },
+        "iris_binary_setosa_vs_rest": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.9933333396911621,
+                    "std_accuracy": 0.019999999552965164
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.9933333396911621,
+                    "std_accuracy": 0.019999999552965164
+                },
+                "opt_axis": {
+                    "mean_accuracy": 1.0,
+                    "std_accuracy": 0.0
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
+                    "t_statistic": NaN,
+                    "p_value": NaN,
+                    "conclusion": "Equivalent"
+                },
+                "ref_vs_opt_axis": {
+                    "t_statistic": -1.0000000000000002,
+                    "p_value": 0.34343639613791355,
+                    "conclusion": "Equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": -1.0000000000000002,
+                    "p_value": 0.34343639613791355,
+                    "conclusion": "Equivalent"
+                }
+            }
+        },
         "iris_binary_setosa_vs_versicolor": {
             "classifier_metrics": {
                 "ref": {
@@ -33,68 +330,68 @@
                 }
             }
         },
-        "iris_binary_setosa_vs_rest": {
+        "kc1": {
             "classifier_metrics": {
                 "ref": {
-                    "mean_accuracy": 0.9933333396911621,
-                    "std_accuracy": 0.019999999552965164
+                    "mean_accuracy": 0.8534845113754272,
+                    "std_accuracy": 0.007780185900628567
                 },
                 "opt_2d": {
-                    "mean_accuracy": 0.9933333396911621,
-                    "std_accuracy": 0.019999999552965164
+                    "mean_accuracy": 0.8549085855484009,
+                    "std_accuracy": 0.0073798238299787045
                 },
                 "opt_axis": {
-                    "mean_accuracy": 1.0,
-                    "std_accuracy": 0.0
+                    "mean_accuracy": 0.8511171340942383,
+                    "std_accuracy": 0.006361730396747589
                 }
             },
             "statistical_comparisons": {
                 "ref_vs_opt_2d": {
-                    "t_statistic": NaN,
-                    "p_value": NaN,
+                    "t_statistic": -0.8966581693183729,
+                    "p_value": 0.3932534939316925,
                     "conclusion": "Equivalent"
                 },
                 "ref_vs_opt_axis": {
-                    "t_statistic": -1.0,
-                    "p_value": 0.3434363901615143,
+                    "t_statistic": 1.166130844709653,
+                    "p_value": 0.273532815008571,
                     "conclusion": "Equivalent"
                 },
                 "opt_2d_vs_opt_axis": {
-                    "t_statistic": -1.0,
-                    "p_value": 0.3434363901615143,
+                    "t_statistic": 2.0579830217100903,
+                    "p_value": 0.06970737536955449,
                     "conclusion": "Equivalent"
                 }
             }
         },
-        "digits_binary_0_vs_1": {
+        "qsar-biodeg": {
             "classifier_metrics": {
                 "ref": {
-                    "mean_accuracy": 0.9972222447395325,
-                    "std_accuracy": 0.008333333767950535
+                    "mean_accuracy": 0.8825336694717407,
+                    "std_accuracy": 0.030387459322810173
                 },
                 "opt_2d": {
-                    "mean_accuracy": 0.5055555701255798,
-                    "std_accuracy": 0.011111111380159855
+                    "mean_accuracy": 0.875885009765625,
+                    "std_accuracy": 0.024991082027554512
                 },
                 "opt_axis": {
-                    "mean_accuracy": 0.5055555701255798,
-                    "std_accuracy": 0.011111111380159855
+                    "mean_accuracy": 0.8408265709877014,
+                    "std_accuracy": 0.09130825847387314
                 }
             },
             "statistical_comparisons": {
                 "ref_vs_opt_2d": {
-                    "t_statistic": 115.87370300292969,
-                    "p_value": 1.3483929134044232e-15,
-                    "conclusion": "Not equivalent"
+                    "t_statistic": 1.7691742474426526,
+                    "p_value": 0.11065052749778526,
+                    "conclusion": "Equivalent"
                 },
                 "ref_vs_opt_axis": {
-                    "t_statistic": 115.87370300292969,
-                    "p_value": 1.3483929134044232e-15,
-                    "conclusion": "Not equivalent"
+                    "t_statistic": 1.51255562486484,
+                    "p_value": 0.16468435020226635,
+                    "conclusion": "Equivalent"
                 },
                 "opt_2d_vs_opt_axis": {
-                    "t_statistic": NaN,
-                    "p_value": NaN,
+                    "t_statistic": 1.3055951938783255,
+                    "p_value": 0.22407590602163102,
                     "conclusion": "Equivalent"
                 }
             }
@@ -116,282 +413,18 @@
             },
             "statistical_comparisons": {
                 "ref_vs_opt_2d": {
-                    "t_statistic": 3.890483856201172,
-                    "p_value": 0.003672247286885977,
+                    "t_statistic": 3.8904839223783347,
+                    "p_value": 0.0036722474031887584,
                     "conclusion": "Not equivalent"
                 },
                 "ref_vs_opt_axis": {
-                    "t_statistic": 0.245998352766037,
-                    "p_value": 0.8112019300460815,
+                    "t_statistic": 0.2459983522935633,
+                    "p_value": 0.8112019541383457,
                     "conclusion": "Equivalent"
                 },
                 "opt_2d_vs_opt_axis": {
-                    "t_statistic": -1.4539090394973755,
-                    "p_value": 0.17993700504302979,
-                    "conclusion": "Equivalent"
-                }
-            }
-        },
-        "ionosphere": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.945793628692627,
-                    "std_accuracy": 0.04328424856066704
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.9401587247848511,
-                    "std_accuracy": 0.04131895676255226
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.9487301707267761,
-                    "std_accuracy": 0.04387417435646057
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": 1.4998140335083008,
-                    "p_value": 0.16789793968200684,
-                    "conclusion": "Equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": -0.578619658946991,
-                    "p_value": 0.5770368576049805,
-                    "conclusion": "Equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": -1.9639610052108765,
-                    "p_value": 0.08112619072198868,
-                    "conclusion": "Equivalent"
-                }
-            }
-        },
-        "breast_cancer": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.9332080483436584,
-                    "std_accuracy": 0.037477053701877594
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.9296992421150208,
-                    "std_accuracy": 0.03680223226547241
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.9261904954910278,
-                    "std_accuracy": 0.034901268780231476
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": 1.5,
-                    "p_value": 0.16785065829753876,
-                    "conclusion": "Equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": 0.8017837405204773,
-                    "p_value": 0.44333183765411377,
-                    "conclusion": "Equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": 0.39056673645973206,
-                    "p_value": 0.705201268196106,
-                    "conclusion": "Equivalent"
-                }
-            }
-        },
-        "diabetes": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.7656698822975159,
-                    "std_accuracy": 0.039582058787345886
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.7669856548309326,
-                    "std_accuracy": 0.04135989397764206
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.7799555659294128,
-                    "std_accuracy": 0.03880423679947853
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": -0.3652791380882263,
-                    "p_value": 0.7233400344848633,
-                    "conclusion": "Equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": -1.1311463117599487,
-                    "p_value": 0.28723329305648804,
-                    "conclusion": "Equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": -1.0986229181289673,
-                    "p_value": 0.30045199394226074,
-                    "conclusion": "Equivalent"
-                }
-            }
-        },
-        "wpbc": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.7519704699516296,
-                    "std_accuracy": 0.06029001250863075
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.7624384164810181,
-                    "std_accuracy": 0.05222444608807564
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.748275876045227,
-                    "std_accuracy": 0.04005853086709976
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": -0.9998462200164795,
-                    "p_value": 0.3435068726539612,
-                    "conclusion": "Equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": 0.22012852132320404,
-                    "p_value": 0.830683171749115,
-                    "conclusion": "Equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": 1.0943561792373657,
-                    "p_value": 0.3022209703922272,
-                    "conclusion": "Equivalent"
-                }
-            }
-        },
-        "blood-transfusion-service-center": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.7847567796707153,
-                    "std_accuracy": 0.019295472651720047
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.776756763458252,
-                    "std_accuracy": 0.01666603423655033
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.7647026777267456,
-                    "std_accuracy": 0.008852862752974033
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": 1.9639610052108765,
-                    "p_value": 0.08112619072198868,
-                    "conclusion": "Equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": 3.316129684448242,
-                    "p_value": 0.008995612151920795,
-                    "conclusion": "Not equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": 2.382124185562134,
-                    "p_value": 0.041084401309490204,
-                    "conclusion": "Not equivalent"
-                }
-            }
-        },
-        "vote": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.9587737917900085,
-                    "std_accuracy": 0.022228913381695747
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.9564481973648071,
-                    "std_accuracy": 0.023819800466299057
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.9610465168952942,
-                    "std_accuracy": 0.02499396540224552
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": 1.0,
-                    "p_value": 0.3434363901615143,
-                    "conclusion": "Equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": -0.5570859909057617,
-                    "p_value": 0.5910512208938599,
-                    "conclusion": "Equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": -1.0063726902008057,
-                    "p_value": 0.3405253291130066,
-                    "conclusion": "Equivalent"
-                }
-            }
-        },
-        "banknote-authentication": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 1.0,
-                    "std_accuracy": 0.0
-                },
-                "opt_2d": {
-                    "mean_accuracy": 1.0,
-                    "std_accuracy": 0.0
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.9788321256637573,
-                    "std_accuracy": 0.012830945663154125
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": NaN,
-                    "p_value": NaN,
-                    "conclusion": "Equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": 4.949256896972656,
-                    "p_value": 0.000792108359746635,
-                    "conclusion": "Not equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": 4.949256896972656,
-                    "p_value": 0.000792108359746635,
-                    "conclusion": "Not equivalent"
-                }
-            }
-        },
-        "german_credit_g": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.7680000066757202,
-                    "std_accuracy": 0.029257478192448616
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.699999988079071,
-                    "std_accuracy": 0.0
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.699999988079071,
-                    "std_accuracy": 0.0
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": 6.97257661819458,
-                    "p_value": 6.519413727801293e-05,
-                    "conclusion": "Not equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": 6.97257661819458,
-                    "p_value": 6.519413727801293e-05,
-                    "conclusion": "Not equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": NaN,
-                    "p_value": NaN,
+                    "t_statistic": -1.4539090547561588,
+                    "p_value": 0.17993700613058763,
                     "conclusion": "Equivalent"
                 }
             }
@@ -414,116 +447,83 @@
             "statistical_comparisons": {
                 "ref_vs_opt_2d": {
                     "t_statistic": -1.5,
-                    "p_value": 0.16785065829753876,
+                    "p_value": 0.16785065605707486,
                     "conclusion": "Equivalent"
                 },
                 "ref_vs_opt_axis": {
+                    "t_statistic": 1.000000000000012,
+                    "p_value": 0.34343639613790794,
+                    "conclusion": "Equivalent"
+                },
+                "opt_2d_vs_opt_axis": {
+                    "t_statistic": 2.449489742783178,
+                    "p_value": 0.03678749787978613,
+                    "conclusion": "Not equivalent"
+                }
+            }
+        },
+        "vote": {
+            "classifier_metrics": {
+                "ref": {
+                    "mean_accuracy": 0.9587737917900085,
+                    "std_accuracy": 0.022228913381695747
+                },
+                "opt_2d": {
+                    "mean_accuracy": 0.9564481973648071,
+                    "std_accuracy": 0.023819800466299057
+                },
+                "opt_axis": {
+                    "mean_accuracy": 0.9610465168952942,
+                    "std_accuracy": 0.02499396540224552
+                }
+            },
+            "statistical_comparisons": {
+                "ref_vs_opt_2d": {
                     "t_statistic": 1.0,
-                    "p_value": 0.3434363901615143,
-                    "conclusion": "Equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": 2.4494898319244385,
-                    "p_value": 0.036787498742341995,
-                    "conclusion": "Not equivalent"
-                }
-            }
-        },
-        "qsar-biodeg": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.8825336694717407,
-                    "std_accuracy": 0.030387459322810173
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.875885009765625,
-                    "std_accuracy": 0.024991082027554512
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.8408265709877014,
-                    "std_accuracy": 0.09130825847387314
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": 1.7691742181777954,
-                    "p_value": 0.11065052449703217,
+                    "p_value": 0.34343639613791355,
                     "conclusion": "Equivalent"
                 },
                 "ref_vs_opt_axis": {
-                    "t_statistic": 1.5125555992126465,
-                    "p_value": 0.16468435525894165,
+                    "t_statistic": -0.5570860145311575,
+                    "p_value": 0.5910512317836034,
                     "conclusion": "Equivalent"
                 },
                 "opt_2d_vs_opt_axis": {
-                    "t_statistic": 1.3055951595306396,
-                    "p_value": 0.22407591342926025,
+                    "t_statistic": -1.0063727006913552,
+                    "p_value": 0.3405253342589292,
                     "conclusion": "Equivalent"
                 }
             }
         },
-        "kc1": {
+        "wpbc": {
             "classifier_metrics": {
                 "ref": {
-                    "mean_accuracy": 0.8534845113754272,
-                    "std_accuracy": 0.007780185900628567
+                    "mean_accuracy": 0.7519704699516296,
+                    "std_accuracy": 0.06029001250863075
                 },
                 "opt_2d": {
-                    "mean_accuracy": 0.8549085855484009,
-                    "std_accuracy": 0.0073798238299787045
+                    "mean_accuracy": 0.7624384164810181,
+                    "std_accuracy": 0.05222444608807564
                 },
                 "opt_axis": {
-                    "mean_accuracy": 0.8511171340942383,
-                    "std_accuracy": 0.006361730396747589
+                    "mean_accuracy": 0.748275876045227,
+                    "std_accuracy": 0.04005853086709976
                 }
             },
             "statistical_comparisons": {
                 "ref_vs_opt_2d": {
-                    "t_statistic": -0.896658182144165,
-                    "p_value": 0.39325350522994995,
+                    "t_statistic": -0.9998462484615755,
+                    "p_value": 0.3435068599600156,
                     "conclusion": "Equivalent"
                 },
                 "ref_vs_opt_axis": {
-                    "t_statistic": 1.1661309003829956,
-                    "p_value": 0.27353280782699585,
+                    "t_statistic": 0.22012852735861047,
+                    "p_value": 0.8306831478645833,
                     "conclusion": "Equivalent"
                 },
                 "opt_2d_vs_opt_axis": {
-                    "t_statistic": 2.057982921600342,
-                    "p_value": 0.06970737874507904,
-                    "conclusion": "Equivalent"
-                }
-            }
-        },
-        "digits_binary_5_vs_rest": {
-            "classifier_metrics": {
-                "ref": {
-                    "mean_accuracy": 0.9966604709625244,
-                    "std_accuracy": 0.002726747188717127
-                },
-                "opt_2d": {
-                    "mean_accuracy": 0.8987212777137756,
-                    "std_accuracy": 0.002152062486857176
-                },
-                "opt_axis": {
-                    "mean_accuracy": 0.8987212777137756,
-                    "std_accuracy": 0.002152062486857176
-                }
-            },
-            "statistical_comparisons": {
-                "ref_vs_opt_2d": {
-                    "t_statistic": 110.94925689697266,
-                    "p_value": 1.992750040501201e-15,
-                    "conclusion": "Not equivalent"
-                },
-                "ref_vs_opt_axis": {
-                    "t_statistic": 110.94925689697266,
-                    "p_value": 1.992750040501201e-15,
-                    "conclusion": "Not equivalent"
-                },
-                "opt_2d_vs_opt_axis": {
-                    "t_statistic": NaN,
-                    "p_value": NaN,
+                    "t_statistic": 1.0943561277326403,
+                    "p_value": 0.30222095900631935,
                     "conclusion": "Equivalent"
                 }
             }
