@@ -105,8 +105,8 @@ def main():
             data = np.load(dataset_path)
             X, y = data['X'], data['y']
             
-            if X.dtype != np.float32:
-                X = X.astype(np.float32)
+            if X.dtype != np.float64:
+                X = X.astype(np.float64)
             if y.dtype != np.int32:
                  y = y.astype(np.int32)
 

@@ -124,7 +124,7 @@ def preprocess_data(X_df_orig, y_series_orig, is_target_categorical=True, binari
         raise ValueError("No features available for processing.")
 
     try:
-        X_processed_np = np.concatenate(X_processed_parts, axis=1).astype(np.float32)
+        X_processed_np = np.concatenate(X_processed_parts, axis=1).astype(np.float64)
     except ValueError as e:
         logger.error(f"Error during feature concatenation: {e}. This might mean all feature parts were empty or incompatible.")
         raise ValueError(f"Could not concatenate processed feature parts: {e}")

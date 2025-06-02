@@ -2,14 +2,14 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.distance import pdist, cdist
 
-def mean_intra_class_dist(Q0: NDArray[np.float32], Q1: NDArray[np.float32]) -> np.float32:
+def mean_intra_class_dist(Q0: NDArray[np.float64], Q1: NDArray[np.float64]) -> np.float64:
     """
     Computes the mean distance between all pairs of points in a class, given by two 1D arrays.
     Args:
-        Q0 (NDArray[np.float32]): 1D array of x-coordinates.
-        Q1 (NDArray[np.float32]): 1D array of y-coordinates.
+        Q0 (NDArray[np.float64]): 1D array of x-coordinates.
+        Q1 (NDArray[np.float64]): 1D array of y-coordinates.
     Returns:
-        np.float32: The mean distance of distances within the class.
+        np.float64: The mean distance of distances within the class.
     Raises:
         ValueError: If the input is invalid.
     """
@@ -34,17 +34,17 @@ def mean_intra_class_dist(Q0: NDArray[np.float32], Q1: NDArray[np.float32]) -> n
     
     mean_dist = np.mean(distances)
     
-    return np.float32(mean_dist)
+    return np.float64(mean_dist)
 
-def mean_inter_class_dist(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: NDArray[np.int32]) -> np.float32:
+def mean_inter_class_dist(Q0: NDArray[np.float64], Q1: NDArray[np.float64], y: NDArray[np.int32]) -> np.float64:
     """
     Computes the mean distance between all pairs of points of opposite classes.
     Args:
-        Q0 (NDArray[np.float32]): 1D array of x-coordinates
-        Q1 (NDArray[np.float32]): 1D array of y-coordinates
+        Q0 (NDArray[np.float64]): 1D array of x-coordinates
+        Q1 (NDArray[np.float64]): 1D array of y-coordinates
         y (NDArray[np.int32]): 1D array of class labels (0 or 1).
     Returns:
-        np.float32: The mean distance between all pairs of points of opposite classes.
+        np.float64: The mean distance between all pairs of points of opposite classes.
     Raises:
         ValueError: If the input is invalid.
     """
@@ -73,19 +73,19 @@ def mean_inter_class_dist(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: N
     # If both classes are non-empty, inter_class_distances will have size > 0.
     mean_dist = np.mean(inter_class_distances)
     
-    return np.float32(mean_dist)
+    return np.float64(mean_dist)
 
-def objective_function(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: NDArray[np.int32]) -> np.float32:
+def objective_function(Q0: NDArray[np.float64], Q1: NDArray[np.float64], y: NDArray[np.int32]) -> np.float64:
     """
     The objective function is the mean distances between points in opposite classes plus the mean distance between points in the same class
     minus the standard deviation of the mean distances within each class.
     It is designed to encourage separation between classes while maintaining spread within classes.
     Args:
-        Q0 (NDArray[np.float32]): 1D array of x-coordinates
-        Q1 (NDArray[np.float32]): 1D array of y-coordinates
+        Q0 (NDArray[np.float64]): 1D array of x-coordinates
+        Q1 (NDArray[np.float64]): 1D array of y-coordinates
         y (NDArray[np.int32]): 1D array of class labels (0 or 1).
     Returns:
-        np.float32: The computed objective value, or NaN if the spread cannot be computed for either group.
+        np.float64: The computed objective value, or NaN if the spread cannot be computed for either group.
     Raises:
         ValueError: For input errors.
     """
@@ -102,7 +102,7 @@ def objective_function(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: NDAr
     try:
         val_m_inter_cd = mean_inter_class_dist(Q0, Q1, y)
     except ValueError:
-        return np.float32(np.nan)
+        return np.float64(np.nan)
 
     # Separate points by class for intra-class calculations
     q0_c0 = Q0[y == 0]
@@ -115,13 +115,13 @@ def objective_function(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: NDAr
     try:
         val_m_intra_c0 = mean_intra_class_dist(q0_c0, q1_c0)
     except ValueError:
-        return np.float32(np.nan)  # Cannot compute spread for class 0
+        return np.float64(np.nan)  # Cannot compute spread for class 0
     
     # Calculate mean intra-class distance for class 1
     try:
         val_m_intra_c1 = mean_intra_class_dist(q0_c1, q1_c1)
     except ValueError:
-        return np.float32(np.nan)  # Cannot compute spread for class 1
+        return np.float64(np.nan)  # Cannot compute spread for class 1
     
     # Calculate the mean of the intra-class distances
     val_m_intra = (val_m_intra_c0 + val_m_intra_c1) / 2.0
@@ -132,4 +132,4 @@ def objective_function(Q0: NDArray[np.float32], Q1: NDArray[np.float32], y: NDAr
     # Objective value is the mean inter-class distance plus the mean intra-class distance minus the standard deviation of intra-class distances
     objective_value = val_m_inter_cd + val_m_intra - val_std_intra
     
-    return np.float32(objective_value)
+    return np.float64(objective_value)
