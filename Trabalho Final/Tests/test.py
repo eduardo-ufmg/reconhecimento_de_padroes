@@ -10,11 +10,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 import logging
 from tqdm import tqdm
-import time # For timestamping output files if desired
 
 # --- Path Setup ---
-# Assuming the script is in a 'scripts' directory, and 'Preprocessing', 'CustomKernelSVC', 'sets'
-# are in the parent directory.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 SETS_DIR = os.path.join(BASE_DIR, 'sets')
