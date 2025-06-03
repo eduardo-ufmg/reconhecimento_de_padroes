@@ -1,0 +1,56 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{bm} % For bold math symbols like vectors
+
+\newcommand{\mat}[1]{\mathbf{#1}} % Matrix
+\newcommand{\vecbf}[1]{\bm{#1}} % Vector (bold)
+\newcommand{\set}[1]{\mathcal{#1}} % Set
+
+\begin{document}
+
+\section*{Model Performance Comparison Framework}
+
+\subsection*{1. Experimental Setup}
+\begin{itemize}
+    \item $K_{cv}$: Number of folds for cross-validation.
+    \item $\alpha_{equiv}$: Significance level for equivalence heuristic.
+\end{itemize}
+Model configurations $M_{2D}$, $M_{Axis}$, $M_{Ref}$ involve previously defined preprocessing and SVM classifiers.
+
+\subsection*{2. Performance Evaluation Methodology}
+\subsubsection*{Stratified K-Fold Cross-Validation}
+For a dataset $\set{D} = \{(\vecbf{x}_i, y_i)\}_{i=1}^N$:
+\begin{enumerate}
+    \item Partition $\set{D}$ into $K_{cv}$ stratified folds $\set{D}_1, \dots, \set{D}_{K_{cv}}$.
+    \item For each fold $k \in \{1, \dots, K_{cv}\}$:
+    \begin{itemize}
+        \item Training set $\set{T}_k = \set{D} \setminus \set{D}_k$, Validation set $\set{V}_k = \set{D}_k$.
+        \item Train model $M$ on $\set{T}_k$ to get $M_k$.
+        \item Accuracy $A_k(M) = \frac{1}{|\set{V}_k|} \sum_{(\vecbf{x},y) \in \set{V}_k} \mathbb{I}(M_k(\vecbf{x}) = y)$, where $\mathbb{I}(\cdot)$ is the indicator function.
+    \end{itemize}
+    This yields scores $\vecbf{A}(M) = (A_1(M), \dots, A_{K_{cv}}(M))$.
+\end{enumerate}
+
+\subsubsection*{Aggregated Performance Metrics}
+\begin{itemize}
+    \item Mean Accuracy: $\bar{A}(M) = \frac{1}{K_{cv}} \sum_{k=1}^{K_{cv}} A_k(M)$.
+    \item Standard Deviation of Accuracy: $s_A(M) = \sqrt{\frac{1}{K_{cv}-1} \sum_{k=1}^{K_{cv}} (A_k(M) - \bar{A}(M))^2}$.
+\end{itemize}
+Computation time for the cross-validation process is also recorded.
+
+\subsection*{3. Statistical Comparison of Models}
+\subsubsection*{Paired Samples t-test}
+For models $M_1, M_2$ with scores $\vecbf{A}(M_1), \vecbf{A}(M_2)$:
+\begin{enumerate}
+    \item Differences: $d_k = A_k(M_1) - A_k(M_2)$.
+    \item Null Hypothesis $H_0: \mu_d = 0$ (true mean difference is zero).
+    \item Test Statistic: $t = \frac{\bar{d}}{s_d / \sqrt{K_{cv}}}$, with $\bar{d} = \frac{1}{K_{cv}}\sum d_k$ and $s_d = \sqrt{\frac{1}{K_{cv}-1}\sum (d_k - \bar{d})^2}$.
+    \item A p-value is computed based on $t$ and $K_{cv}-1$ degrees of freedom. (If all $d_k=0$, p-value is treated as $1.0$).
+\end{enumerate}
+
+\subsubsection*{Heuristic for Performance Equivalence}
+Models $M_1, M_2$ are considered "equivalent" if p-value $ > \alpha_{equiv}$.
+
+\end{document}
