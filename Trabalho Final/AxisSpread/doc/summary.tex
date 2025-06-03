@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+\begin{document}
+
+\section*{1. Measure of Even Spacing for a Numerical Sequence}
+
+\subsection*{Mathematical Formulation}
+
+\paragraph{Inputs:} A numerical sequence $V = (v_1, v_2, \dots, v_n)$ of $n$ real numbers.
+
+\paragraph{Preprocessing and Special Cases:}
+\begin{enumerate}
+    \item If $V$ cannot be converted to floats or contains NaN, score is undefined.
+    \item If $n=0$, score is undefined.
+    \item If $n=1$, score $S_V = 1.0$.
+\end{enumerate}
+
+\paragraph{Core Calculation (for $n \ge 2$):}
+\begin{enumerate}
+    \item \textbf{Sorting:} $V'_{sorted} = (v'_{(1)}, \dots, v'_{(n)})$.
+    \item \textbf{Difference Sequence ($\Delta$):} $\Delta = (\delta_1, \dots, \delta_{n-1})$, where $\delta_j = v'_{(j+1)} - v'_{(j)} \ge 0$.
+    \item \textbf{Statistical Measures of $\Delta$ (for $n \ge 2$):}
+    \begin{itemize}
+        \item Mean of Differences ($\mu_{\Delta}$): $\mu_{\Delta} = \frac{1}{n-1} \sum_{j=1}^{n-1} \delta_j$.
+        \item Population Standard Deviation of Differences ($\sigma_{\Delta}$): $\sigma_{\Delta} = \sqrt{\frac{1}{n-1} \sum_{j=1}^{n-1} (\delta_j - \mu_{\Delta})^2}$. (If $n=2$, $\sigma_{\Delta}=0$).
+        \item Maximum Difference ($\delta_{max}$): $\delta_{max} = \max(\delta_1, \dots, \delta_{n-1})$.
+    \end{itemize}
+    \item \textbf{Score Components (for $n \ge 2$):}
+    \begin{itemize}
+        \item Standard Deviation Score ($S_{\sigma}$): $S_{\sigma} = \frac{1}{1 + \sigma_{\Delta}}$. (Undefined if $\sigma_{\Delta}$ is NaN/Inf).
+        \item Mean Spacing Score ($S_{\mu}$): $S_{\mu} = \begin{cases} \frac{\mu_{\Delta}}{\delta_{max}} & \text{if } \delta_{max} \neq 0 \\ 0 & \text{if } \delta_{max} = 0 \end{cases}$.
+    \end{itemize}
+    \item \textbf{Final Vector Evenness Score ($S_V$ for $n \ge 2$):} $S_V = S_{\sigma} \times S_{\mu}$.
+\end{enumerate}
+
+\section*{2. Comparative Spread Objective for Labeled Feature Sets}
+
+\subsection*{Mathematical Formulation}
+
+\paragraph{Inputs:}
+\begin{itemize}
+    \item $X = (x_1, \dots, x_M)$: Primary numerical sequence.
+    \item $W = (w_1, \dots, w_M)$: Secondary numerical sequence.
+    \item $L = (l_1, \dots, l_M)$: Binary class labels $l_i \in \{0, 1\}$.
+\end{itemize}
+
+\paragraph{Sub-sequence Extraction:}
+\begin{itemize}
+    \item $V_{X_0} = \{x_i \mid l_i = 0\}$.
+    \item $V_{W_1} = \{w_i \mid l_i = 1\}$.
+\end{itemize}
+
+\paragraph{Spread Calculations:}
+\begin{itemize}
+    \item $S_{X_0} = \text{CalculateVectorEvennessScore}(V_{X_0})$
+    \item $S_{W_1} = \text{CalculateVectorEvennessScore}(V_{W_1})$.
+\end{itemize}
+
+\paragraph{Objective Function Value ($J_O$):}
+If $S_{X_0}$ or $S_{W_1}$ is undefined, $J_O$ is undefined. Otherwise:
+$$ J_O = \frac{S_{X_0} + S_{W_1}}{2} - |S_{X_0} - S_{W_1}| $$
+
+\end{document}

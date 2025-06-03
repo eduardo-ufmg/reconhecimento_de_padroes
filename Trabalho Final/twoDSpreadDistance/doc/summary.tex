@@ -1,0 +1,95 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+\begin{document}
+
+\section*{1. Mean Distance Within a Single Point Group}
+
+\subsection*{Mathematical Formulation}
+
+\paragraph{Inputs:}
+A single group of $N$ points, denoted as $G = \{P_1, P_2, \dots, P_N\}$. Each point $P_i$ is defined by its coordinates $(x_i, y_i)$ in a 2D Cartesian space.
+
+\paragraph{Point Representation:}
+Each point $P_i \in G$ is represented as $P_i = (x_i, y_i)$.
+
+\paragraph{Distance Metric:}
+The Euclidean distance $d(P_i, P_j)$ between two points $P_i = (x_i, y_i)$ and $P_j = (x_j, y_j)$ is given by:
+$$ d(P_i, P_j) = \sqrt{(x_i - x_j)^2 + (y_i - y_j)^2} $$
+
+\paragraph{Calculation:}
+The set of all unique pairwise distances within the group $G$ is $D_G = \{d(P_i, P_j) \mid 1 \le i < j \le N\}$.
+The total number of such unique pairs is $\binom{N}{2} = \frac{N(N-1)}{2}$.
+
+The mean distance within the point group, $\mu_G$, is calculated as:
+$$ \mu_G = \frac{\sum_{1 \le i < j \le N} d(P_i, P_j)}{\binom{N}{2}} $$
+For this calculation to be meaningful, the number of points $N$ must be at least 2.
+
+\paragraph{Output:}
+A non-negative scalar value $\mu_G \in \mathbb{R}_{\ge 0}$.
+
+\section*{2. Mean Distance Between Two Distinct Point Groups}
+
+\subsection*{Mathematical Formulation}
+
+\paragraph{Inputs:}
+A collection of $M$ points in total, $P_{\text{total}} = \{P_1, \dots, P_M\}$, where each point $P_k = (x_k, y_k)$.
+A set of categorical labels $L = \{l_1, \dots, l_M\}$, where each $l_k \in \{0, 1\}$ assigns point $P_k$ to one of two groups, $G_0$ or $G_1$.
+
+Let $G_0 = \{P_k \in P_{\text{total}} \mid l_k = 0\}$ be the set of $N_0$ points in group 0.
+Let $G_1 = \{P_k \in P_{\text{total}} \mid l_k = 1\}$ be the set of $N_1$ points in group 1.
+
+\paragraph{Distance Metric:}
+The Euclidean distance $d(A, B)$ between a point $A \in G_0$ and a point $B \in G_1$ is used.
+
+\paragraph{Calculation:}
+The set of all distances between points in $G_0$ and points in $G_1$ is $D_{G_0,G_1} = \{d(A, B) \mid A \in G_0, B \in G_1\}$.
+The total number of such pairs is $N_0 \times N_1$.
+
+The mean distance between groups $G_0$ and $G_1$, denoted $\mu_{G_0,G_1}$, is:
+$$ \mu_{G_0,G_1} = \frac{\sum_{A \in G_0} \sum_{B \in G_1} d(A, B)}{N_0 N_1} $$
+This calculation requires both $N_0 > 0$ and $N_1 > 0$.
+
+\paragraph{Output:}
+A non-negative scalar value $\mu_{G_0,G_1} \in \mathbb{R}_{\ge 0}$.
+
+\section*{3. Composite Separability and Cohesion Measure}
+
+\subsection*{Mathematical Formulation}
+
+\paragraph{Inputs:}
+Same as for the Mean Distance Between Two Distinct Point Groups.
+
+\paragraph{Component Calculations:}
+\begin{enumerate}
+    \item \textbf{Mean Inter-Group Distance ($M_{inter}$):}
+    $M_{inter} = \mu_{G_0,G_1}$.
+
+    \item \textbf{Mean Intra-Group Distance for Group 0 ($M_{intra,0}$):}
+    Calculated as $\mu_{G_0}$ using only points in $G_0$. Requires $N_0 \ge 2$.
+
+    \item \textbf{Mean Intra-Group Distance for Group 1 ($M_{intra,1}$):}
+    Calculated as $\mu_{G_1}$ using only points in $G_1$. Requires $N_1 \ge 2$.
+
+    \item \textbf{Average of Mean Intra-Group Distances ($\bar{M}_{intra}$):}
+    $$ \bar{M}_{intra} = \frac{M_{intra,0} + M_{intra,1}}{2} $$
+
+    \item \textbf{Standard Deviation of Mean Intra-Group Distances ($\sigma_{M_{intra}}$):}
+    Population standard deviation of $M_{intra,0}$ and $M_{intra,1}$:
+    $$ \sigma_{M_{intra}} = \frac{|M_{intra,0} - M_{intra,1}|}{2} $$
+\end{enumerate}
+
+\paragraph{Objective Function Value ($J$):}
+The objective function $J$ is defined as:
+$$ J = M_{inter} + \bar{M}_{intra} - \sigma_{M_{intra}} $$
+Substituting the expressions for $\bar{M}_{intra}$ and $\sigma_{M_{intra}}$:
+$$ J = M_{inter} + \frac{M_{intra,0} + M_{intra,1}}{2} - \frac{|M_{intra,0} - M_{intra,1}|}{2} $$
+This expression simplifies to:
+$$ J = M_{inter} + \min(M_{intra,0}, M_{intra,1}) $$
+
+\paragraph{Output:}
+A scalar value $J \in \mathbb{R}$.
+
+\end{document}

@@ -1,4 +1,4 @@
-{
+{ // float32
     "sylvine": {
         "accuracy": {
             "opt_2d": "0.5015 \u00b1 0.0082",
