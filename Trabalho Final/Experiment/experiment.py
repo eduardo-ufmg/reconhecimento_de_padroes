@@ -71,14 +71,20 @@ def compute_pvalue(results1: AccuracyResults, results2: AccuracyResults) -> floa
 def run_experiment(dataset: str) -> DatasetResults:
     X, y = load_dataset(dataset)
 
-    sklearns_svc_pipeline = Pipeline([("pca", PCA()), ("svc", SVC())])
+    sklearns_svc_pipeline = Pipeline([("pca", PCA(n_components="mle")), ("svc", SVC())])
 
     murilos_svc_pipeline = Pipeline(
-        [("pca", PCA()), ("svc", CustomSVC(optimization_metric="dissimilarity"))]
+        [
+            ("pca", PCA(n_components="mle")),
+            ("svc", CustomSVC(optimization_metric="dissimilarity")),
+        ]
     )
 
     my_svc_pipeline = Pipeline(
-        [("pca", PCA()), ("svc", CustomSVC(optimization_metric="spatial_spread"))]
+        [
+            ("pca", PCA(n_components="mle")),
+            ("svc", CustomSVC(optimization_metric="spatial_spread")),
+        ]
     )
 
     pipelines = {
