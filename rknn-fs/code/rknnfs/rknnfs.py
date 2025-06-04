@@ -1,286 +1,287 @@
+import logging
 import os
 import time
-import logging
-from typing import Tuple, Dict, Union
+from typing import Dict, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from ucimlrepo import fetch_ucirepo
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsClassifier
+from joblib import Parallel, delayed
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
+from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-  accuracy_score, confusion_matrix
-)
-from joblib import Parallel, delayed
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
+from ucimlrepo import fetch_ucirepo
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # Constants
 MIN_FEATURES = 0  # Minimum features to maintain during elimination
 DEFAULT_TEST_SIZE = 0.3
 DEFAULT_RANDOM_STATE = None
 
+
 def compute_supports(
-  X: np.ndarray,
-  y: np.ndarray,
-  r: int,
-  k: int,
-  n_jobs: int = -1
+    X: np.ndarray, y: np.ndarray, r: int, k: int, n_jobs: int = -1
 ) -> Tuple[np.ndarray, float]:
-  """
-  Compute feature supports using parallelized bidirectional voting.
+    """
+    Compute feature supports using parallelized bidirectional voting.
 
-  Args:
-    X: Input data matrix (n_samples, n_features)
-    y: Target labels (n_samples,)
-    r: Number of KNN models to train
-    k: Number of neighbors for KNN
-    n_jobs: Number of parallel jobs (-1 for all cores)
+    Args:
+      X: Input data matrix (n_samples, n_features)
+      y: Target labels (n_samples,)
+      r: Number of KNN models to train
+      k: Number of neighbors for KNN
+      n_jobs: Number of parallel jobs (-1 for all cores)
 
-  Returns:
-    Tuple containing:
-    - support_values: Normalized support scores for each feature
-    - mean_accuracy: Average accuracy of all KNN models
-  """
+    Returns:
+      Tuple containing:
+      - support_values: Normalized support scores for each feature
+      - mean_accuracy: Average accuracy of all KNN models
+    """
 
-  n_samples, p_current = X.shape
-  m = int(np.sqrt(p_current))
-  supports = np.zeros(p_current)
-  counts = np.zeros(p_current)
-  accuracies = []
+    n_samples, p_current = X.shape
+    m = int(np.sqrt(p_current))
+    supports = np.zeros(p_current)
+    counts = np.zeros(p_current)
+    accuracies = []
 
-  def process_iteration():
-    nonlocal supports, counts
-    selected = np.random.choice(p_current, size=m, replace=False)
-    indices = np.random.permutation(n_samples)
-    split = n_samples // 2
-    
-    X_base = X[indices[:split]][:, selected]
-    y_base = y[indices[:split]]
-    X_query = X[indices[split:]][:, selected]
-    y_query = y[indices[split:]]
+    def process_iteration():
+        nonlocal supports, counts
+        selected = np.random.choice(p_current, size=m, replace=False)
+        indices = np.random.permutation(n_samples)
+        split = n_samples // 2
 
-    knn = KNeighborsClassifier(n_neighbors=k)
-    knn.fit(X_base, y_base)
-    pred = knn.predict(X_query)
-    acc = accuracy_score(y_query, pred)
-    
-    return selected, acc
+        X_base = X[indices[:split]][:, selected]
+        y_base = y[indices[:split]]
+        X_query = X[indices[split:]][:, selected]
+        y_query = y[indices[split:]]
 
-  # Parallel execution
-  results = Parallel(n_jobs=n_jobs)(
-    delayed(process_iteration)() for _ in range(r)
-  )
+        knn = KNeighborsClassifier(n_neighbors=k)
+        knn.fit(X_base, y_base)
+        pred = knn.predict(X_query)
+        acc = accuracy_score(y_query, pred)
 
-  # Aggregate results
-  for selected, acc in results:
-    accuracies.append(acc)
-    for f in selected:
-      supports[f] += acc
-      counts[f] += 1
+        return selected, acc
 
-  # Calculate normalized supports
-  support_values = np.divide(
-    supports, counts, 
-    out=np.zeros_like(supports), 
-    where=counts != 0
-  )
-  return support_values, np.mean(accuracies)
+    # Parallel execution
+    results = Parallel(n_jobs=n_jobs)(delayed(process_iteration)() for _ in range(r))
+
+    # Aggregate results
+    for selected, acc in results:
+        accuracies.append(acc)
+        for f in selected:
+            supports[f] += acc
+            counts[f] += 1
+
+    # Calculate normalized supports
+    support_values = np.divide(
+        supports, counts, out=np.zeros_like(supports), where=counts != 0
+    )
+    return support_values, np.mean(accuracies)
+
 
 def rknn_feature_selection(
-  X: np.ndarray,
-  y: np.ndarray,
-  k: int = 1,
-  r: int = 250,
-  q: float = 0.5,
-  d: int = 1,
-  min_features: int = MIN_FEATURES
+    X: np.ndarray,
+    y: np.ndarray,
+    k: int = 1,
+    r: int = 250,
+    q: float = 0.5,
+    d: int = 1,
+    min_features: int = MIN_FEATURES,
 ) -> np.ndarray:
-  """
-  RKNN-FS with peak detection and early stopping.
+    """
+    RKNN-FS with peak detection and early stopping.
 
-  Args:
-    X: Input data matrix
-    y: Target labels
-    k: KNN neighbors parameter
-    r: Models per iteration
-    q: Feature elimination ratio (Stage 1)
-    d: Features to remove per iteration (Stage 2)
-    min_features: Minimum features to preserve
+    Args:
+      X: Input data matrix
+      y: Target labels
+      k: KNN neighbors parameter
+      r: Models per iteration
+      q: Feature elimination ratio (Stage 1)
+      d: Features to remove per iteration (Stage 2)
+      min_features: Minimum features to preserve
 
-  Returns:
-    Selected feature indices
-  """
-  
-  p = X.shape[1]
-  remaining = np.arange(p)
-  stage1_acc, stage1_features = [], []
+    Returns:
+      Selected feature indices
+    """
 
-  # Stage 1: Geometric Elimination
-  while len(remaining) > min_features:
-    supports, acc = compute_supports(X[:, remaining], y, r, k)
-    stage1_acc.append(acc)
-    stage1_features.append(remaining.copy())
-    
-    keep = max(int(len(remaining) * (1 - q)), 1)
-    remaining = remaining[np.argsort(-supports)[:keep]]
+    p = X.shape[1]
+    remaining = np.arange(p)
+    stage1_acc, stage1_features = [], []
 
-  # Peak detection
-  if stage1_acc:
-    peak_idx = np.argmax(stage1_acc)
-    # Look backward for first non-increasing point
-    for i in range(peak_idx, 0, -1):
-      if stage1_acc[i-1] < stage1_acc[i]:
-        remaining = stage1_features[i]
-        break
-    else:
-      remaining = stage1_features[0]
+    # Stage 1: Geometric Elimination
+    while len(remaining) > min_features:
+        supports, acc = compute_supports(X[:, remaining], y, r, k)
+        stage1_acc.append(acc)
+        stage1_features.append(remaining.copy())
 
-  # Stage 2: Linear Reduction
-  stage2_acc, stage2_features = [], []
-  while len(remaining) > min_features:
-    supports, acc = compute_supports(X[:, remaining], y, r, k)
-    stage2_acc.append(acc)
-    stage2_features.append(remaining.copy())
-    
-    if len(remaining) <= d:
-      break
-    remaining = remaining[np.argsort(-supports)[:-d]]
+        keep = max(int(len(remaining) * (1 - q)), 1)
+        remaining = remaining[np.argsort(-supports)[:keep]]
 
-  return stage2_features[np.argmax(stage2_acc)] if stage2_acc else remaining
+    # Peak detection
+    if stage1_acc:
+        peak_idx = np.argmax(stage1_acc)
+        # Look backward for first non-increasing point
+        for i in range(peak_idx, 0, -1):
+            if stage1_acc[i - 1] < stage1_acc[i]:
+                remaining = stage1_features[i]
+                break
+        else:
+            remaining = stage1_features[0]
+
+    # Stage 2: Linear Reduction
+    stage2_acc, stage2_features = [], []
+    while len(remaining) > min_features:
+        supports, acc = compute_supports(X[:, remaining], y, r, k)
+        stage2_acc.append(acc)
+        stage2_features.append(remaining.copy())
+
+        if len(remaining) <= d:
+            break
+        remaining = remaining[np.argsort(-supports)[:-d]]
+
+    return stage2_features[np.argmax(stage2_acc)] if stage2_acc else remaining
+
 
 def evaluate_model(
-  model,
-  X_train: np.ndarray,
-  y_train: np.ndarray,
-  X_test: np.ndarray,
-  y_test: np.ndarray
+    model,
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
 ) -> Dict[str, Union[float, np.ndarray]]:
-  """Evaluation with class count awareness."""
-  
-  start = time.perf_counter()
-  model.fit(X_train, y_train)
-  train_time = time.perf_counter() - start
-  
-  start = time.perf_counter()
-  y_pred = model.predict(X_test)
-  pred_time = time.perf_counter() - start
-  
-  metrics = {
-    'accuracy': accuracy_score(y_test, y_pred),
-    'train_time': train_time,
-    'pred_time': pred_time,
-    'num_features': X_train.shape[1]
-  }
-  
-  return metrics
+    """Evaluation with class count awareness."""
+
+    start = time.perf_counter()
+    model.fit(X_train, y_train)
+    train_time = time.perf_counter() - start
+
+    start = time.perf_counter()
+    y_pred = model.predict(X_test)
+    pred_time = time.perf_counter() - start
+
+    metrics = {
+        "accuracy": accuracy_score(y_test, y_pred),
+        "train_time": train_time,
+        "pred_time": pred_time,
+        "num_features": X_train.shape[1],
+    }
+
+    return metrics
+
 
 def compare_models(
-  X_train: np.ndarray,
-  y_train: np.ndarray,
-  X_test: np.ndarray,
-  y_test: np.ndarray,
-  k: int = 3,
-  r: int = 200
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    k: int = 3,
+    r: int = 200,
 ) -> Tuple[Dict, np.ndarray]:
-  """
-  Comprehensive model comparison with feature selectors.
-  """
-  
-  # RKNN-FS
-  selected = rknn_feature_selection(X_train, y_train, k=k, r=r)
-  X_train_rknn = X_train[:, selected]
-  X_test_rknn = X_test[:, selected]
-  
-  # KNN Models
-  results = {}
-  knn = KNeighborsClassifier(n_neighbors=k)
-  results['RKNN-FS'] = evaluate_model(knn, X_train_rknn, y_train, X_test_rknn, y_test)
-  results['KNN'] = evaluate_model(knn, X_train, y_train, X_test, y_test)
-  
-  # Random Forest with Feature Importance
-  rf = RandomForestClassifier(n_estimators=100, random_state=DEFAULT_RANDOM_STATE)
-  rf.fit(X_train, y_train)
-  sfm = SelectFromModel(rf)
-  X_train_rf = sfm.transform(X_train)
-  X_test_rf = sfm.transform(X_test)
-  results['RF-FS'] = evaluate_model(rf, X_train_rf, y_train, X_test_rf, y_test)
-  
-  return results, selected
+    """
+    Comprehensive model comparison with feature selectors.
+    """
+
+    # RKNN-FS
+    selected = rknn_feature_selection(X_train, y_train, k=k, r=r)
+    X_train_rknn = X_train[:, selected]
+    X_test_rknn = X_test[:, selected]
+
+    # KNN Models
+    results = {}
+    knn = KNeighborsClassifier(n_neighbors=k)
+    results["RKNN-FS"] = evaluate_model(knn, X_train_rknn, y_train, X_test_rknn, y_test)
+    results["KNN"] = evaluate_model(knn, X_train, y_train, X_test, y_test)
+
+    # Random Forest with Feature Importance
+    rf = RandomForestClassifier(n_estimators=100, random_state=DEFAULT_RANDOM_STATE)
+    rf.fit(X_train, y_train)
+    sfm = SelectFromModel(rf)
+    X_train_rf = sfm.transform(X_train)
+    X_test_rf = sfm.transform(X_test)
+    results["RF-FS"] = evaluate_model(rf, X_train_rf, y_train, X_test_rf, y_test)
+
+    return results, selected
+
 
 def load_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
-  """
-  Unified dataset loader with error handling and path normalization.
-  """
+    """
+    Unified dataset loader with error handling and path normalization.
+    """
 
-  data_dir = os.path.join(os.path.dirname(__file__), 'data')
-  
-  try:
-    if name == 'Leukemia':
-      url = "https://web.stanford.edu/~hastie/CASI_files/DATA/leukemia_big.csv"
-      df = pd.read_csv(url, index_col=0).T
-      y = pd.Series(df.index).str.contains('ALL').astype(int).values
-      return df.values.astype(float), y
-    
-    elif name == 'Gastrointestinal':
-      path = os.path.join(data_dir, 'gastrointestinal+lesions+in+regular+colonoscopy', 'data.txt')
-      df = pd.read_csv(path, header=None).T
-      y = df[1].astype(int).values
-      return df.drop([0, 1], axis=1).astype(float).values, y
-    
-    elif name == 'Period Changer':
-      path = os.path.join(data_dir, 'period+changer-2', 'data.csv')
-      df = pd.read_csv(path)
-      return df.iloc[:, :-1].values, df.iloc[:, -1].values
-    
-    elif name == 'Toxicity':
-      data = fetch_ucirepo(id=728)
-      return data.data.features.values, data.data.targets.values.ravel()
-    
-  except Exception as e:
-    logging.error(f"Error loading {name}: {str(e)}")
-    raise
+    data_dir = os.path.join(os.path.dirname(__file__), "data")
+
+    try:
+        if name == "Leukemia":
+            url = "https://web.stanford.edu/~hastie/CASI_files/DATA/leukemia_big.csv"
+            df = pd.read_csv(url, index_col=0).T
+            y = pd.Series(df.index).str.contains("ALL").astype(int).values
+            return df.values.astype(float), y
+
+        elif name == "Gastrointestinal":
+            path = os.path.join(
+                data_dir, "gastrointestinal+lesions+in+regular+colonoscopy", "data.txt"
+            )
+            df = pd.read_csv(path, header=None).T
+            y = df[1].astype(int).values
+            return df.drop([0, 1], axis=1).astype(float).values, y
+
+        elif name == "Period Changer":
+            path = os.path.join(data_dir, "period+changer-2", "data.csv")
+            df = pd.read_csv(path)
+            return df.iloc[:, :-1].values, df.iloc[:, -1].values
+
+        elif name == "Toxicity":
+            data = fetch_ucirepo(id=728)
+            return data.data.features.values, data.data.targets.values.ravel()
+
+    except Exception as e:
+        logging.error(f"Error loading {name}: {str(e)}")
+        raise
+
 
 def run_experiments() -> pd.DataFrame:
-  """
-  Main experiment runner with result handling.
-  """
-  
-  datasets = ['Toxicity', 'Period Changer', 'Gastrointestinal', 'Leukemia']
-  results = []
+    """
+    Main experiment runner with result handling.
+    """
 
-  for name in datasets:
-    logging.info(f"Processing {name}")
-    try:
-      X, y = load_dataset(name)
-      X = StandardScaler().fit_transform(X)
-      X_train, X_test, y_train, y_test = train_test_split(
-          X, y, test_size=DEFAULT_TEST_SIZE,
-          random_state=DEFAULT_RANDOM_STATE, stratify=y
-      )
-      
-      model_results, selected = compare_models(X_train, y_train, X_test, y_test)
-      
-      for model_name, metrics in model_results.items():
-          results.append({
-              'Dataset': name,
-              'Model': model_name,
-              **metrics
-          })
-          
-    except Exception as e:
-      logging.error(f"Skipping {name} due to error: {str(e)}")
-      continue
+    datasets = ["Toxicity", "Period Changer", "Gastrointestinal", "Leukemia"]
+    results = []
 
-  # Create comprehensive report
-  report = pd.DataFrame(results)
+    for name in datasets:
+        logging.info(f"Processing {name}")
+        try:
+            X, y = load_dataset(name)
+            X = StandardScaler().fit_transform(X)
+            X_train, X_test, y_train, y_test = train_test_split(
+                X,
+                y,
+                test_size=DEFAULT_TEST_SIZE,
+                random_state=DEFAULT_RANDOM_STATE,
+                stratify=y,
+            )
 
-  return report
+            model_results, selected = compare_models(X_train, y_train, X_test, y_test)
+
+            for model_name, metrics in model_results.items():
+                results.append({"Dataset": name, "Model": model_name, **metrics})
+
+        except Exception as e:
+            logging.error(f"Skipping {name} due to error: {str(e)}")
+            continue
+
+    # Create comprehensive report
+    report = pd.DataFrame(results)
+
+    return report
+
 
 if __name__ == "__main__":
-  report = run_experiments()
-  print("\nExperiment Summary:")
-  print(report.groupby(['Dataset', 'Model']).mean(numeric_only=True))
+    report = run_experiments()
+    print("\nExperiment Summary:")
+    print(report.groupby(["Dataset", "Model"]).mean(numeric_only=True))

@@ -2,15 +2,14 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
-
-from pathlib import Path
+from scipy.stats import wilcoxon
 from sklearn.decomposition import PCA
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
-from scipy.stats import wilcoxon
 
 sys.path.append(str(Path(__file__).parent.parent / "CustomSVC"))
 

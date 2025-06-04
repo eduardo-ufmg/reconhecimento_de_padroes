@@ -2,7 +2,6 @@ import os
 import sys
 
 import numpy as np
-
 from scipy.optimize import minimize_scalar
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import accuracy_score
@@ -10,8 +9,8 @@ from sklearn.svm import SVC
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from Kernel.kernel import kernel_matrix
 from Dissimilarity.dissimilarity import objective_function_dissimilarity
+from Kernel.kernel import kernel_matrix
 from SpatialSpread.spatial_spread import objective_function_spatial_spread
 
 

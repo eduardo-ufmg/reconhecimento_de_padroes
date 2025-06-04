@@ -1,13 +1,12 @@
+import logging
 import os
-import numpy as np
-import pandas as pd
-
 from typing import cast
 
-from sklearn.datasets import load_breast_cancer, load_iris, load_digits, fetch_openml
-from sklearn.preprocessing import LabelEncoder
+import numpy as np
+import pandas as pd
+from sklearn.datasets import fetch_openml, load_breast_cancer, load_digits, load_iris
 from sklearn.impute import SimpleImputer
-import logging
+from sklearn.preprocessing import LabelEncoder
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(

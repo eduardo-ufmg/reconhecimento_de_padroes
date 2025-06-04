@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.datasets import make_moons
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import plot_tree
 from sklearn.model_selection import train_test_split
+from sklearn.tree import plot_tree
 
 # Generate a challenging classification dataset
 X, y = make_moons(n_samples=1000, noise=0.3)
@@ -12,9 +12,7 @@ X, y = make_moons(n_samples=1000, noise=0.3)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 # Create a Random Forest with few trees (2 in this case)
-rf = RandomForestClassifier(n_estimators=2,
-                           max_depth=1,
-                           bootstrap=True)
+rf = RandomForestClassifier(n_estimators=2, max_depth=1, bootstrap=True)
 rf.fit(X_train, y_train)
 
 # Create a figure to display the forest
@@ -23,14 +21,16 @@ fig.suptitle("Random Forest Tree Structures", fontsize=16, y=1.05)
 
 # Plot each tree in the forest
 for index, (tree, ax) in enumerate(zip(rf.estimators_, axes)):
-  plot_tree(tree, 
-            ax=ax,
-            feature_names=["x1", "x2"],
-            class_names=["0", "1"],
-            filled=True,
-            rounded=True,
-            impurity=False,
-            proportion=True)
+    plot_tree(
+        tree,
+        ax=ax,
+        feature_names=["x1", "x2"],
+        class_names=["0", "1"],
+        filled=True,
+        rounded=True,
+        impurity=False,
+        proportion=True,
+    )
 
 # Add spacing between subplots
 plt.tight_layout()

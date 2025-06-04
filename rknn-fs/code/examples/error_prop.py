@@ -1,7 +1,7 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-import matplotlib.pyplot as plt
 
 # Set random seed for reproducibility
 np.random.seed(42)
@@ -36,10 +36,10 @@ tree_noisy.fit(X_train, y_train_noisy)
 # Visualize the trees
 plt.figure(figsize=(15, 7))
 plt.subplot(1, 2, 1)
-plot_tree(tree_clean, feature_names=['X'], class_names=['0', '1'], filled=True)
+plot_tree(tree_clean, feature_names=["X"], class_names=["0", "1"], filled=True)
 plt.title("Decision Tree Trained on Clean Data")
 plt.subplot(1, 2, 2)
-plot_tree(tree_noisy, feature_names=['X'], class_names=['0', '1'], filled=True)
+plot_tree(tree_noisy, feature_names=["X"], class_names=["0", "1"], filled=True)
 plt.title("Decision Tree Trained on Noisy Data")
 plt.show()
 
