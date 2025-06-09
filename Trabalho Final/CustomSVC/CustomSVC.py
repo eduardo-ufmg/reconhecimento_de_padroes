@@ -16,39 +16,51 @@ from SpatialSpread.spatial_spread import objective_function_spatial_spread
 
 class OptimizationResult:
     h_opt: float
-    scaled_inv_cov: np.ndarray
-    scaled_norm_factor: float
+    H: np.ndarray
     K_matrix_opt: np.ndarray
 
     def __init__(
         self,
         h_opt: float,
-        scaled_inv_cov: np.ndarray,
-        scaled_norm_factor: float,
         K_matrix_opt: np.ndarray,
     ):
         self.h_opt = h_opt
-        self.scaled_inv_cov = scaled_inv_cov
-        self.scaled_norm_factor = scaled_norm_factor
         self.K_matrix_opt = K_matrix_opt
 
 
 def optimize_h(
-    X: np.ndarray,
-    y: np.ndarray,
-    inv_cov: np.ndarray,
-    norm_factor: float,
-    optimization_metric: str,
+    X: np.ndarray, y: np.ndarray, optimization_metric: str
 ) -> OptimizationResult:
-    raise NotImplementedError(
-        "This function should be implemented to optimize the bandwidth parameter 'h' based on the provided optimization metric."
-    )
+    def objective(h_val):
+        # This is the function that minimize_scalar will optimize
+        K_matrix = kernel_matrix(X, h_val)
+        if optimization_metric == "dissimilarity":
+            return objective_function_dissimilarity(K_matrix, y)
+        elif optimization_metric == "spatial_spread":
+            return objective_function_spatial_spread(K_matrix, y)
+        else:
+            raise ValueError("Invalid optimization metric.")
+
+    # Define bounds for h. This is crucial for 'bounded' method and good practice generally.
+    # The range should be chosen based on the expected scale of your data.
+    # For a bandwidth, it's typically positive, often in a logarithmic scale.
+    bounds_h = (1e-1, 1e1)  # Example bounds: h can be between 0.1 and 10.0
+
+    # Use minimize_scalar with the 'bounded' method
+    result = minimize_scalar(objective, bounds=bounds_h, method="bounded")
+
+    if not result.success:
+        raise RuntimeError(f"Optimization for h failed: {result.message}")
+
+    best_h = result.x
+
+    best_K_matrix = kernel_matrix(X, best_h)
+
+    return OptimizationResult(best_h, best_K_matrix)
 
 
 class CustomSVC(BaseEstimator, ClassifierMixin):
     optimization_metric_: str
-    inv_cov_: np.ndarray
-    norm_factor_: float
     h_opt_: float
     classes_: np.ndarray
     svc_: SVC
@@ -69,20 +81,9 @@ class CustomSVC(BaseEstimator, ClassifierMixin):
 
         self.classes_ = np.unique(y)
 
-        cov = np.cov(X, rowvar=False)
-        cov_det = np.linalg.det(cov)
-        n_features = X.shape[1]
-
-        self.inv_cov_ = np.linalg.inv(cov)
-        self.norm_factor_ = 1.0 / np.sqrt((2 * np.pi) ** n_features * cov_det)
-
-        optimization_result = optimize_h(
-            X, y, self.inv_cov_, self.norm_factor_, self.optimization_metric_
-        )
+        optimization_result = optimize_h(X, y, self.optimization_metric_)
 
         self.h_opt_ = optimization_result.h_opt
-        self.inv_cov_ = optimization_result.scaled_inv_cov
-        self.norm_factor_ = optimization_result.scaled_norm_factor
         K_matrix_opt = optimization_result.K_matrix_opt
 
         self.svc_ = SVC(kernel="precomputed").fit(K_matrix_opt, y)
@@ -90,9 +91,7 @@ class CustomSVC(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        return self.svc_.predict(
-            kernel_matrix(X, self.h_opt_, self.inv_cov_, self.norm_factor_)
-        )
+        return self.svc_.predict(kernel_matrix(X, self.h_opt_))
 
     def score(self, X: np.ndarray, y: np.ndarray) -> float:
         return float(accuracy_score(y, self.predict(X)))
