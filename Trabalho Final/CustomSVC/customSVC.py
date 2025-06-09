@@ -62,7 +62,7 @@ def optimize_h(
     return OptimizationResult(best_h, best_K_matrix)
 
 
-class CustomSVC(BaseEstimator, ClassifierMixin):
+class CSVC(BaseEstimator, ClassifierMixin):
     optimization_metric_: str
     h_opt_: float
     classes_: np.ndarray
@@ -80,7 +80,7 @@ class CustomSVC(BaseEstimator, ClassifierMixin):
 
         self.optimization_metric_ = optimization_metric
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "CustomSVC":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "CSVC":
 
         self.classes_ = np.unique(y)
 

@@ -13,7 +13,7 @@ from sklearn.svm import SVC
 
 sys.path.append(str(Path(__file__).parent.parent / "CustomSVC"))
 
-from CustomSVC import CustomSVC
+from CustomSVC.customSVC import CSVC
 
 
 class EquivalenceResults:
@@ -75,14 +75,14 @@ def run_experiment(dataset: str) -> DatasetResults:
     murilos_svc_pipeline = Pipeline(
         [
             ("pca", PCA(n_components="mle")),
-            ("svc", CustomSVC(optimization_metric="dissimilarity")),
+            ("svc", CSVC(optimization_metric="dissimilarity")),
         ]
     )
 
     my_svc_pipeline = Pipeline(
         [
             ("pca", PCA(n_components="mle")),
-            ("svc", CustomSVC(optimization_metric="spatial_spread")),
+            ("svc", CSVC(optimization_metric="spatial_spread")),
         ]
     )
 
