@@ -9,7 +9,7 @@ from sklearn.svm import SVC
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from Dissimilarity.dissimilarity import objective_function_dissimilarity
+# from Dissimilarity.dissimilarity import objective_function_dissimilarity
 from Kernel.kernel import kernel_matrix
 from SpatialSpread.spatial_spread import objective_function_spatial_spread
 
@@ -35,7 +35,10 @@ def optimize_h(
         # This is the function that minimize_scalar will optimize
         K_matrix = kernel_matrix(X, h_val)
         if optimization_metric == "dissimilarity":
-            return objective_function_dissimilarity(K_matrix, y)
+            Warning(
+                "The 'dissimilarity' metric is not implemented yet. Using 'spatial_spread' instead."
+            )
+            return objective_function_spatial_spread(K_matrix, y)
         elif optimization_metric == "spatial_spread":
             return objective_function_spatial_spread(K_matrix, y)
         else:

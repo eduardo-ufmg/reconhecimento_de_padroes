@@ -13,7 +13,7 @@ from sklearn.svm import SVC
 
 sys.path.append(str(Path(__file__).parent.parent / "CustomSVC"))
 
-from CustomSVC.CustomSVC import CustomSVC
+from CustomSVC import CustomSVC
 
 
 class EquivalenceResults:
