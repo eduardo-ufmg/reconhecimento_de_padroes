@@ -11,7 +11,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 
-sys.path.append(str(Path(__file__).parent.parent / "CustomSVC"))
+sys.path.append(str(Path(__file__).parent.parent))
 
 from CustomSVC.customSVC import CSVC
 
@@ -26,24 +26,26 @@ class EquivalenceResults:
 
 
 class AccuracyResults:
+    scores: np.ndarray
     mean: float
     std: float
 
-    def __init__(self, mean: float, std: float):
-        self.mean = mean
-        self.std = std
+    def __init__(self, scores: np.ndarray):
+        self.scores = scores
+        self.mean = scores.mean()
+        self.std = scores.std()
 
 
 class DatasetResults:
     accuracy_results: dict[str, AccuracyResults]
     time: dict[str, float]
-    equivalence: dict[tuple[str, str], EquivalenceResults]
+    equivalence: dict[str, EquivalenceResults]
 
     def __init__(
         self,
         accuracy_results: dict[str, AccuracyResults],
         time: dict[str, float],
-        equivalence: dict[tuple[str, str], EquivalenceResults],
+        equivalence: dict[str, EquivalenceResults],
     ):
         self.accuracy_results = accuracy_results
         self.time = time
@@ -51,6 +53,19 @@ class DatasetResults:
 
 
 ExperimentResults = dict[str, DatasetResults]
+
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, (AccuracyResults, EquivalenceResults, DatasetResults)):
+            return o.__dict__
+        if isinstance(o, np.integer):
+            return int(o)
+        if isinstance(o, np.floating):
+            return float(o)
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+        return super().default(o)
 
 
 def load_dataset(dataset_name: str):
@@ -64,11 +79,16 @@ def load_dataset(dataset_name: str):
 
 def compute_pvalue(results1: AccuracyResults, results2: AccuracyResults) -> float:
     # Using Wilcoxon signed-rank test for paired samples
-    return wilcoxon([results1.mean], [results2.mean]).pvalue
+    return wilcoxon(results1.scores, results2.scores).pvalue  # type: ignore
 
 
 def run_experiment(dataset: str) -> DatasetResults:
-    X, y = load_dataset(dataset)
+
+    try:
+        X, y = load_dataset(dataset)
+    except FileNotFoundError:
+        print(f"Dataset {dataset} not found. Skipping...")
+        return DatasetResults({}, {}, {})
 
     sklearns_svc_pipeline = Pipeline([("pca", PCA(n_components="mle")), ("svc", SVC())])
 
@@ -100,7 +120,7 @@ def run_experiment(dataset: str) -> DatasetResults:
         scores = cross_val_score(pipeline, X, y)
         elapsed_time = time.time() - start_time
 
-        accuracy_results[name] = AccuracyResults(mean=scores.mean(), std=scores.std())
+        accuracy_results[name] = AccuracyResults(scores=scores)
         time_results[name] = elapsed_time
 
     equivalence_results = {}
@@ -111,9 +131,17 @@ def run_experiment(dataset: str) -> DatasetResults:
     ]
 
     for name1, name2 in pairs:
-        pvalue = compute_pvalue(accuracy_results[name1], accuracy_results[name2])
-        equivalent = pvalue > 0.05
-        equivalence_results[(name1, name2)] = EquivalenceResults(
+        if np.isnan(accuracy_results[name1].mean) or np.isnan(
+            accuracy_results[name2].mean
+        ):
+            pvalue = np.nan
+            equivalent = False
+        else:
+            pvalue = compute_pvalue(accuracy_results[name1], accuracy_results[name2])
+            equivalent = bool(pvalue > 0.05)
+
+        key = str((name1, name2))
+        equivalence_results[key] = EquivalenceResults(
             pvalue=pvalue, equivalent=equivalent
         )
 
@@ -153,12 +181,13 @@ if __name__ == "__main__":
     experiment_results: ExperimentResults = {}
 
     for dataset in DATASETS:
+        print(f"Running experiment on: {dataset}")
         experiment_results[dataset] = run_experiment(dataset)
 
-    output_dir = Path(__file__).resolve() / "results"
+    output_dir = Path(__file__).parent.resolve() / "results"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_file = output_dir / "experiment_results.json"
 
     with open(output_file, "w") as f:
-        json.dump(experiment_results, f)
+        json.dump(experiment_results, f, cls=CustomEncoder, indent=4)

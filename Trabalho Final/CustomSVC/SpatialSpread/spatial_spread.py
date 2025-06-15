@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.distance import cdist, pdist
 
 
 def intra_class_average_distance(C: np.ndarray) -> float:
@@ -6,16 +7,19 @@ def intra_class_average_distance(C: np.ndarray) -> float:
     Computes the average distance between points in the same class.
 
     Parameters:
-    - C: np.ndarray, shape (n_samples,)
+    - C: np.ndarray, shape (n_samples, 2)
         The samples from the similarity space for a specific class.
 
     Returns:
     - float: The average distance between points in the same class.
     """
-    if len(C) < 2:
-        return 0.0  # No distance to compute if less than 2 points
-    distances = np.linalg.norm(C[:, np.newaxis] - C[np.newaxis, :], axis=2)
-    return np.mean(distances[distances > 0])  # Exclude self-distances
+    # If there are fewer than 2 points, the distance is 0
+    if C.shape[0] < 2:
+        return 0.0
+    # pdist computes the condensed distance matrix (1D array of pairwise distances)
+    distances = pdist(C, "euclidean")
+    # The average distance is the mean of these pairwise distances
+    return float(np.mean(distances))
 
 
 def inter_class_average_distance(C0: np.ndarray, C1: np.ndarray) -> float:
@@ -23,18 +27,21 @@ def inter_class_average_distance(C0: np.ndarray, C1: np.ndarray) -> float:
     Computes the average distance between points in different classes.
 
     Parameters:
-    - C0: np.ndarray, shape (n_samples_class_0,)
+    - C0: np.ndarray, shape (n_samples_class_0, 2)
         The samples from the similarity space for class 0.
-    - C1: np.ndarray, shape (n_samples_class_1,)
+    - C1: np.ndarray, shape (n_samples_class_1, 2)
         The samples from the similarity space for class 1.
 
     Returns:
     - float: The average distance between points in different classes.
     """
-    if len(C0) == 0 or len(C1) == 0:
-        return 0.0  # No distance to compute if one class is empty
-    distances = np.linalg.norm(C0[:, np.newaxis] - C1[np.newaxis, :], axis=2)
-    return np.mean(distances)
+    # If either class has no points, the distance is 0
+    if C0.shape[0] == 0 or C1.shape[0] == 0:
+        return 0.0
+    # cdist computes the distance between each pair of the two collections of inputs
+    dist_matrix = cdist(C0, C1, "euclidean")
+    # The average is the mean of all distances in the resulting matrix
+    return float(np.mean(dist_matrix))
 
 
 def objective_function_spatial_spread(K_matrix: np.ndarray, y: np.ndarray) -> float:
@@ -56,12 +63,12 @@ def objective_function_spatial_spread(K_matrix: np.ndarray, y: np.ndarray) -> fl
     """
 
     # Projects the samples into the similarity space
-    Q0 = np.array([np.sum(K_matrix[i, y == 0]) for i in range(K_matrix.shape[0])])
-    Q1 = np.array([np.sum(K_matrix[i, y == 1]) for i in range(K_matrix.shape[0])])
+    Q0 = np.sum(K_matrix[:, y == 0], axis=1)
+    Q1 = np.sum(K_matrix[:, y == 1], axis=1)
 
     # Extracts the samples from the similarity space for each class
-    C0 = np.hstack((Q0[y == 0], Q1[y == 0]))
-    C1 = np.hstack((Q0[y == 1], Q1[y == 1]))
+    C0 = np.column_stack((Q0[y == 0], Q1[y == 0]))
+    C1 = np.column_stack((Q0[y == 1], Q1[y == 1]))
 
     # Computes the average distance between points in the same class
     intra_class_average_distance_0 = intra_class_average_distance(C0)

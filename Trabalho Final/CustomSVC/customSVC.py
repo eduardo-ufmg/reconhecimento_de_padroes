@@ -33,7 +33,7 @@ def optimize_h(
 ) -> OptimizationResult:
     def objective(h_val):
         # This is the function that minimize_scalar will optimize
-        K_matrix = kernel_matrix(X, h_val)
+        K_matrix = kernel_matrix(X, h=h_val)
         if optimization_metric == "dissimilarity":
             Warning(
                 "The 'dissimilarity' metric is not implemented yet. Using 'spatial_spread' instead."
@@ -57,16 +57,17 @@ def optimize_h(
 
     best_h = result.x
 
-    best_K_matrix = kernel_matrix(X, best_h)
+    best_K_matrix = kernel_matrix(X, h=best_h)
 
     return OptimizationResult(best_h, best_K_matrix)
 
 
 class CSVC(BaseEstimator, ClassifierMixin):
-    optimization_metric_: str
+    optimization_metric: str
     h_opt_: float
     classes_: np.ndarray
     svc_: SVC
+    X_train_: np.ndarray
 
     def __init__(self, optimization_metric: str | None = None):
 
@@ -78,13 +79,14 @@ class CSVC(BaseEstimator, ClassifierMixin):
                 "Invalid optimization metric. Choose 'dissimilarity' or 'spatial_spread'."
             )
 
-        self.optimization_metric_ = optimization_metric
+        self.optimization_metric = optimization_metric
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "CSVC":
 
         self.classes_ = np.unique(y)
+        self.X_train_ = X
 
-        optimization_result = optimize_h(X, y, self.optimization_metric_)
+        optimization_result = optimize_h(X, y, self.optimization_metric)
 
         self.h_opt_ = optimization_result.h_opt
         K_matrix_opt = optimization_result.K_matrix_opt
@@ -94,7 +96,8 @@ class CSVC(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        return self.svc_.predict(kernel_matrix(X, self.h_opt_))
+        K_pred = kernel_matrix(X, self.X_train_, self.h_opt_)
+        return self.svc_.predict(K_pred)
 
     def score(self, X: np.ndarray, y: np.ndarray) -> float:
         return float(accuracy_score(y, self.predict(X)))
