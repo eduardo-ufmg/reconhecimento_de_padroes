@@ -1,0 +1,37 @@
+# Custom SVC Project
+
+This project implements a custom Support Vector Classifier (SVC) with specialized kernels, dissimilarity measures, and spatial spread techniques. It is designed for experimentation with various datasets for pattern recognition tasks.
+
+## Project Structure
+
+- `CustomSVC/`
+  - `customSVC.py`: Main implementation of the custom SVC.
+  - `Dissimilarity/dissimilarity.py`: Dissimilarity measures for SVC.
+  - `Kernel/kernel.py`: Custom kernel functions.
+  - `SpatialSpread/spatial_spread.py`: Spatial spread techniques.
+- `Experiment/experiment.py`: Script to run experiments and store results.
+- `Experiment/results/`: Stores experiment results in JSON format.
+- `sets/`: Contains datasets in `.npz` format.
+- `StoreSets/store_sets.py`: Utility for managing datasets.
+
+## Requirements
+Install dependencies with:
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+Run experiments with:
+```bash
+python Experiment/experiment.py
+```
+
+## Datasets
+Datasets are provided in the `sets/` directory in `.npz` format.
+
+## Results
+Experiment results are saved in `Experiment/results/experiment_results.json`.
+
+---
+
+Feel free to modify or extend the modules for your research needs.
