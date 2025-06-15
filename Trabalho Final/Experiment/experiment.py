@@ -155,28 +155,20 @@ def run_experiment(dataset: str) -> DatasetResults:
 
 
 if __name__ == "__main__":
-    DATASETS = [
-        "adult",
-        "banknote-authentication",
-        "blood-transfusion-service-center",
-        "breast_cancer",
-        "diabetes",
-        "digits_binary_0_vs_1",
-        "digits_binary_5_vs_rest",
-        "german_credit_g",
-        "ionosphere",
-        "iris_binary_setosa_vs_rest",
-        "iris_binary_setosa_vs_versicolor",
-        "kc1",
-        "mushroom",
-        "qsar-biodeg",
-        "sonar",
-        "spambase",
-        "sylvine",
-        "titanic",
-        "vote",
-        "wpbc",
-    ]
+    # Dynamically find datasets in the "sets" directory
+    sets_dir = Path(__file__).parent.parent / "sets"
+    if not sets_dir.exists():
+        print(f"Error: The directory '{sets_dir}' was not found. Exiting.")
+        sys.exit(1)
+
+    # Get all files ending with .npz and extract their names without the extension
+    DATASETS = sorted([f.stem for f in sets_dir.glob("*.npz")])
+
+    if not DATASETS:
+        print(f"No datasets (.npz files) found in '{sets_dir}'. Exiting.")
+        sys.exit(1)
+
+    print(f"Found {len(DATASETS)} datasets to process: {DATASETS}")
 
     output_dir = Path(__file__).parent.resolve() / "results"
     output_dir.mkdir(parents=True, exist_ok=True)
