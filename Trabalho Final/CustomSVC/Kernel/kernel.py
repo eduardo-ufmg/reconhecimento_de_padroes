@@ -43,10 +43,9 @@ def kernel_matrix(
             + np.sum(X2**2, axis=1)
             - 2 * np.dot(X1, X2.T)
         )
-        # Apply the Gaussian kernel formula
-        K = np.exp(-sq_distances / (2 * h**2))
-        # Normalization constant for the Gaussian kernel in KDE context
-        K /= (h * np.sqrt(2 * np.pi)) ** n_features1
+
+        log_norm_const = n_features1 * (np.log(h) + 0.5 * np.log(2 * np.pi))
+        K = np.exp(-sq_distances / (2 * h**2) - log_norm_const)
 
     elif kernel == "pdf":
         # Multivariate Normal Distribution Probability Density Function

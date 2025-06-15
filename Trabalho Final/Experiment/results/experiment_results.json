@@ -36,9 +36,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.029393911361694336,
-            "murilos_svc_pipeline": 1.316211223602295,
-            "my_svc_pipeline": 1.0373876094818115
+            "sklearns_svc_pipeline": 0.030818939208984375,
+            "murilos_svc_pipeline": 1.3422644138336182,
+            "my_svc_pipeline": 1.263216257095337
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -92,9 +92,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.03990650177001953,
-            "murilos_svc_pipeline": 0.3517773151397705,
-            "my_svc_pipeline": 0.5490808486938477
+            "sklearns_svc_pipeline": 0.030844926834106445,
+            "murilos_svc_pipeline": 0.36670494079589844,
+            "my_svc_pipeline": 0.7531249523162842
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -148,9 +148,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.042029619216918945,
-            "murilos_svc_pipeline": 0.9983818531036377,
-            "my_svc_pipeline": 1.5156636238098145
+            "sklearns_svc_pipeline": 0.07266473770141602,
+            "murilos_svc_pipeline": 0.962127685546875,
+            "my_svc_pipeline": 1.4523167610168457
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -204,9 +204,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.12479114532470703,
-            "murilos_svc_pipeline": 1.0922911167144775,
-            "my_svc_pipeline": 1.4707608222961426
+            "sklearns_svc_pipeline": 0.13103365898132324,
+            "murilos_svc_pipeline": 1.2652528285980225,
+            "my_svc_pipeline": 2.6477861404418945
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -260,9 +260,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.25172972679138184,
-            "murilos_svc_pipeline": 4.798466205596924,
-            "my_svc_pipeline": 11.736177444458008
+            "sklearns_svc_pipeline": 0.21399545669555664,
+            "murilos_svc_pipeline": 4.59932541847229,
+            "my_svc_pipeline": 11.35640287399292
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -316,9 +316,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.0222165584564209,
-            "murilos_svc_pipeline": 1.210150957107544,
-            "my_svc_pipeline": 0.998028039932251
+            "sklearns_svc_pipeline": 0.09624838829040527,
+            "murilos_svc_pipeline": 0.8000571727752686,
+            "my_svc_pipeline": 1.7687723636627197
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -372,9 +372,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.013718366622924805,
-            "murilos_svc_pipeline": 0.02472710609436035,
-            "my_svc_pipeline": 0.038826704025268555
+            "sklearns_svc_pipeline": 0.017240524291992188,
+            "murilos_svc_pipeline": 0.03887677192687988,
+            "my_svc_pipeline": 0.05147695541381836
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -428,9 +428,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.011065959930419922,
-            "murilos_svc_pipeline": 0.0163421630859375,
-            "my_svc_pipeline": 0.02579355239868164
+            "sklearns_svc_pipeline": 0.010088682174682617,
+            "murilos_svc_pipeline": 0.015440940856933594,
+            "my_svc_pipeline": 0.02455878257751465
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -484,9 +484,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.06598687171936035,
-            "murilos_svc_pipeline": 2.389244556427002,
-            "my_svc_pipeline": 4.096026420593262
+            "sklearns_svc_pipeline": 0.06488227844238281,
+            "murilos_svc_pipeline": 3.3841500282287598,
+            "my_svc_pipeline": 2.886505603790283
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -540,9 +540,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.13782596588134766,
-            "murilos_svc_pipeline": 0.9882807731628418,
-            "my_svc_pipeline": 1.1867589950561523
+            "sklearns_svc_pipeline": 0.4413020610809326,
+            "murilos_svc_pipeline": 1.0104434490203857,
+            "my_svc_pipeline": 1.2453553676605225
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -596,9 +596,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.7010443210601807,
-            "murilos_svc_pipeline": 2.025263786315918,
-            "my_svc_pipeline": 2.2554798126220703
+            "sklearns_svc_pipeline": 1.1631057262420654,
+            "murilos_svc_pipeline": 5.088611841201782,
+            "my_svc_pipeline": 2.6288812160491943
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -652,9 +652,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 6.407673597335815,
-            "murilos_svc_pipeline": 9.763879299163818,
-            "my_svc_pipeline": 11.143389701843262
+            "sklearns_svc_pipeline": 5.46401834487915,
+            "murilos_svc_pipeline": 11.418867349624634,
+            "my_svc_pipeline": 11.728337526321411
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
