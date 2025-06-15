@@ -9,6 +9,7 @@ from scipy.stats import wilcoxon
 from sklearn.decomposition import PCA
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
 sys.path.append(str(Path(__file__).parent.parent))
@@ -55,6 +56,20 @@ class DatasetResults:
 ExperimentResults = dict[str, DatasetResults]
 
 
+class Preprocessor(Pipeline):
+    """Pipeline for preprocessing the dataset with StandardScaler and PCA."""
+
+    n_components: int | None = None
+
+    def __init__(self, n_components=None):
+        steps = [
+            ("scaler", StandardScaler()),
+            ("pca", PCA(n_components=n_components)),
+        ]
+        super().__init__(steps)
+        self.n_components = n_components
+
+
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, (AccuracyResults, EquivalenceResults, DatasetResults)):
@@ -90,18 +105,18 @@ def run_experiment(dataset: str) -> DatasetResults:
         print(f"Dataset {dataset} not found. Skipping...")
         return DatasetResults({}, {}, {})
 
-    sklearns_svc_pipeline = Pipeline([("pca", PCA()), ("svc", SVC())])
+    sklearns_svc_pipeline = Pipeline([("preprocessor", Preprocessor()), ("svc", SVC())])
 
     murilos_svc_pipeline = Pipeline(
         [
-            ("pca", PCA()),
+            ("preprocessor", Preprocessor()),
             ("svc", CSVC(optimization_metric="dissimilarity")),
         ]
     )
 
     my_svc_pipeline = Pipeline(
         [
-            ("pca", PCA()),
+            ("preprocessor", Preprocessor()),
             ("svc", CSVC(optimization_metric="spatial_spread")),
         ]
     )

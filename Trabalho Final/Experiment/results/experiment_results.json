@@ -1,56 +1,296 @@
 {
-    "adult": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
-    "banknote-authentication": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
     "blood-transfusion-service-center": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    0.7,
+                    0.76,
+                    0.7533333333333333,
+                    0.8187919463087249,
+                    0.7651006711409396
+                ],
+                "mean": 0.7594451901565995,
+                "std": 0.03775027197647397
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.47333333333333333,
+                    0.76,
+                    0.8866666666666667,
+                    0.6577181208053692,
+                    0.8590604026845637
+                ],
+                "mean": 0.7273557046979866,
+                "std": 0.15044501875104402
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.5533333333333333,
+                    0.7866666666666666,
+                    0.8933333333333333,
+                    0.6711409395973155,
+                    0.9060402684563759
+                ],
+                "mean": 0.7621029082774049,
+                "std": 0.1344630666840098
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.029393911361694336,
+            "murilos_svc_pipeline": 1.316211223602295,
+            "my_svc_pipeline": 1.0373876094818115
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.625,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.8125,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            }
+        }
     },
     "breast_cancer": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    0.9736842105263158,
+                    0.956140350877193,
+                    1.0,
+                    0.9649122807017544,
+                    0.9734513274336283
+                ],
+                "mean": 0.9736376339077782,
+                "std": 0.014678541667933545
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.40350877192982454,
+                    0.5701754385964912,
+                    0.6491228070175439,
+                    0.7456140350877193,
+                    0.7699115044247787
+                ],
+                "mean": 0.6276665114112715,
+                "std": 0.13278369223876046
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.40350877192982454,
+                    0.5701754385964912,
+                    0.6491228070175439,
+                    0.7456140350877193,
+                    0.7699115044247787
+                ],
+                "mean": 0.6276665114112715,
+                "std": 0.13278369223876046
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.03990650177001953,
+            "murilos_svc_pipeline": 0.3517773151397705,
+            "my_svc_pipeline": 0.5490808486938477
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     },
     "diabetes": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    0.7662337662337663,
+                    0.7532467532467533,
+                    0.7467532467532467,
+                    0.8169934640522876,
+                    0.7777777777777778
+                ],
+                "mean": 0.7722010016127664,
+                "std": 0.024819044221603956
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.6493506493506493,
+                    0.5844155844155844,
+                    0.6298701298701299,
+                    0.7450980392156863,
+                    0.6470588235294118
+                ],
+                "mean": 0.6511586452762923,
+                "std": 0.05244525561493349
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.6493506493506493,
+                    0.5844155844155844,
+                    0.6298701298701299,
+                    0.7450980392156863,
+                    0.6470588235294118
+                ],
+                "mean": 0.6511586452762923,
+                "std": 0.05244525561493349
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.042029619216918945,
+            "murilos_svc_pipeline": 0.9983818531036377,
+            "my_svc_pipeline": 1.5156636238098145
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     },
     "digits_binary_0_vs_1": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    0.9861111111111112,
+                    0.9722222222222222,
+                    1.0
+                ],
+                "mean": 0.9916666666666668,
+                "std": 0.01111111111111111
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.4861111111111111,
+                    0.5,
+                    1.0,
+                    0.5,
+                    0.5138888888888888
+                ],
+                "mean": 0.6,
+                "std": 0.20019280829696948
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.4861111111111111,
+                    0.5,
+                    0.9861111111111112,
+                    0.5,
+                    0.5138888888888888
+                ],
+                "mean": 0.5972222222222222,
+                "std": 0.19464275601505393
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.12479114532470703,
+            "murilos_svc_pipeline": 1.0922911167144775,
+            "my_svc_pipeline": 1.4707608222961426
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.125,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.125,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     },
     "digits_binary_5_vs_rest": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
-    "german_credit_g": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    0.9888888888888889,
+                    0.9888888888888889,
+                    0.9944289693593314,
+                    0.9944289693593314,
+                    0.9916434540389972
+                ],
+                "mean": 0.9916558341070877,
+                "std": 0.002477607039124083
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.9,
+                    0.8972222222222223,
+                    0.8941504178272981,
+                    0.9052924791086351,
+                    0.8969359331476323
+                ],
+                "mean": 0.8987202104611576,
+                "std": 0.0037720868349064357
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.9,
+                    0.8972222222222223,
+                    0.8941504178272981,
+                    0.9052924791086351,
+                    0.8969359331476323
+                ],
+                "mean": 0.8987202104611576,
+                "std": 0.0037720868349064357
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.25172972679138184,
+            "murilos_svc_pipeline": 4.798466205596924,
+            "my_svc_pipeline": 11.736177444458008
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     },
     "ionosphere": {
         "accuracy_results": {
             "sklearns_svc_pipeline": {
                 "scores": [
                     0.9577464788732394,
-                    0.9,
-                    0.9,
+                    0.9142857142857143,
+                    0.9142857142857143,
                     1.0,
                     0.9571428571428572
                 ],
-                "mean": 0.9429778672032192,
-                "std": 0.03837831835299377
+                "mean": 0.948692152917505,
+                "std": 0.03210450570030358
             },
             "murilos_svc_pipeline": {
                 "scores": [
@@ -76,9 +316,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.08808779716491699,
-            "murilos_svc_pipeline": 1.495441198348999,
-            "my_svc_pipeline": 1.0617408752441406
+            "sklearns_svc_pipeline": 0.0222165584564209,
+            "murilos_svc_pipeline": 1.210150957107544,
+            "my_svc_pipeline": 0.998028039932251
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -96,42 +336,185 @@
         }
     },
     "iris_binary_setosa_vs_rest": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "mean": 1.0,
+                "std": 0.0
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.0,
+                    0.3333333333333333,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "mean": 0.6666666666666666,
+                "std": 0.42163702135578396
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.0,
+                    0.3333333333333333,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "mean": 0.6666666666666666,
+                "std": 0.42163702135578396
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.013718366622924805,
+            "murilos_svc_pipeline": 0.02472710609436035,
+            "my_svc_pipeline": 0.038826704025268555
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.5,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.5,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     },
     "iris_binary_setosa_vs_versicolor": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
-    "kc1": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
-    "mushroom": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "mean": 1.0,
+                "std": 0.0
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "mean": 0.2,
+                "std": 0.4000000000000001
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                ],
+                "mean": 0.2,
+                "std": 0.4000000000000001
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.011065959930419922,
+            "murilos_svc_pipeline": 0.0163421630859375,
+            "my_svc_pipeline": 0.02579355239868164
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.125,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.125,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     },
     "qsar-biodeg": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    0.909952606635071,
+                    0.9004739336492891,
+                    0.8767772511848341,
+                    0.8056872037914692,
+                    0.8483412322274881
+                ],
+                "mean": 0.8682464454976303,
+                "std": 0.03784353512355853
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.009478672985781991,
+                    0.6635071090047393,
+                    1.0,
+                    0.966824644549763,
+                    0.6919431279620853
+                ],
+                "mean": 0.666350710900474,
+                "std": 0.35601976489972964
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.0,
+                    0.6540284360189573,
+                    1.0,
+                    0.966824644549763,
+                    0.6919431279620853
+                ],
+                "mean": 0.6625592417061611,
+                "std": 0.35954544550387996
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.06598687171936035,
+            "murilos_svc_pipeline": 2.389244556427002,
+            "my_svc_pipeline": 4.096026420593262
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.4375,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.4375,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.5,
+                "equivalent": true
+            }
+        }
     },
     "sonar": {
         "accuracy_results": {
             "sklearns_svc_pipeline": {
                 "scores": [
-                    0.5714285714285714,
-                    0.6904761904761905,
-                    0.40476190476190477,
-                    0.6829268292682927,
-                    0.4146341463414634
+                    0.5476190476190477,
+                    0.7857142857142857,
+                    0.6190476190476191,
+                    0.7073170731707317,
+                    0.5365853658536586
                 ],
-                "mean": 0.5528455284552846,
-                "std": 0.12428983803001706
+                "mean": 0.6392566782810685,
+                "std": 0.09531978593305387
             },
             "murilos_svc_pipeline": {
                 "scores": [
@@ -157,9 +540,9 @@
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.3999490737915039,
-            "murilos_svc_pipeline": 1.1798646450042725,
-            "my_svc_pipeline": 1.1980266571044922
+            "sklearns_svc_pipeline": 0.13782596588134766,
+            "murilos_svc_pipeline": 0.9882807731628418,
+            "my_svc_pipeline": 1.1867589950561523
         },
         "equivalence": {
             "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
@@ -176,29 +559,116 @@
             }
         }
     },
-    "spambase": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
     "sylvine": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.984375,
+                    1.0
+                ],
+                "mean": 0.996875,
+                "std": 0.00625
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.4461538461538462,
+                    0.3384615384615385,
+                    0.4307692307692308,
+                    0.390625,
+                    0.453125
+                ],
+                "mean": 0.4118269230769231,
+                "std": 0.042602068090895555
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.4461538461538462,
+                    0.3384615384615385,
+                    0.4307692307692308,
+                    0.390625,
+                    0.453125
+                ],
+                "mean": 0.4118269230769231,
+                "std": 0.042602068090895555
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 0.7010443210601807,
+            "murilos_svc_pipeline": 2.025263786315918,
+            "my_svc_pipeline": 2.2554798126220703
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     },
     "titanic": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
-    "vote": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
-    },
-    "wpbc": {
-        "accuracy_results": {},
-        "time": {},
-        "equivalence": {}
+        "accuracy_results": {
+            "sklearns_svc_pipeline": {
+                "scores": [
+                    0.6526717557251909,
+                    0.7404580152671756,
+                    0.7213740458015268,
+                    0.7786259541984732,
+                    0.6781609195402298
+                ],
+                "mean": 0.7142581381065192,
+                "std": 0.044668058245342666
+            },
+            "murilos_svc_pipeline": {
+                "scores": [
+                    0.3702290076335878,
+                    0.5687022900763359,
+                    0.648854961832061,
+                    0.7099236641221374,
+                    0.7931034482758621
+                ],
+                "mean": 0.6181626743879969,
+                "std": 0.14414146026772925
+            },
+            "my_svc_pipeline": {
+                "scores": [
+                    0.3702290076335878,
+                    0.5687022900763359,
+                    0.648854961832061,
+                    0.7099236641221374,
+                    0.7931034482758621
+                ],
+                "mean": 0.6181626743879969,
+                "std": 0.14414146026772925
+            }
+        },
+        "time": {
+            "sklearns_svc_pipeline": 6.407673597335815,
+            "murilos_svc_pipeline": 9.763879299163818,
+            "my_svc_pipeline": 11.143389701843262
+        },
+        "equivalence": {
+            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+                "pvalue": 0.3125,
+                "equivalent": true
+            },
+            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 0.3125,
+                "equivalent": true
+            },
+            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            }
+        }
     }
 }
