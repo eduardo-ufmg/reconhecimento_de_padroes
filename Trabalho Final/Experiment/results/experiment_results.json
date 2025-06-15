@@ -1,7 +1,7 @@
 {
     "blood-transfusion-service-center": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.7,
                     0.76,
@@ -12,52 +12,52 @@
                 "mean": 0.7594451901565995,
                 "std": 0.03775027197647397
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.47333333333333333,
-                    0.76,
-                    0.8866666666666667,
-                    0.6577181208053692,
-                    0.8590604026845637
-                ],
-                "mean": 0.7273557046979866,
-                "std": 0.15044501875104402
-            },
-            "my_svc_pipeline": {
-                "scores": [
-                    0.5533333333333333,
+                    0.5466666666666666,
                     0.7866666666666666,
                     0.8933333333333333,
-                    0.6711409395973155,
+                    0.7114093959731543,
                     0.9060402684563759
                 ],
-                "mean": 0.7621029082774049,
-                "std": 0.1344630666840098
+                "mean": 0.7688232662192394,
+                "std": 0.1321359577682216
+            },
+            "spread_svc": {
+                "scores": [
+                    0.56,
+                    0.7866666666666666,
+                    0.8866666666666667,
+                    0.6778523489932886,
+                    0.9060402684563759
+                ],
+                "mean": 0.7634451901565995,
+                "std": 0.13020922045401445
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.030818939208984375,
-            "murilos_svc_pipeline": 1.3422644138336182,
-            "my_svc_pipeline": 1.263216257095337
+            "sklearns_svc": 0.03059983253479004,
+            "dissimilarity_svc": 0.7817845344543457,
+            "spread_svc": 1.5687813758850098
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.625,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.8125,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.0625,
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.75,
                 "equivalent": true
             }
         }
     },
     "breast_cancer": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.9736842105263158,
                     0.956140350877193,
@@ -68,52 +68,52 @@
                 "mean": 0.9736376339077782,
                 "std": 0.014678541667933545
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.40350877192982454,
-                    0.5701754385964912,
-                    0.6491228070175439,
-                    0.7456140350877193,
-                    0.7699115044247787
+                    0.9385964912280702,
+                    0.9824561403508771,
+                    0.9736842105263158,
+                    0.9912280701754386,
+                    0.9823008849557522
                 ],
-                "mean": 0.6276665114112715,
-                "std": 0.13278369223876046
+                "mean": 0.9736531594472908,
+                "std": 0.01838545113486739
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.40350877192982454,
-                    0.5701754385964912,
-                    0.6491228070175439,
-                    0.7456140350877193,
-                    0.7699115044247787
+                    0.8947368421052632,
+                    0.9473684210526315,
+                    0.9736842105263158,
+                    0.9912280701754386,
+                    0.9823008849557522
                 ],
-                "mean": 0.6276665114112715,
-                "std": 0.13278369223876046
+                "mean": 0.9578636857630801,
+                "std": 0.034801714977635706
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.030844926834106445,
-            "murilos_svc_pipeline": 0.36670494079589844,
-            "my_svc_pipeline": 0.7531249523162842
+            "sklearns_svc": 0.04247736930847168,
+            "dissimilarity_svc": 0.28986501693725586,
+            "spread_svc": 0.6537370681762695
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.0625,
-                "equivalent": true
-            },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.0625,
-                "equivalent": true
-            },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+            "('sklearns_svc', 'dissimilarity_svc')": {
                 "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 0.6875,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.5,
                 "equivalent": true
             }
         }
     },
     "diabetes": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.7662337662337663,
                     0.7532467532467533,
@@ -124,52 +124,52 @@
                 "mean": 0.7722010016127664,
                 "std": 0.024819044221603956
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.6493506493506493,
-                    0.5844155844155844,
-                    0.6298701298701299,
-                    0.7450980392156863,
-                    0.6470588235294118
+                    0.7727272727272727,
+                    0.7272727272727273,
+                    0.7727272727272727,
+                    0.8235294117647058,
+                    0.7777777777777778
                 ],
-                "mean": 0.6511586452762923,
-                "std": 0.05244525561493349
+                "mean": 0.7748068924539512,
+                "std": 0.03049870995135777
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.6493506493506493,
-                    0.5844155844155844,
-                    0.6298701298701299,
-                    0.7450980392156863,
-                    0.6470588235294118
+                    0.7727272727272727,
+                    0.7402597402597403,
+                    0.7857142857142857,
+                    0.8562091503267973,
+                    0.7516339869281046
                 ],
-                "mean": 0.6511586452762923,
-                "std": 0.05244525561493349
+                "mean": 0.7813088871912401,
+                "std": 0.04066628389750321
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.07266473770141602,
-            "murilos_svc_pipeline": 0.962127685546875,
-            "my_svc_pipeline": 1.4523167610168457
+            "sklearns_svc": 0.0854945182800293,
+            "dissimilarity_svc": 0.7097563743591309,
+            "spread_svc": 1.6837751865386963
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.0625,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 0.75,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.0625,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 0.625,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 1.0,
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.625,
                 "equivalent": true
             }
         }
     },
     "digits_binary_0_vs_1": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     1.0,
                     1.0,
@@ -180,44 +180,44 @@
                 "mean": 0.9916666666666668,
                 "std": 0.01111111111111111
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.4861111111111111,
-                    0.5,
                     1.0,
-                    0.5,
-                    0.5138888888888888
+                    1.0,
+                    1.0,
+                    0.9583333333333334,
+                    1.0
                 ],
-                "mean": 0.6,
-                "std": 0.20019280829696948
+                "mean": 0.9916666666666668,
+                "std": 0.016666666666666653
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.4861111111111111,
-                    0.5,
-                    0.9861111111111112,
-                    0.5,
-                    0.5138888888888888
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.9583333333333334,
+                    1.0
                 ],
-                "mean": 0.5972222222222222,
-                "std": 0.19464275601505393
+                "mean": 0.9916666666666668,
+                "std": 0.016666666666666653
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.13103365898132324,
-            "murilos_svc_pipeline": 1.2652528285980225,
-            "my_svc_pipeline": 2.6477861404418945
+            "sklearns_svc": 0.11529660224914551,
+            "dissimilarity_svc": 1.1487369537353516,
+            "spread_svc": 1.9413714408874512
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.125,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.125,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+            "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -225,7 +225,7 @@
     },
     "digits_binary_5_vs_rest": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.9888888888888889,
                     0.9888888888888889,
@@ -236,52 +236,52 @@
                 "mean": 0.9916558341070877,
                 "std": 0.002477607039124083
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.9,
-                    0.8972222222222223,
-                    0.8941504178272981,
-                    0.9052924791086351,
-                    0.8969359331476323
+                    0.9861111111111112,
+                    0.9888888888888889,
+                    0.9944289693593314,
+                    0.9944289693593314,
+                    0.9916434540389972
                 ],
-                "mean": 0.8987202104611576,
-                "std": 0.0037720868349064357
+                "mean": 0.991100278551532,
+                "std": 0.003232257433641085
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.9,
-                    0.8972222222222223,
-                    0.8941504178272981,
-                    0.9052924791086351,
-                    0.8969359331476323
+                    0.9888888888888889,
+                    0.9861111111111112,
+                    0.9860724233983287,
+                    0.9944289693593314,
+                    0.9860724233983287
                 ],
-                "mean": 0.8987202104611576,
-                "std": 0.0037720868349064357
+                "mean": 0.9883147632311978,
+                "std": 0.0032442378262584797
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.21399545669555664,
-            "murilos_svc_pipeline": 4.59932541847229,
-            "my_svc_pipeline": 11.35640287399292
+            "sklearns_svc": 0.1439683437347412,
+            "dissimilarity_svc": 8.727587461471558,
+            "spread_svc": 8.300522327423096
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.0625,
-                "equivalent": true
-            },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.0625,
-                "equivalent": true
-            },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+            "('sklearns_svc', 'dissimilarity_svc')": {
                 "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 0.25,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.375,
                 "equivalent": true
             }
         }
     },
     "ionosphere": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.9577464788732394,
                     0.9142857142857143,
@@ -292,52 +292,52 @@
                 "mean": 0.948692152917505,
                 "std": 0.03210450570030358
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.5070422535211268,
-                    0.5142857142857142,
-                    0.5,
-                    0.7142857142857143,
-                    1.0
+                    0.9295774647887324,
+                    0.9,
+                    0.9428571428571428,
+                    0.9571428571428572,
+                    0.9714285714285714
                 ],
-                "mean": 0.647122736418511,
-                "std": 0.1938796247458171
+                "mean": 0.9402012072434609,
+                "std": 0.024487640706378204
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.5070422535211268,
-                    0.5,
-                    0.5,
-                    0.7,
-                    1.0
+                    0.8169014084507042,
+                    0.7714285714285715,
+                    0.9,
+                    0.9428571428571428,
+                    0.9857142857142858
                 ],
-                "mean": 0.6414084507042254,
-                "std": 0.1949706868643639
+                "mean": 0.8833802816901409,
+                "std": 0.07904250305787015
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.09624838829040527,
-            "murilos_svc_pipeline": 0.8000571727752686,
-            "my_svc_pipeline": 1.7687723636627197
+            "sklearns_svc": 0.09912228584289551,
+            "dissimilarity_svc": 0.7724747657775879,
+            "spread_svc": 0.9540317058563232
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.125,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 0.6875,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.125,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 0.1875,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.5,
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.1875,
                 "equivalent": true
             }
         }
     },
     "iris_binary_setosa_vs_rest": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     1.0,
                     1.0,
@@ -348,44 +348,44 @@
                 "mean": 1.0,
                 "std": 0.0
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.0,
-                    0.3333333333333333,
+                    1.0,
+                    1.0,
                     1.0,
                     1.0,
                     1.0
                 ],
-                "mean": 0.6666666666666666,
-                "std": 0.42163702135578396
+                "mean": 1.0,
+                "std": 0.0
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.0,
-                    0.3333333333333333,
+                    1.0,
+                    1.0,
                     1.0,
                     1.0,
                     1.0
                 ],
-                "mean": 0.6666666666666666,
-                "std": 0.42163702135578396
+                "mean": 1.0,
+                "std": 0.0
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.017240524291992188,
-            "murilos_svc_pipeline": 0.03887677192687988,
-            "my_svc_pipeline": 0.05147695541381836
+            "sklearns_svc": 0.020865678787231445,
+            "dissimilarity_svc": 0.04546761512756348,
+            "spread_svc": 0.044867753982543945
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.5,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.5,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+            "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -393,7 +393,7 @@
     },
     "iris_binary_setosa_vs_versicolor": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     1.0,
                     1.0,
@@ -404,44 +404,44 @@
                 "mean": 1.0,
                 "std": 0.0
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.0,
-                    0.0,
                     1.0,
-                    0.0,
-                    0.0
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
                 ],
-                "mean": 0.2,
-                "std": 0.4000000000000001
+                "mean": 1.0,
+                "std": 0.0
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.0,
-                    0.0,
                     1.0,
-                    0.0,
-                    0.0
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
                 ],
-                "mean": 0.2,
-                "std": 0.4000000000000001
+                "mean": 1.0,
+                "std": 0.0
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.010088682174682617,
-            "murilos_svc_pipeline": 0.015440940856933594,
-            "my_svc_pipeline": 0.02455878257751465
+            "sklearns_svc": 0.009568214416503906,
+            "dissimilarity_svc": 0.016512393951416016,
+            "spread_svc": 0.023806333541870117
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.125,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.125,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+            "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -449,7 +449,7 @@
     },
     "qsar-biodeg": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.909952606635071,
                     0.9004739336492891,
@@ -460,52 +460,52 @@
                 "mean": 0.8682464454976303,
                 "std": 0.03784353512355853
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.009478672985781991,
-                    0.6635071090047393,
-                    1.0,
-                    0.966824644549763,
-                    0.6919431279620853
+                    0.6161137440758294,
+                    0.8625592417061612,
+                    0.9146919431279621,
+                    0.8483412322274881,
+                    0.8578199052132701
                 ],
-                "mean": 0.666350710900474,
-                "std": 0.35601976489972964
+                "mean": 0.8199052132701421,
+                "std": 0.10448060514241042
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.0,
-                    0.6540284360189573,
-                    1.0,
-                    0.966824644549763,
-                    0.6919431279620853
+                    0.0995260663507109,
+                    0.8672985781990521,
+                    0.8815165876777251,
+                    0.8151658767772512,
+                    0.8578199052132701
                 ],
-                "mean": 0.6625592417061611,
-                "std": 0.35954544550387996
+                "mean": 0.704265402843602,
+                "std": 0.3031782855714268
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.06488227844238281,
-            "murilos_svc_pipeline": 3.3841500282287598,
-            "my_svc_pipeline": 2.886505603790283
+            "sklearns_svc": 0.06496644020080566,
+            "dissimilarity_svc": 0.710395097732544,
+            "spread_svc": 1.7022552490234375
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.4375,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.4375,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 0.75,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.5,
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.25,
                 "equivalent": true
             }
         }
     },
     "sonar": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.5476190476190477,
                     0.7857142857142857,
@@ -516,52 +516,52 @@
                 "mean": 0.6392566782810685,
                 "std": 0.09531978593305387
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.0,
-                    0.0,
-                    0.30952380952380953,
-                    0.0,
-                    0.0
+                    0.42857142857142855,
+                    0.47619047619047616,
+                    0.5,
+                    0.34146341463414637,
+                    0.4146341463414634
                 ],
-                "mean": 0.06190476190476191,
-                "std": 0.12380952380952381
+                "mean": 0.43217189314750293,
+                "std": 0.05493059569076104
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.0,
-                    0.0,
-                    0.30952380952380953,
-                    0.0,
-                    0.0
+                    0.2857142857142857,
+                    0.21428571428571427,
+                    0.4523809523809524,
+                    0.4146341463414634,
+                    0.24390243902439024
                 ],
-                "mean": 0.06190476190476191,
-                "std": 0.12380952380952381
+                "mean": 0.3221835075493612,
+                "std": 0.09444401397184983
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 0.4413020610809326,
-            "murilos_svc_pipeline": 1.0104434490203857,
-            "my_svc_pipeline": 1.2453553676605225
+            "sklearns_svc": 0.1204221248626709,
+            "dissimilarity_svc": 1.1038415431976318,
+            "spread_svc": 1.189746618270874
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+            "('sklearns_svc', 'dissimilarity_svc')": {
                 "pvalue": 0.0625,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
+            "('sklearns_svc', 'spread_svc')": {
                 "pvalue": 0.0625,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 1.0,
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.1875,
                 "equivalent": true
             }
         }
     },
     "sylvine": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     1.0,
                     1.0,
@@ -572,44 +572,44 @@
                 "mean": 0.996875,
                 "std": 0.00625
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.4461538461538462,
-                    0.3384615384615385,
-                    0.4307692307692308,
-                    0.390625,
-                    0.453125
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.984375,
+                    1.0
                 ],
-                "mean": 0.4118269230769231,
-                "std": 0.042602068090895555
+                "mean": 0.996875,
+                "std": 0.00625
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
-                    0.4461538461538462,
-                    0.3384615384615385,
-                    0.4307692307692308,
-                    0.390625,
-                    0.453125
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.984375,
+                    1.0
                 ],
-                "mean": 0.4118269230769231,
-                "std": 0.042602068090895555
+                "mean": 0.996875,
+                "std": 0.00625
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 1.1631057262420654,
-            "murilos_svc_pipeline": 5.088611841201782,
-            "my_svc_pipeline": 2.6288812160491943
+            "sklearns_svc": 1.5077738761901855,
+            "dissimilarity_svc": 2.190892219543457,
+            "spread_svc": 1.407844066619873
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
-                "pvalue": 0.0625,
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.0625,
+            "('sklearns_svc', 'spread_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
+            "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -617,7 +617,7 @@
     },
     "titanic": {
         "accuracy_results": {
-            "sklearns_svc_pipeline": {
+            "sklearns_svc": {
                 "scores": [
                     0.6526717557251909,
                     0.7404580152671756,
@@ -628,45 +628,45 @@
                 "mean": 0.7142581381065192,
                 "std": 0.044668058245342666
             },
-            "murilos_svc_pipeline": {
+            "dissimilarity_svc": {
                 "scores": [
-                    0.3702290076335878,
-                    0.5687022900763359,
-                    0.648854961832061,
-                    0.7099236641221374,
-                    0.7931034482758621
+                    0.40458015267175573,
+                    0.6145038167938931,
+                    0.6679389312977099,
+                    0.7137404580152672,
+                    0.8544061302681992
                 ],
-                "mean": 0.6181626743879969,
-                "std": 0.14414146026772925
+                "mean": 0.651033897809365,
+                "std": 0.14673244569401767
             },
-            "my_svc_pipeline": {
+            "spread_svc": {
                 "scores": [
                     0.3702290076335878,
-                    0.5687022900763359,
+                    0.5725190839694656,
                     0.648854961832061,
                     0.7099236641221374,
                     0.7931034482758621
                 ],
-                "mean": 0.6181626743879969,
-                "std": 0.14414146026772925
+                "mean": 0.6189260331666228,
+                "std": 0.14388738442787802
             }
         },
         "time": {
-            "sklearns_svc_pipeline": 5.46401834487915,
-            "murilos_svc_pipeline": 11.418867349624634,
-            "my_svc_pipeline": 11.728337526321411
+            "sklearns_svc": 5.2623131275177,
+            "dissimilarity_svc": 10.187005758285522,
+            "spread_svc": 10.293961763381958
         },
         "equivalence": {
-            "('sklearns_svc_pipeline', 'murilos_svc_pipeline')": {
+            "('sklearns_svc', 'dissimilarity_svc')": {
+                "pvalue": 0.4375,
+                "equivalent": true
+            },
+            "('sklearns_svc', 'spread_svc')": {
                 "pvalue": 0.3125,
                 "equivalent": true
             },
-            "('sklearns_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 0.3125,
-                "equivalent": true
-            },
-            "('murilos_svc_pipeline', 'my_svc_pipeline')": {
-                "pvalue": 1.0,
+            "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 0.0625,
                 "equivalent": true
             }
         }

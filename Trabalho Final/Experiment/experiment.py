@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import time
+from itertools import combinations
 from pathlib import Path
 
 import numpy as np
@@ -107,14 +108,14 @@ def run_experiment(dataset: str) -> DatasetResults:
 
     sklearns_svc_pipeline = Pipeline([("preprocessor", Preprocessor()), ("svc", SVC())])
 
-    murilos_svc_pipeline = Pipeline(
+    dissimilarity_svc_pipeline = Pipeline(
         [
             ("preprocessor", Preprocessor()),
             ("svc", CSVC(optimization_metric="dissimilarity")),
         ]
     )
 
-    my_svc_pipeline = Pipeline(
+    spread_svc_pipeline = Pipeline(
         [
             ("preprocessor", Preprocessor()),
             ("svc", CSVC(optimization_metric="spatial_spread")),
@@ -122,9 +123,9 @@ def run_experiment(dataset: str) -> DatasetResults:
     )
 
     pipelines = {
-        "sklearns_svc_pipeline": sklearns_svc_pipeline,
-        "murilos_svc_pipeline": murilos_svc_pipeline,
-        "my_svc_pipeline": my_svc_pipeline,
+        "sklearns_svc": sklearns_svc_pipeline,
+        "dissimilarity_svc": dissimilarity_svc_pipeline,
+        "spread_svc": spread_svc_pipeline,
     }
 
     accuracy_results = {}
@@ -139,11 +140,9 @@ def run_experiment(dataset: str) -> DatasetResults:
         time_results[name] = elapsed_time
 
     equivalence_results = {}
-    pairs = [
-        ("sklearns_svc_pipeline", "murilos_svc_pipeline"),
-        ("sklearns_svc_pipeline", "my_svc_pipeline"),
-        ("murilos_svc_pipeline", "my_svc_pipeline"),
-    ]
+    # Compare all pairs of pipelines
+    pipeline_names = list(pipelines.keys())
+    pairs = list(combinations(pipeline_names, 2))
 
     for name1, name2 in pairs:
         if np.isnan(accuracy_results[name1].mean) or np.isnan(

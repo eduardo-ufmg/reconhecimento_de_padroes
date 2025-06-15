@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 from scipy.optimize import minimize_scalar
+from scipy.spatial.distance import pdist
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
@@ -31,29 +32,47 @@ class OptimizationResult:
 def optimize_h(
     X: np.ndarray, y: np.ndarray, optimization_metric: str
 ) -> OptimizationResult:
-    def objective(h_val):
-        # This is the function that minimize_scalar will optimize
+    """Optimizes the kernel bandwidth 'h' based on the chosen metric."""
+
+    def objective(h_val: float) -> float:
+        """Objective function for the optimizer."""
+        if h_val <= 1e-6:  # Prevent h from being too close to zero
+            return np.inf
+
         K_matrix = kernel_matrix(X, h=h_val)
         if optimization_metric == "dissimilarity":
             return objective_function_dissimilarity(K_matrix, y)
         elif optimization_metric == "spatial_spread":
             return objective_function_spatial_spread(K_matrix, y)
         else:
-            raise ValueError("Invalid optimization metric.")
+            raise ValueError(f"Invalid optimization metric: {optimization_metric}")
 
-    # Define bounds for h. This is crucial for 'bounded' method and good practice generally.
-    # The range should be chosen based on the expected scale of your data.
-    # For a bandwidth, it's typically positive, often in a logarithmic scale.
-    bounds_h = (1e-1, 1e1)  # Example bounds: h can be between 0.1 and 10.0
+    # --- Data-driven bounds for h ---
+    # Heuristic: Set bounds based on percentiles of pairwise distances
+    # to ensure the search range is relevant to the data's scale.
+    if X.shape[0] > 1:
+        pairwise_dists = pdist(X, "euclidean")
+        # Use 10th and 90th percentiles as a robust range estimate
+        lower_bound = np.percentile(pairwise_dists, 10)
+        upper_bound = np.percentile(pairwise_dists, 90)
+    else:
+        # Fallback for single-sample data
+        lower_bound, upper_bound = 0.1, 10.0
 
-    # Use minimize_scalar with the 'bounded' method
-    result = minimize_scalar(objective, bounds=bounds_h, method="bounded")
+    # Ensure bounds are reasonable
+    if lower_bound < 1e-5:
+        lower_bound = 1e-5
+    if upper_bound <= lower_bound:
+        upper_bound = lower_bound * 100  # Ensure upper > lower
+
+    result = minimize_scalar(
+        objective, bounds=(lower_bound, upper_bound), method="bounded"
+    )
 
     if not result.success:
         raise RuntimeError(f"Optimization for h failed: {result.message}")
 
     best_h = result.x
-
     best_K_matrix = kernel_matrix(X, h=best_h)
 
     return OptimizationResult(best_h, best_K_matrix)
