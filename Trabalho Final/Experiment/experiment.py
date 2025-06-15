@@ -90,18 +90,18 @@ def run_experiment(dataset: str) -> DatasetResults:
         print(f"Dataset {dataset} not found. Skipping...")
         return DatasetResults({}, {}, {})
 
-    sklearns_svc_pipeline = Pipeline([("pca", PCA(n_components="mle")), ("svc", SVC())])
+    sklearns_svc_pipeline = Pipeline([("pca", PCA()), ("svc", SVC())])
 
     murilos_svc_pipeline = Pipeline(
         [
-            ("pca", PCA(n_components="mle")),
+            ("pca", PCA()),
             ("svc", CSVC(optimization_metric="dissimilarity")),
         ]
     )
 
     my_svc_pipeline = Pipeline(
         [
-            ("pca", PCA(n_components="mle")),
+            ("pca", PCA()),
             ("svc", CSVC(optimization_metric="spatial_spread")),
         ]
     )
@@ -117,7 +117,7 @@ def run_experiment(dataset: str) -> DatasetResults:
 
     for name, pipeline in pipelines.items():
         start_time = time.time()
-        scores = cross_val_score(pipeline, X, y)
+        scores = cross_val_score(pipeline, X, y, error_score="raise")
         elapsed_time = time.time() - start_time
 
         accuracy_results[name] = AccuracyResults(scores=scores)
@@ -178,16 +178,35 @@ if __name__ == "__main__":
         "wpbc",
     ]
 
-    experiment_results: ExperimentResults = {}
-
-    for dataset in DATASETS:
-        print(f"Running experiment on: {dataset}")
-        experiment_results[dataset] = run_experiment(dataset)
-
     output_dir = Path(__file__).parent.resolve() / "results"
     output_dir.mkdir(parents=True, exist_ok=True)
-
     output_file = output_dir / "experiment_results.json"
 
-    with open(output_file, "w") as f:
-        json.dump(experiment_results, f, cls=CustomEncoder, indent=4)
+    experiment_results: ExperimentResults = {}
+    if output_file.exists():
+        with open(output_file, "r") as f:
+            try:
+                experiment_results = json.load(f)
+            except json.JSONDecodeError:
+                print("Results file is empty or corrupted. Starting from scratch.")
+                experiment_results = {}
+
+    for dataset in DATASETS:
+        if dataset in experiment_results and experiment_results[dataset].get(
+            "accuracy_results"
+        ):
+            print(f"Dataset {dataset} already tested. Skipping...")
+            continue
+
+        print(f"Running experiment on: {dataset}")
+        try:
+            dataset_results = run_experiment(dataset)
+            experiment_results[dataset] = dataset_results
+
+            with open(output_file, "w") as f:
+                json.dump(experiment_results, f, cls=CustomEncoder, indent=4)
+            print(f"Results for {dataset} saved.")
+
+        except Exception as e:
+            print(f"An error occurred while running the experiment for {dataset}: {e}")
+            continue
