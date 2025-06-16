@@ -33,12 +33,24 @@
                 ],
                 "mean": 0.7674809843400447,
                 "std": 0.12928488986158798
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.56,
+                    0.7866666666666666,
+                    0.8866666666666667,
+                    0.6778523489932886,
+                    0.9060402684563759
+                ],
+                "mean": 0.7634451901565995,
+                "std": 0.13020922045401445
             }
         },
         "time": {
-            "sklearns_svc": 0.30199766159057617,
-            "dissimilarity_svc": 0.5687947273254395,
-            "spread_svc": 0.5687813758850098
+            "sklearns_svc": 0.05041337013244629,
+            "dissimilarity_svc": 0.5332181453704834,
+            "spread_svc": 0.5465881824493408,
+            "convex_hull_svc": 0.5542240142822266
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -49,8 +61,20 @@
                 "pvalue": 1.0,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 0.75,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 0.75,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
                 "equivalent": true
             }
         }
@@ -89,12 +113,24 @@
                 ],
                 "mean": 0.9718987734823784,
                 "std": 0.015070253421173813
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.9385964912280702,
+                    0.9824561403508771,
+                    0.9736842105263158,
+                    0.9912280701754386,
+                    0.9911504424778761
+                ],
+                "mean": 0.9754230709517155,
+                "std": 0.019523487856826307
             }
         },
         "time": {
-            "sklearns_svc": 0.05888223648071289,
-            "dissimilarity_svc": 0.25444650650024414,
-            "spread_svc": 0.36490511894226074
+            "sklearns_svc": 0.03137707710266113,
+            "dissimilarity_svc": 0.24942374229431152,
+            "spread_svc": 0.26809048652648926,
+            "convex_hull_svc": 0.2518310546875
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -105,8 +141,20 @@
                 "pvalue": 0.875,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
+                "pvalue": 0.5,
                 "equivalent": true
             }
         }
@@ -145,12 +193,24 @@
                 ],
                 "mean": 0.776114081996435,
                 "std": 0.03262492026273657
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.7662337662337663,
+                    0.7272727272727273,
+                    0.7727272727272727,
+                    0.8562091503267973,
+                    0.7777777777777778
+                ],
+                "mean": 0.7800441388676682,
+                "std": 0.042036484551602075
             }
         },
         "time": {
-            "sklearns_svc": 0.09247112274169922,
-            "dissimilarity_svc": 0.561467170715332,
-            "spread_svc": 0.6947762966156006
+            "sklearns_svc": 0.08752632141113281,
+            "dissimilarity_svc": 0.5896642208099365,
+            "spread_svc": 0.624161958694458,
+            "convex_hull_svc": 0.5210647583007812
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -161,7 +221,19 @@
                 "pvalue": 0.75,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 0.75,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -201,12 +273,24 @@
                 ],
                 "mean": 0.9916666666666668,
                 "std": 0.016666666666666653
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.9583333333333334,
+                    1.0
+                ],
+                "mean": 0.9916666666666668,
+                "std": 0.016666666666666653
             }
         },
         "time": {
-            "sklearns_svc": 0.1656191349029541,
-            "dissimilarity_svc": 1.43772554397583,
-            "spread_svc": 1.8139333724975586
+            "sklearns_svc": 0.11335945129394531,
+            "dissimilarity_svc": 1.0281355381011963,
+            "spread_svc": 1.4639747142791748,
+            "convex_hull_svc": 1.6141414642333984
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -217,7 +301,19 @@
                 "pvalue": 1.0,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -257,12 +353,24 @@
                 ],
                 "mean": 0.991100278551532,
                 "std": 0.003232257433641085
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.9861111111111112,
+                    0.9888888888888889,
+                    0.9944289693593314,
+                    0.9944289693593314,
+                    0.9916434540389972
+                ],
+                "mean": 0.991100278551532,
+                "std": 0.003232257433641085
             }
         },
         "time": {
-            "sklearns_svc": 0.24209117889404297,
-            "dissimilarity_svc": 8.72370982170105,
-            "spread_svc": 6.209773778915405
+            "sklearns_svc": 0.14468145370483398,
+            "dissimilarity_svc": 8.774390697479248,
+            "spread_svc": 6.356158494949341,
+            "convex_hull_svc": 7.176978588104248
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -273,7 +381,19 @@
                 "pvalue": 1.0,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -313,12 +433,24 @@
                 ],
                 "mean": 0.9430181086519115,
                 "std": 0.02390673987345228
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.9295774647887324,
+                    0.9,
+                    0.9428571428571428,
+                    0.9571428571428572,
+                    0.9714285714285714
+                ],
+                "mean": 0.9402012072434609,
+                "std": 0.024487640706378204
             }
         },
         "time": {
-            "sklearns_svc": 0.09082221984863281,
-            "dissimilarity_svc": 0.7255349159240723,
-            "spread_svc": 0.856151819229126
+            "sklearns_svc": 0.09378290176391602,
+            "dissimilarity_svc": 0.7870192527770996,
+            "spread_svc": 1.0861499309539795,
+            "convex_hull_svc": 0.7891156673431396
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -329,7 +461,19 @@
                 "pvalue": 0.875,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 0.6875,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -369,12 +513,24 @@
                 ],
                 "mean": 1.0,
                 "std": 0.0
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "mean": 1.0,
+                "std": 0.0
             }
         },
         "time": {
-            "sklearns_svc": 0.014449119567871094,
-            "dissimilarity_svc": 0.031178712844848633,
-            "spread_svc": 0.03275132179260254
+            "sklearns_svc": 0.020958900451660156,
+            "dissimilarity_svc": 0.04293251037597656,
+            "spread_svc": 0.02109670639038086,
+            "convex_hull_svc": 0.050498008728027344
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -385,7 +541,19 @@
                 "pvalue": 1.0,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -425,12 +593,24 @@
                 ],
                 "mean": 1.0,
                 "std": 0.0
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "mean": 1.0,
+                "std": 0.0
             }
         },
         "time": {
-            "sklearns_svc": 0.0265657901763916,
-            "dissimilarity_svc": 0.04020047187805176,
-            "spread_svc": 0.04704117774963379
+            "sklearns_svc": 0.010460376739501953,
+            "dissimilarity_svc": 0.017826557159423828,
+            "spread_svc": 0.019629478454589844,
+            "convex_hull_svc": 0.04624009132385254
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -441,7 +621,19 @@
                 "pvalue": 1.0,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -481,12 +673,24 @@
                 ],
                 "mean": 0.8236966824644549,
                 "std": 0.10354772392056755
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.5971563981042654,
+                    0.8625592417061612,
+                    0.9146919431279621,
+                    0.8388625592417062,
+                    0.8530805687203792
+                ],
+                "mean": 0.8132701421800949,
+                "std": 0.11105024924820947
             }
         },
         "time": {
-            "sklearns_svc": 0.19951415061950684,
-            "dissimilarity_svc": 2.08591365814209,
-            "spread_svc": 2.070051670074463
+            "sklearns_svc": 0.06961870193481445,
+            "dissimilarity_svc": 0.720841646194458,
+            "spread_svc": 0.797539472579956,
+            "convex_hull_svc": 0.7090959548950195
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -497,8 +701,20 @@
                 "pvalue": 1.0,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 0.5,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 0.25,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
+                "pvalue": 0.25,
                 "equivalent": true
             }
         }
@@ -537,12 +753,24 @@
                 ],
                 "mean": 0.43217189314750293,
                 "std": 0.05493059569076104
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.40476190476190477,
+                    0.47619047619047616,
+                    0.5,
+                    0.36585365853658536,
+                    0.4146341463414634
+                ],
+                "mean": 0.4322880371660859,
+                "std": 0.048980013379703584
             }
         },
         "time": {
-            "sklearns_svc": 0.14932870864868164,
-            "dissimilarity_svc": 1.2722017765045166,
-            "spread_svc": 1.248741626739502
+            "sklearns_svc": 0.10740065574645996,
+            "dissimilarity_svc": 1.0376980304718018,
+            "spread_svc": 1.1983411312103271,
+            "convex_hull_svc": 1.0578296184539795
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -553,7 +781,19 @@
                 "pvalue": 0.0625,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -593,12 +833,24 @@
                 ],
                 "mean": 0.996875,
                 "std": 0.00625
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.984375,
+                    1.0
+                ],
+                "mean": 0.996875,
+                "std": 0.00625
             }
         },
         "time": {
-            "sklearns_svc": 0.707122802734375,
-            "dissimilarity_svc": 2.609286069869995,
-            "spread_svc": 2.008538007736206
+            "sklearns_svc": 0.6843047142028809,
+            "dissimilarity_svc": 1.3612892627716064,
+            "spread_svc": 1.41219162940979,
+            "convex_hull_svc": 1.9374885559082031
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -609,7 +861,19 @@
                 "pvalue": 1.0,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
                 "pvalue": 1.0,
                 "equivalent": true
             }
@@ -649,12 +913,24 @@
                 ],
                 "mean": 0.651033897809365,
                 "std": 0.14673244569401767
+            },
+            "convex_hull_svc": {
+                "scores": [
+                    0.3702290076335878,
+                    0.6106870229007634,
+                    0.6603053435114504,
+                    0.7099236641221374,
+                    0.8084291187739464
+                ],
+                "mean": 0.6319148313883771,
+                "std": 0.1462728840364741
             }
         },
         "time": {
-            "sklearns_svc": 8.314603090286255,
-            "dissimilarity_svc": 12.204352617263794,
-            "spread_svc": 11.792968511581421
+            "sklearns_svc": 5.690099716186523,
+            "dissimilarity_svc": 9.96183443069458,
+            "spread_svc": 11.504106760025024,
+            "convex_hull_svc": 8.080557584762573
         },
         "equivalence": {
             "('sklearns_svc', 'dissimilarity_svc')": {
@@ -665,8 +941,20 @@
                 "pvalue": 0.4375,
                 "equivalent": true
             },
+            "('sklearns_svc', 'convex_hull_svc')": {
+                "pvalue": 0.4375,
+                "equivalent": true
+            },
             "('dissimilarity_svc', 'spread_svc')": {
                 "pvalue": 1.0,
+                "equivalent": true
+            },
+            "('dissimilarity_svc', 'convex_hull_svc')": {
+                "pvalue": 0.0625,
+                "equivalent": true
+            },
+            "('spread_svc', 'convex_hull_svc')": {
+                "pvalue": 0.0625,
                 "equivalent": true
             }
         }

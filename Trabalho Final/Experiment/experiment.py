@@ -122,10 +122,18 @@ def run_experiment(dataset: str) -> DatasetResults:
         ]
     )
 
+    convex_hull_svc_pipeline = Pipeline(
+        [
+            ("preprocessor", Preprocessor()),
+            ("svc", CSVC(optimization_metric="convex_hull")),
+        ]
+    )
+
     pipelines = {
         "sklearns_svc": sklearns_svc_pipeline,
         "dissimilarity_svc": dissimilarity_svc_pipeline,
         "spread_svc": spread_svc_pipeline,
+        "convex_hull_svc": convex_hull_svc_pipeline,
     }
 
     accuracy_results = {}
@@ -198,8 +206,8 @@ if __name__ == "__main__":
                 experiment_results = {}
 
     for dataset in DATASETS:
-        if dataset in experiment_results and experiment_results[dataset].get(
-            "accuracy_results"
+        if dataset in experiment_results and getattr(
+            experiment_results[dataset], "accuracy_results", None
         ):
             print(f"Dataset {dataset} already tested. Skipping...")
             continue
