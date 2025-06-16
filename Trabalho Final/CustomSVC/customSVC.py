@@ -10,6 +10,7 @@ from sklearn.svm import SVC
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from ConvexHull.convex_hull import objective_function_convex_hull_intersection_area
 from Dissimilarity.dissimilarity import objective_function_dissimilarity
 from Kernel.kernel import kernel_matrix
 from SpatialSpread.spatial_spread import objective_function_spatial_spread
@@ -41,9 +42,11 @@ def optimize_h(
 
         K_matrix = kernel_matrix(X, h=h_val)
         if optimization_metric == "dissimilarity":
-            return objective_function_dissimilarity(K_matrix, y)
+            return -objective_function_dissimilarity(K_matrix, y)
         elif optimization_metric == "spatial_spread":
-            return objective_function_spatial_spread(K_matrix, y)
+            return -objective_function_spatial_spread(K_matrix, y)
+        elif optimization_metric == "convex_hull":
+            return -objective_function_convex_hull_intersection_area(K_matrix, y)
         else:
             raise ValueError(f"Invalid optimization metric: {optimization_metric}")
 
@@ -87,12 +90,10 @@ class CSVC(BaseEstimator, ClassifierMixin):
 
     def __init__(self, optimization_metric: str | None = None):
 
-        if optimization_metric is None or optimization_metric not in [
-            "dissimilarity",
-            "spatial_spread",
-        ]:
+        valid_metrics = ["dissimilarity", "spatial_spread", "convex_hull"]
+        if optimization_metric is None or optimization_metric not in valid_metrics:
             raise ValueError(
-                "Invalid optimization metric. Choose 'dissimilarity' or 'spatial_spread'."
+                f"Invalid optimization metric. Choose from {valid_metrics}"
             )
 
         self.optimization_metric = optimization_metric

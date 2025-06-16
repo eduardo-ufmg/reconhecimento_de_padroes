@@ -3,7 +3,7 @@ import numpy as np
 
 def objective_function_dissimilarity(K_matrix: np.ndarray, y: np.ndarray) -> float:
     """
-    Calculates the negative dissimilarity metric for kernel matrix optimization.
+    Calculates the dissimilarity metric for kernel matrix optimization.
 
     This function implements the dissimilarity metric described in the paper
     "Width optimization of RBF kernels for binary classification of support
@@ -13,16 +13,13 @@ def objective_function_dissimilarity(K_matrix: np.ndarray, y: np.ndarray) -> flo
 
     The dissimilarity is defined in Equation (13) of the paper as the product of the
     Euclidean distance and the cosine of the angle between the class similarity vectors.
-    Since the optimization framework seeks to minimize the objective function, this
-    implementation returns the *negative* of the dissimilarity metric.
 
     Parameters:
     - K_matrix: The pre-computed kernel matrix for a given 'h'.
     - y: The binary class labels (0 or 1) for the dataset.
 
     Returns:
-    The negative value of the calculated dissimilarity metric. A higher (less negative)
-    value indicates better class separability for the given kernel width.
+    The calculated dissimilarity metric.
     """
     # Use boolean indexing for splitting the data by class
     class_0_mask = y == 0
@@ -68,5 +65,4 @@ def objective_function_dissimilarity(K_matrix: np.ndarray, y: np.ndarray) -> flo
     # The dissimilarity metric from Equation (12) in the paper
     dissimilarity = cosine_angle * euclidean_distance
 
-    # Return the negative value for minimization
-    return -dissimilarity
+    return dissimilarity
