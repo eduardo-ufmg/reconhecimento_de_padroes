@@ -1,0 +1,9 @@
+name,dropout_rate,epochs,test_accuracy,model_path,intra_dist,inter_dist,fisher_ratio,silhouette
+Dropout_0.0_Fast,0.0,5,60.07,saved_models_dropout/model_Dropout_0.0_Fast.pth,2.684266,3.5956757,0.8199718772091829,0.03339496999979019
+Dropout_0.0_Slow,0.0,8,68.42,saved_models_dropout/model_Dropout_0.0_Slow.pth,2.8496237,3.8952048,0.8535993726994527,0.05228833109140396
+Dropout_0.1_Fast,0.1,6,59.17,saved_models_dropout/model_Dropout_0.1_Fast.pth,2.6715379,3.569506,0.808216555770842,0.034357089549303055
+Dropout_0.1_Slow,0.1,9,66.4,saved_models_dropout/model_Dropout_0.1_Slow.pth,2.7661161,4.1016793,1.0004160737951213,0.05919122323393822
+Dropout_0.25_Fast,0.25,8,65.88,saved_models_dropout/model_Dropout_0.25_Fast.pth,2.4932985,3.559454,0.9096975330696864,0.04813358932733536
+Dropout_0.25_Slow,0.25,12,68.81,saved_models_dropout/model_Dropout_0.25_Slow.pth,2.4171727,3.5002897,0.9347902731945578,0.0584084577858448
+Dropout_0.5_Fast,0.5,10,63.19,saved_models_dropout/model_Dropout_0.5_Fast.pth,2.2057111,3.3310812,1.022608064153393,0.03931006044149399
+Dropout_0.5_Slow,0.5,15,66.51,saved_models_dropout/model_Dropout_0.5_Slow.pth,2.1588156,3.4751685,1.2013169252514058,0.05027427524328232
