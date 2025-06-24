@@ -48,7 +48,7 @@ Our results demonstrate a strong and consistent correlation between the geometri
 \section{Methodology}
 
 \subsection{Dataset and Preprocessing}
-All experiments were conducted on the CIFAR-10 dataset \cite{b1}, which consists of 60,000 32x32 color images in 10 classes. The dataset is split into 50,000 training images and 10,000 test images. We apply standard data augmentation techniques to the training set, including random cropping and horizontal flipping. Both training and test images are normalized using the mean and standard deviation of the CIFAR-10 dataset.
+All experiments were conducted on the CIFAR-10 dataset \cite{CIFAR2010}, which consists of 60,000 32x32 color images in 10 classes. The dataset is split into 50,000 training images and 10,000 test images. We apply standard data augmentation techniques to the training set, including random cropping and horizontal flipping. Both training and test images are normalized using the mean and standard deviation of the CIFAR-10 dataset.
 
 \subsection{Base Model}
 Our base model is a VGG-style CNN. The architecture consists of a sequence of convolutional blocks followed by an adaptive average pooling layer and a final linear classifier. Each convolutional block contains two convolutional layers, each followed by a batch normalization layer and a ReLU activation function, and concludes with a max-pooling layer. This modular design allows us to easily modify the depth and width of the network. The embeddings for our analysis are extracted from the output of the adaptive average pooling layer, just before the final classification layer.
@@ -88,7 +88,7 @@ In this experiment, we used a fixed CNN architecture (two convolutional blocks w
 \section{Results and Discussion}
 
 \subsection{Impact of Model Architecture}
-The results of the architecture experiment are summarized in Table \ref{tab:arch_results}. As expected, larger models, such as 'Medium\_Slow', achieved higher test accuracies.
+The results of the architecture experiment are summarized in Table \ref{tab:arch_results}. As expected, larger models, such as 'Medium S', achieved higher test accuracies.
 
 \begin{table}[htbp]
 \caption{Results of the Architecture Experiment}
@@ -111,7 +111,7 @@ Deep Nrrw & 83.95 & 4.3339 & 7.9408 & 1.4835 & 0.1852 \\
 \end{center}
 \end{table}
 
-Figure \ref{fig:arch_corr} shows the correlation between each spatial metric and the test accuracy. We observe a strong positive correlation for inter-class distance, Fisher's Discriminant Ratio, and especially the Silhouette Score. The Silhouette Score has a Pearson correlation coefficient of 0.928 with test accuracy, indicating that it is a very strong predictor of model performance. Intra-class distance shows a weaker, but still positive, correlation (0.578). This suggests that while cluster tightness is important, cluster separation is a more dominant factor for high accuracy.
+Figure \ref{fig:arch_corr} shows the correlation between each spatial metric and the test accuracy. We observe a moderate positive correlation for inter-class distance and Fisher's Discriminant Ratio, as well as a strong positive correlation for the Silhouette Score. The latter has a Pearson correlation coefficient of 0.928 with test accuracy, indicating that it is a significant predictor of model performance. Intra-class distance shows a weaker, but still positive, correlation (0.578). This suggests that while cluster tightness is important, cluster separation is a more dominant factor for high accuracy.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{architecture_correlation.png}}
@@ -143,7 +143,7 @@ The results for the dropout experiment are shown in Table \ref{tab:dropout_resul
 \end{center}
 \end{table}
 
-The correlation plot for the dropout experiment (Figure \ref{fig:dropout_corr}) again shows a strong positive correlation between the spatial metrics and test accuracy. The Silhouette Score remains the strongest predictor with a correlation of 0.925. Interestingly, intra-class distance now shows a weak negative correlation (-0.092), suggesting that higher dropout rates, which are a form of regularization, tend to create tighter clusters, even if they don't always lead to higher accuracy.
+The correlation plot for the dropout experiment (Figure \ref{fig:dropout_corr}) shows that most of the spatial metrics over the embedding space lost their correlation to accuracy. The Silhouette Score, however, remains a strong predictor with a correlation of 0.925. Interestingly, intra-class distance now shows a weak negative correlation (-0.092), suggesting that higher dropout rates, which are a form of regularization, tend to create tighter clusters, even if they don't always lead to higher accuracy.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{dropout_correlation.png}}
@@ -152,13 +152,11 @@ The correlation plot for the dropout experiment (Figure \ref{fig:dropout_corr}) 
 \end{figure}
 
 \section{Conclusion}
-Our experiments demonstrate a clear and strong link between the geometric structure of a CNN's embedding space and its classification performance. Both architectural choices and regularization techniques like dropout significantly influence this structure. We found that spatial metrics, particularly the Silhouette Score, serve as excellent predictors of a model's generalization ability. These findings highlight the importance of representation learning in deep neural networks and provide a quantitative framework for analyzing and comparing different models beyond just their final accuracy scores. Future work could extend this analysis to other datasets, architectures, and regularization methods, and explore the use of these metrics in automated model design and optimization.
+Our experiments demonstrate a clear and strong link between the geometric structure of a CNN's embedding space and its classification performance. Both architectural choices and regularization techniques like dropout significantly influence this structure. We found that Silhouette Score serves as an excellent predictor of a model's generalization ability. These findings highlight the importance of representation learning in deep neural networks and provide a quantitative framework for analyzing and comparing different models beyond just their final accuracy scores. Future work could extend this analysis to other datasets, architectures, and regularization methods, and explore the use of these metrics in automated model design and optimization.
 
 \begin{thebibliography}{00}
-\bibitem{b1} A. Krizhevsky, "Learning Multiple Layers of Features from Tiny Images," 2009.
-\bibitem{b2} G. E. Hinton, N. Srivastava, A. Krizhevsky, I. Sutskever, and R. R. Salakhutdinov, "Improving neural networks by preventing co-adaptation of feature detectors," arXiv preprint arXiv:1207.0580, 2012.
-\bibitem{b3} K. He, X. Zhang, S. Ren, and J. Sun, "Deep residual learning for image recognition," in Proceedings of the IEEE conference on computer vision and pattern recognition, 2016, pp. 770-778.
-\bibitem{b4} P. J. Rousseeuw, "Silhouettes: a graphical aid to the interpretation and validation of cluster analysis," Journal of computational and applied mathematics, vol. 20, pp. 53-65, 1987.
+\bibitem{CIFAR2010} A. Krizhevsky, "Learning Multiple Layers of Features from Tiny Images," 2009.
+\bibitem{Braga2025} A.~P. Braga, “Aprendendo com Exemplos: Princípios de Redes Neurais Artificiais e de Reconhecimento de Padrões,” Departamento de Engenharia Eletrônica, Escola de Engenharia, Universidade Federal de Minas Gerais, Belo Horizonte, Brazil, Tech. Rep., 2025.
 \end{thebibliography}
 
 \end{document}
